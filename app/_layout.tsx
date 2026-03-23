@@ -1,0 +1,119 @@
+import '../global.css';
+import 'reflect-metadata';
+import { useEffect, useState, useRef } from 'react';
+import { Slot, useRouter, useSegments } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { View, ActivityIndicator, Alert } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { observer } from 'mobx-react-lite';
+import * as Notifications from 'expo-notifications';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { container } from '../src/core/container';
+import { TYPES } from '../src/core/types';
+import { AuthViewModel } from '../src/presentation/viewmodels/AuthViewModel';
+import { ApiClient } from '../src/data/api/ApiClient';
+import { notificationService } from '../src/services/NotificationService';
+import { ErrorBoundary } from '../src/presentation/components/common/ErrorBoundary';
+
+const authViewModel = container.get<AuthViewModel>(TYPES.AuthViewModel);
+
+const RootLayoutNav = observer(function RootLayoutNav() {
+  const router = useRouter();
+  const segments = useSegments();
+  const [isReady, setIsReady] = useState(false);
+  const notificationListenerRef = useRef<Notifications.EventSubscription | null>(null);
+  const responseListenerRef = useRef<Notifications.EventSubscription | null>(null);
+
+  useEffect(() => {
+    const init = async () => {
+      const apiClient = container.get<ApiClient>(TYPES.ApiClient);
+      await apiClient.loadToken();
+
+      apiClient.setOnUnauthorized(() => {
+        authViewModel.logout();
+      });
+
+      await authViewModel.checkAuth();
+      setIsReady(true);
+    };
+
+    init();
+
+    notificationListenerRef.current = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        if (__DEV__) console.log('Notification received:', notification.request.content);
+        const { title, body } = notification.request.content;
+        if (title || body) {
+          Alert.alert(title || 'Nueva Alerta', body || '');
+        }
+      }
+    );
+
+    responseListenerRef.current = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        if (__DEV__) console.log('Notification tapped:', response.notification.request.content);
+        const data = response.notification.request.content.data;
+
+        if (data?.type === 'event' && data?.eventId) {
+          router.push(`/(tabs)/events?eventId=${data.eventId}`);
+        } else if (data?.type === 'alert') {
+          router.push('/(tabs)/alerts');
+        }
+      }
+    );
+
+    notificationService.getLastNotificationResponse().then((response) => {
+      if (response) {
+        if (__DEV__) console.log('App opened from notification:', response.notification.request.content);
+      }
+    });
+
+    return () => {
+      if (notificationListenerRef.current) {
+        notificationListenerRef.current.remove();
+      }
+      if (responseListenerRef.current) {
+        responseListenerRef.current.remove();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isReady) return;
+
+    const inAuthGroup = segments[0] === '(auth)';
+    const isAuthenticated = authViewModel.isAuthenticated;
+
+    if (!isAuthenticated && !inAuthGroup) {
+      router.replace('/(auth)/login');
+    } else if (isAuthenticated && inAuthGroup) {
+      router.replace('/(tabs)');
+    }
+  }, [isReady, authViewModel.isAuthenticated, segments]);
+
+  if (!isReady) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000000' }}>
+        <ActivityIndicator size="large" color="#3B82F6" />
+      </View>
+    );
+  }
+
+  return <Slot />;
+});
+
+export default observer(function RootLayout() {
+  return (
+    <ErrorBoundary>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <BottomSheetModalProvider>
+            <StatusBar style="light" />
+            <RootLayoutNav />
+          </BottomSheetModalProvider>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    </ErrorBoundary>
+  );
+});
