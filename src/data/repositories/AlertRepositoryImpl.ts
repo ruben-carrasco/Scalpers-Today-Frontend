@@ -66,9 +66,7 @@ export class AlertRepositoryImpl implements IAlertRepository {
       })),
       push_enabled: params.pushEnabled ?? true,
     };
-    if (__DEV__) console.log('[AlertRepository] Creating alert:', JSON.stringify(body, null, 2));
     const response = await this.apiClient.post<ApiAlert>(this.endpoints.alerts, body);
-    console.log('[AlertRepository] Alert created:', response.id, 'Status:', response.status);
     return this.mapAlert(response);
   }
 
@@ -115,9 +113,7 @@ export class AlertRepositoryImpl implements IAlertRepository {
       device_type: params.deviceType,
       device_name: params.deviceName,
     };
-    console.log('[AlertRepository] Registering device token:', params.deviceType);
     const response = await this.apiClient.post<ApiDeviceToken>(this.endpoints.deviceToken, body);
-    console.log('[AlertRepository] Device token registered:', response.id, 'Active:', response.is_active);
     return this.mapDeviceToken(response);
   }
 

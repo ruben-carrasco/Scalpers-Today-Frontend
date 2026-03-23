@@ -20,13 +20,17 @@ interface EventDetailModalProps {
 
 export function EventDetailModal({ event, visible, onClose }: EventDetailModalProps) {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const lastEventRef = useRef<EventModel | null>(null);
   const snapPoints = useMemo(() => ['65%', '90%'], []);
+
+  // Keep last event data so content stays visible during close animation
+  if (event) {
+    lastEventRef.current = event;
+  }
 
   useEffect(() => {
     if (visible && event) {
       bottomSheetModalRef.current?.present();
-    } else {
-      bottomSheetModalRef.current?.dismiss();
     }
   }, [visible, event]);
 
@@ -48,9 +52,10 @@ export function EventDetailModal({ event, visible, onClose }: EventDetailModalPr
     []
   );
 
-  if (!event) return null;
+  const displayEvent = lastEventRef.current;
+  if (!displayEvent) return null;
 
-  const impColor = getImportanceColor(event.importance);
+  const impColor = getImportanceColor(displayEvent.importance);
 
   return (
     <BottomSheetModal
@@ -63,13 +68,13 @@ export function EventDetailModal({ event, visible, onClose }: EventDetailModalPr
       handleIndicatorStyle={{ backgroundColor: colors.border.indicator }}
     >
       <BottomSheetView className="flex-1">
-        <EventHeader event={event} impColor={impColor} bottomSheetModalRef={bottomSheetModalRef} />
+        <EventHeader event={displayEvent} impColor={impColor} bottomSheetModalRef={bottomSheetModalRef} />
 
         <ScrollView showsVerticalScrollIndicator={false} className="px-6">
-          <EventDataSection event={event} />
+          <EventDataSection event={displayEvent} />
 
-          {event.aiAnalysis && (
-            <EventAnalysisSection ai={event.aiAnalysis} />
+          {displayEvent.aiAnalysis && (
+            <EventAnalysisSection ai={displayEvent.aiAnalysis} />
           )}
 
           <View className="h-10" />

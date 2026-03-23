@@ -15,8 +15,10 @@ export function buildApiUrl(): string {
 }
 
 export function logApiConfig(): void {
-  console.log('API Configuration:');
-  console.log(`  URL: ${buildApiUrl()}`);
-  console.log(`  Host: ${API_CONFIG.HOST}`);
-  console.log(`  Timeout: ${API_CONFIG.TIMEOUT}ms`);
+  if (__DEV__) {
+    console.log('API Configuration:');
+    console.log(`  URL: ${buildApiUrl()}`);
+    console.log(`  Host: ${API_CONFIG.HOST}`);
+    console.log(`  Timeout: ${API_CONFIG.TIMEOUT}ms`);
+  }
 }

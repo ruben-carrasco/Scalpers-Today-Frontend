@@ -254,8 +254,7 @@ export default observer(function HomeScreen() {
         event={selectedEvent}
         onClose={() => {
           setEventModalVisible(false);
-          // Small delay to let modal close animation finish before nulling
-          setTimeout(() => setSelectedEvent(null), 300);
+          setSelectedEvent(null);
         }}
       />
     </View>
