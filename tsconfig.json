@@ -1,0 +1,20 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "strictPropertyInitialization": false,
+    "types": ["reflect-metadata", "jest"],
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"],
+      "@core/*": ["src/core/*"],
+      "@domain/*": ["src/domain/*"],
+      "@data/*": ["src/data/*"],
+      "@presentation/*": ["src/presentation/*"],
+      "@theme": ["src/presentation/theme"],
+      "@theme/*": ["src/presentation/theme/*"]
+    }
+  }
+}

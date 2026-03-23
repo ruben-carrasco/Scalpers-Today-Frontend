@@ -1,0 +1,54 @@
+{
+  "expo": {
+    "name": "ScalperToday",
+    "slug": "scalper-today",
+    "version": "1.0.0",
+    "scheme": "scalpertoday",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "color": "#3B82F6",
+          "sounds": [],
+          "defaultChannel": "default"
+        }
+      ],
+      "expo-web-browser",
+      "expo-secure-store"
+    ],
+    "ios": {
+      "supportsTabletMode": true,
+      "bundleIdentifier": "com.rubencorrasco.scalpertoday"
+    },
+    "android": {
+      "package": "com.rubencorrasco.scalpertoday"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "f33d55ad-9490-4c78-9430-af426abdcc8c"
+      }
+    },
+    "notification": {
+      "color": "#3B82F6",
+      "androidMode": "default",
+      "androidCollapsedTitle": "ScalperToday"
+    },
+    "owner": "superru"
+  }
+}

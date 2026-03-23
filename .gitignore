@@ -1,0 +1,16 @@
+node_modules/
+.expo/
+.env
+.env.local
+dist/
+build/
+coverage/
+*.log
+*.tsbuildinfo
+.eslintcache
+.claude/
+CLAUDE.md
+.DS_Store
+.vscode/
+Thumbs.db
+package-lock.json

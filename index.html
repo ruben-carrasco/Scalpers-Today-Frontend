@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scalper Today - Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2563eb;
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
+        .status {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+        .info {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        code {
+            background: #f1f5f9;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Scalper Today</h1>
+        
+        <div class="status">
+            ✅ <strong>Servidor Web Iniciado</strong><br>
+            La aplicación está en proceso de carga...
+        </div>
+
+        <div class="info">
+            <strong>Estado Actual:</strong><br>
+            • React Native Web se está compilando<br>
+            • Metro Bundler activo<br>
+            • Expo Router configurado<br>
+            <br>
+            <strong>Si ves esta página:</strong><br>
+            La compilación de módulos está en progreso. Por favor espera...
+        </div>
+
+        <div id="error-container"></div>
+
+        <h2 style="margin-top: 30px; font-size: 18px; color: #1e293b;">Instrucciones</h2>
+        <div class="info" style="background: #f5f5f5; border-color: #e5e7eb; color: #374151;">
+            1. Abre la <strong>Consola del Navegador</strong> (F12)<br>
+            2. Mira los errores en la pestaña <strong>Console</strong><br>
+            3. Enviame los errores exactos que ves<br>
+            <br>
+            <strong>O bien:</strong><br>
+            • Si los módulos cargan, la app debería aparecer aquí<br>
+            • Recarga la página (Ctrl+R o Cmd+R)<br>
+        </div>
+
+        <button onclick="location.reload()">🔄 Recargar Página</button>
+    </div>
+
+    <script>
+        // Logging para debugging
+        const originalError = console.error;
+        const errorLogs = [];
+        
+        console.error = function(...args) {
+            errorLogs.push(args.join(' '));
+            originalError.apply(console, args);
+        };
+
+        window.addEventListener('error', (e) => {
+            const errorContainer = document.getElementById('error-container');
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.innerHTML = `<strong>Error Detectado:</strong><br>${e.message}<br><br><code>${e.filename}:${e.lineno}:${e.colno}</code>`;
+            errorContainer.appendChild(errorDiv);
+        });
+
+        // Esperar a que la app intente cargar
+        console.log('Esperando carga de módulos...');
+        setTimeout(() => {
+            console.log('Estado actual de errores:', errorLogs.length);
+        }, 3000);
+    </script>
+</body>
+</html>
