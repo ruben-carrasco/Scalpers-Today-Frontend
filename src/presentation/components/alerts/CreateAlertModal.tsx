@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { View, TouchableOpacity, LayoutChangeEvent } from 'react-native';
 import {
   BottomSheetModal,
-  BottomSheetView,
   BottomSheetBackdrop,
   BottomSheetFooter,
   BottomSheetFooterProps,
@@ -179,7 +178,12 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
       backgroundStyle={{ backgroundColor: colors.bg.modal }}
       handleIndicatorStyle={{ backgroundColor: colors.border.indicator }}
     >
-      <BottomSheetView className="flex-1">
+      <BottomSheetScrollView
+        key={`${step}-${selectedTypes.join(',')}`}
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: footerHeight + 16 }}
+        keyboardShouldPersistTaps="handled"
+      >
         <View className="px-6 py-4">
           <Typography variant="h2" weight="bold">{STEP_TITLES[step - 1]}</Typography>
           <Typography variant="caption" color="secondary" className="mt-1">{STEP_SUBTITLES[step - 1]}</Typography>
@@ -187,11 +191,7 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
 
         <ProgressBar currentStep={step} />
 
-        <BottomSheetScrollView
-          className="flex-1"
-          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: footerHeight + 16 }}
-          keyboardShouldPersistTaps="handled"
-        >
+        <View className="px-6">
           {step === 1 && (
             <StepBasicInfo
               name={name}
@@ -219,8 +219,8 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
               onPushEnabledChange={setPushEnabled}
             />
           )}
-        </BottomSheetScrollView>
-      </BottomSheetView>
+        </View>
+      </BottomSheetScrollView>
     </BottomSheetModal>
   );
 }
