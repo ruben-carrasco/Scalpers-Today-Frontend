@@ -1,18 +1,9 @@
-
 import { injectable } from 'inversify';
-import { buildApiUrl, logApiConfig } from '../../config/api.config';
+import { buildApiUrl } from '../../config/api.config';
 
 @injectable()
 export class ApiEndpointProvider {
-  private baseUrl: string;
-
-  constructor() {
-    this.baseUrl = buildApiUrl();
-    
-    if (__DEV__) {
-      logApiConfig();
-    }
-  }
+  private readonly baseUrl = buildApiUrl();
 
   getBaseUrl(): string {
     return this.baseUrl;
