@@ -109,6 +109,7 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
       ref={bottomSheetModalRef}
       index={0}
       snapPoints={snapPoints}
+      enableDynamicSizing={false}
       onChange={handleSheetChanges}
       backdropComponent={renderBackdrop}
       backgroundStyle={{ backgroundColor: colors.bg.modal }}
@@ -122,7 +123,11 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
 
         <ProgressBar currentStep={step} />
 
-        <ScrollView className="flex-1 px-6">
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 24 }}
+          keyboardShouldPersistTaps="handled"
+        >
           {step === 1 && (
             <StepBasicInfo
               name={name}
@@ -152,7 +157,7 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
           )}
         </ScrollView>
 
-        <View className="flex-row p-6 pb-10 border-t" style={{ borderTopColor: colors.bg.modalCard }}>
+        <View className="flex-row px-6 pt-4 pb-8 border-t" style={{ borderTopColor: colors.bg.modalCard }}>
           {step > 1 && (
             <TouchableOpacity
               onPress={() => setStep(step - 1)}
