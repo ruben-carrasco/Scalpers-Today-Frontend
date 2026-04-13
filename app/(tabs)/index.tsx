@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 import {
   View,
   ScrollView,
@@ -44,37 +44,6 @@ const translateVolatility = (volatility: string): string => {
   return 'Normal';
 };
 
-function SectionHeader({
-  icon,
-  eyebrow,
-  title,
-  description,
-}: {
-  icon: ReactNode;
-  eyebrow: string;
-  title: string;
-  description: string;
-}) {
-  return (
-    <View className="mb-4 flex-row items-start justify-between gap-4">
-      <View className="flex-1">
-        <Typography variant="caption" color="secondary" weight="bold" className="mb-2 uppercase tracking-[0.28em]">
-          {eyebrow}
-        </Typography>
-        <Typography variant="h2" weight="bold" className="mb-2 text-text-primary">
-          {title}
-        </Typography>
-        <Typography variant="body" color="secondary" className="leading-6">
-          {description}
-        </Typography>
-      </View>
-      <View className="mt-1 rounded-2xl border border-[#2C3440] bg-[#121A27] p-3">
-        {icon}
-      </View>
-    </View>
-  );
-}
-
 export default observer(function HomeScreen() {
   const insets = useSafeAreaInsets();
   const homeViewModel = useHomeViewModel();
@@ -106,16 +75,8 @@ export default observer(function HomeScreen() {
     ? translateVolatility(summary.marketSentiment.volatility)
     : 'Normal';
 
+  // --- REMOVED MOCK DATA PARA PROBAR LOS DESTACADOS ---
   const activeSummary = summary;
-  const highlightCount = activeSummary?.highlights?.length ?? 0;
-  const nextEventTime = activeSummary?.nextEvent?.time ?? 'Sin cita inmediata';
-  const hasBriefing = Boolean(briefing?.generalOutlook);
-
-  const openEventDetails = (event: any) => {
-    haptics.impactLight();
-    setSelectedEvent(createEventModel(event));
-    setEventModalVisible(true);
-  };
 
   return (
     <View className="flex-1 bg-bg-primary">
@@ -139,46 +100,8 @@ export default observer(function HomeScreen() {
         />
 
         {activeSummary && (
-          <View className="px-6 pb-32">
-            <View className="mb-6 -mt-2 flex-row gap-3">
-              <View className="flex-1 rounded-[28px] border border-[#203047] bg-[#0D1522] px-5 py-5">
-                <View className="mb-3 flex-row items-center gap-2">
-                  <Clock size={16} color="#93C5FD" strokeWidth={2.3} />
-                  <Typography variant="caption" weight="bold" className="uppercase tracking-[0.22em] text-[#BFDBFE]">
-                    Ventana activa
-                  </Typography>
-                </View>
-                <Typography variant="h3" weight="bold" className="mb-1 text-text-primary">
-                  {nextEventTime}
-                </Typography>
-                <Typography variant="caption" color="secondary">
-                  Próxima referencia operativa en el radar.
-                </Typography>
-              </View>
-
-              <View className="flex-1 rounded-[28px] border border-[#3D3220] bg-[#19150F] px-5 py-5">
-                <View className="mb-3 flex-row items-center gap-2">
-                  <Zap size={16} color="#FBBF24" strokeWidth={2.3} />
-                  <Typography variant="caption" weight="bold" className="uppercase tracking-[0.22em] text-[#FCD34D]">
-                    Lectura rápida
-                  </Typography>
-                </View>
-                <Typography variant="h3" weight="bold" className="mb-1 text-text-primary">
-                  {highlightCount} focos hoy
-                </Typography>
-                <Typography variant="caption" color="secondary">
-                  {hasBriefing ? 'Briefing IA preparado para la sesión.' : 'Esperando briefing y contexto macro.'}
-                </Typography>
-              </View>
-            </View>
-
-            <View className="mb-9">
-              <SectionHeader
-                icon={<TrendingUp size={18} color="#60A5FA" strokeWidth={2.4} />}
-                eyebrow="Panorama"
-                title="Pulso del mercado"
-                description="Lectura compacta del día para identificar si la sesión viene cargada, limpia o con catalizadores de alto impacto."
-              />
+          <View className="px-6 mt-4 pb-32">
+            <View className="mb-8">
               <MarketOverviewCard
                 stats={activeSummary.todayStats}
                 sentiment={sentiment}
@@ -186,49 +109,44 @@ export default observer(function HomeScreen() {
               />
             </View>
 
-            <View className="mb-9">
-              <SectionHeader
-                icon={<Calendar size={18} color="#FCA5A5" strokeWidth={2.4} />}
-                eyebrow="Agenda"
-                title="Próximo evento"
-                description="La siguiente referencia relevante para gestionar exposición, volatilidad y timing operativo."
-              />
+            <View className="mb-8">
+              <Typography variant="h2" weight="bold" className="mb-4 text-text-primary">
+                Próximo Evento
+              </Typography>
               {activeSummary.nextEvent ? (
                 <NextEventCard
                   event={activeSummary.nextEvent}
-                  onPress={() => openEventDetails(activeSummary.nextEvent)}
+                  onPress={() => {
+                    setSelectedEvent(createEventModel(activeSummary.nextEvent!));
+                    setEventModalVisible(true);
+                  }}
                 />
               ) : (
-                <View className="items-center justify-center rounded-[32px] border border-[#27272A] bg-[#151619] px-6 py-12">
-                  <View className="rounded-full border border-[#2F3640] bg-[#1B1D21] p-4">
-                    <Calendar size={30} color="#94A3B8" strokeWidth={2} />
-                  </View>
-                  <Typography variant="body" weight="semibold" color="secondary" className="mt-5">
+                <View className="bg-[#18181B] rounded-3xl p-6 border border-[#27272A] items-center justify-center py-10">
+                  <Calendar size={32} color="#52525B" strokeWidth={2} />
+                  <Typography variant="body" weight="semibold" color="secondary" className="mt-4">
                     No hay más eventos hoy
                   </Typography>
-                  <Typography variant="caption" color="muted" className="mt-2 text-center">
-                    La agenda macro ya no tiene publicaciones pendientes para esta sesión.
+                  <Typography variant="caption" color="muted" className="mt-1">
+                    El mercado ha cerrado su agenda económica
                   </Typography>
                 </View>
               )}
             </View>
 
             {briefing && (
-              <View className="mb-9">
-                <SectionHeader
-                  icon={<FileText size={18} color="#C4B5FD" strokeWidth={2.4} />}
-                  eyebrow="Análisis"
-                  title="Briefing del día"
-                  description="Resumen estratégico generado para aterrizar el contexto macro en decisiones de riesgo, atención y seguimiento."
-                />
+              <View className="mb-8">
+                <Typography variant="h2" weight="bold" className="mb-4">
+                  Briefing del Día
+                </Typography>
 
-                <View className="mb-4 rounded-[32px] border border-[#27272A] bg-[#141518] p-6">
+                <View className="bg-[#18181B] rounded-3xl p-6 border border-[#27272A] mb-4">
                   <FormattedAIText text={briefing.generalOutlook} />
                 </View>
 
                 {briefing.cautionaryHours && briefing.cautionaryHours.length > 0 && (
-                  <View className="mb-4 rounded-[32px] border border-[#FBBF24]/25 bg-[#1A1510] p-6">
-                    <View className="mb-4 flex-row items-center gap-2">
+                  <View className="bg-[#18181B] border border-[#FBBF24]/30 rounded-3xl p-6 mb-4">
+                    <View className="flex-row items-center gap-2 mb-4">
                       <AlarmClock size={20} color="#FBBF24" strokeWidth={2.5} />
                       <Typography variant="h3" weight="bold" className="text-[#FBBF24]">
                         Horas Clave
@@ -246,8 +164,8 @@ export default observer(function HomeScreen() {
                 )}
 
                 {briefing.impactedAssets && briefing.impactedAssets.length > 0 && (
-                  <View className="rounded-[32px] border border-[#27272A] bg-[#141518] p-6">
-                    <View className="mb-4 flex-row items-center gap-2">
+                  <View className="bg-[#18181B] border border-[#27272A] rounded-3xl p-6">
+                    <View className="flex-row items-center gap-2 mb-4">
                       <TrendingUp size={20} color="#3B82F6" strokeWidth={2.5} />
                       <Typography variant="h3" weight="bold" className="text-[#3B82F6]">
                         Activos a Vigilar
@@ -269,17 +187,19 @@ export default observer(function HomeScreen() {
 
             {activeSummary.highlights && activeSummary.highlights.length > 0 && (
               <View className="mb-8">
-                <SectionHeader
-                  icon={<Zap size={18} color="#FBBF24" strokeWidth={2.4} />}
-                  eyebrow="Monitor"
-                  title="Eventos destacados"
-                  description="Referencias que merecen vigilancia manual o una lectura más detallada por su relevancia intradía."
-                />
-                <View className="rounded-[32px] border border-[#27272A] bg-[#141518] p-6">
+                <Typography variant="h2" weight="bold" className="mb-4">
+                  Destacados
+                </Typography>
+                <View className="bg-[#18181B] border border-[#27272A] rounded-3xl p-6">
                   {activeSummary.highlights.slice(0, 5).map((highlightEvent, index) => (
                     <TouchableOpacity
                       key={index}
-                      onPress={() => openEventDetails(highlightEvent)}
+                      onPress={() => {
+                        haptics.impactLight();
+                        const eventModel = createEventModel(highlightEvent);
+                        setSelectedEvent(eventModel);
+                        setEventModalVisible(true);
+                      }}
                       activeOpacity={0.7}
                       className={`flex-row items-center gap-4 py-4 ${index < Math.min(activeSummary.highlights!.length - 1, 4) ? 'border-b border-[#27272A]' : ''}`}
                     >
@@ -311,30 +231,19 @@ export default observer(function HomeScreen() {
         )}
 
         {error && (
-          <View className="mx-6 mt-10 items-center rounded-[32px] border border-[#FF453A]/30 bg-[#1A1212] p-8">
-            <View className="rounded-full border border-[#7F1D1D] bg-[#2A1717] p-4">
-              <CloudOff size={42} color="#FF453A" strokeWidth={1.7} />
-            </View>
+          <View className="mx-6 mt-10 p-8 bg-[#18181B] rounded-3xl items-center border border-[#FF453A]/30">
+            <CloudOff size={56} color="#FF453A" strokeWidth={1.5} />
             <Typography variant="h2" weight="bold" color="danger" className="mt-4">
               Sin conexión
             </Typography>
             <Typography variant="body" color="secondary" className="mt-3 text-center leading-relaxed">
               {error}
             </Typography>
-            <TouchableOpacity
-              onPress={() => homeViewModel.refresh(true)}
-              activeOpacity={0.8}
-              className="mt-6 rounded-full border border-[#334155] bg-[#111827] px-5 py-3"
-            >
-              <Typography variant="caption" weight="bold" className="uppercase tracking-[0.22em] text-[#BFDBFE]">
-                Reintentar
-              </Typography>
-            </TouchableOpacity>
           </View>
         )}
 
         {!summary && !error && (
-          <View className="px-6 mt-4">
+          <View className="px-6 mt-6">
             <HomeSkeleton />
           </View>
         )}
