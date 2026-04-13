@@ -21,10 +21,19 @@ class NotificationService {
   private notificationListener: Notifications.EventSubscription | null = null;
   private responseListener: Notifications.EventSubscription | null = null;
 
+  private debugLog(message: string, payload?: unknown): void {
+    if (!__DEV__) return;
+    if (payload !== undefined) {
+      console.log(message, payload);
+      return;
+    }
+    console.log(message);
+  }
+
   async registerForPushNotifications(): Promise<string | null> {
     try {
       if (!Device.isDevice) {
-        console.log('Push notifications work best on physical devices');
+        this.debugLog('Push notifications work best on physical devices');
       }
 
       const { status: existingStatus } = await Notifications.getPermissionsAsync();
@@ -36,7 +45,7 @@ class NotificationService {
       }
 
       if (finalStatus !== 'granted') {
-        console.log('Permission for push notifications was denied');
+        this.debugLog('Permission for push notifications was denied');
         return null;
       }
 
@@ -54,13 +63,13 @@ class NotificationService {
 
       const token = await Notifications.getExpoPushTokenAsync(tokenConfig);
 
-      if (__DEV__) console.log('Push token:', token.data);
+      this.debugLog('Push token registered');
       return token.data;
     } catch (error: any) {
       console.warn('Error registering for push notifications:', error?.message || error);
 
       if (error?.message?.includes('projectId')) {
-        console.log('Para push notifications en Expo Go, configura el projectId en app.json');
+        this.debugLog('Para push notifications en Expo Go, configura el projectId en app.json');
       }
 
       return null;
@@ -93,16 +102,18 @@ class NotificationService {
     onNotificationReceived?: (notification: Notifications.Notification) => void,
     onNotificationResponse?: (response: Notifications.NotificationResponse) => void
   ): void {
+    this.removeNotificationListeners();
+
     this.notificationListener = Notifications.addNotificationReceivedListener(
       (notification) => {
-        console.log('Notification received:', notification);
+        this.debugLog('Notification received', notification.request.content);
         onNotificationReceived?.(notification);
       }
     );
 
     this.responseListener = Notifications.addNotificationResponseReceivedListener(
       (response) => {
-        console.log('Notification response:', response);
+        this.debugLog('Notification response', response.notification.request.content);
         onNotificationResponse?.(response);
       }
     );

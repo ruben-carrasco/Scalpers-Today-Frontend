@@ -31,6 +31,12 @@ export class ApiClient {
     this._onUnauthorized = callback;
   }
 
+  private debugLog(message: string): void {
+    if (__DEV__) {
+      console.log(message);
+    }
+  }
+
   private async fetchWithTimeout(url: string, options: RequestInit, timeout: number = API_CONFIG.TIMEOUT): Promise<Response> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -73,7 +79,7 @@ export class ApiClient {
 
         // Retry on 5xx server errors
         if (response.status >= 500 && attempt < maxRetries) {
-          if (__DEV__) console.log(`[API] Server error ${response.status}, retry ${attempt}/${maxRetries}`);
+          this.debugLog(`[API] Server error ${response.status}, retry ${attempt}/${maxRetries}`);
           await this.delay(1000 * Math.pow(2, attempt - 1));
           continue;
         }
@@ -84,7 +90,7 @@ export class ApiClient {
 
         // Retry on connection errors and timeouts
         if ((error instanceof ConnectionError || error instanceof TimeoutError) && attempt < maxRetries) {
-          if (__DEV__) console.log(`[API] ${error.constructor.name}, retry ${attempt}/${maxRetries}`);
+          this.debugLog(`[API] ${error.constructor.name}, retry ${attempt}/${maxRetries}`);
           await this.delay(1000 * Math.pow(2, attempt - 1));
           continue;
         }
@@ -179,7 +185,7 @@ export class ApiClient {
 
   async get<T>(url: string, params?: Record<string, any>): Promise<T> {
     const fullUrl = this.buildUrl(url, params);
-    if (__DEV__) console.log(`[API GET] ${fullUrl}`);
+    this.debugLog(`[API GET] ${fullUrl}`);
     const response = await this.fetchWithRetry(fullUrl, {
       method: 'GET',
       headers: this.getHeaders(),
@@ -188,7 +194,7 @@ export class ApiClient {
   }
 
   async post<T>(url: string, body?: any): Promise<T> {
-    if (__DEV__) console.log(`[API POST] ${url}`, body ? `Body: ${JSON.stringify(body)}` : '');
+    this.debugLog(`[API POST] ${url}`);
     const response = await this.fetchWithRetry(url, {
       method: 'POST',
       headers: this.getHeaders(),
@@ -198,7 +204,7 @@ export class ApiClient {
   }
 
   async put<T>(url: string, body?: any): Promise<T> {
-    if (__DEV__) console.log(`[API PUT] ${url}`, body ? `Body: ${JSON.stringify(body)}` : '');
+    this.debugLog(`[API PUT] ${url}`);
     const response = await this.fetchWithRetry(url, {
       method: 'PUT',
       headers: this.getHeaders(),
@@ -209,7 +215,7 @@ export class ApiClient {
 
   async delete(url: string, params?: Record<string, any>): Promise<void> {
     const fullUrl = this.buildUrl(url, params);
-    if (__DEV__) console.log(`[API DELETE] ${fullUrl}`);
+    this.debugLog(`[API DELETE] ${fullUrl}`);
     const response = await this.fetchWithRetry(fullUrl, {
       method: 'DELETE',
       headers: this.getHeaders(),
