@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   View,
   TextInput,
@@ -29,8 +29,6 @@ export default observer(function EventsScreen() {
   const eventsViewModel = useEventsViewModel();
   const haptics = useHaptics();
 
-  const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   useEffect(() => {
     eventsViewModel.loadEvents().then(() => {
       if (params.eventId && typeof params.eventId === 'string') {
@@ -41,17 +39,11 @@ export default observer(function EventsScreen() {
         }
       }
     });
-    return () => {
-      if (searchTimeout.current) clearTimeout(searchTimeout.current);
-    };
   }, [eventsViewModel, params.eventId]);
 
   const handleSearch = useCallback((text: string) => {
     setSearchText(text);
-    if (searchTimeout.current) clearTimeout(searchTimeout.current);
-    searchTimeout.current = setTimeout(() => {
-      eventsViewModel.setSearchFilter(text || undefined);
-    }, 400);
+    eventsViewModel.setSearchFilter(text || undefined);
   }, [eventsViewModel]);
 
   const handleImportanceFilter = (importance: number | undefined) => {
