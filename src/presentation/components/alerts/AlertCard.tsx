@@ -38,6 +38,7 @@ const getStatusLabel = (status: string) => {
 
 export const AlertCard = React.memo(function AlertCard({ alert, onToggle, onDelete }: AlertCardProps) {
   const statusColor = getStatusColor(alert.status);
+  const pushColor = alert.pushEnabled ? colors.brand.primaryLight : colors.text.muted;
 
   return (
     <View className="rounded-3xl p-5 border mb-3" style={{ backgroundColor: colors.bg.modal, borderColor: colors.bg.modalCard }} accessibilityLabel={`Alerta ${alert.name}, estado ${getStatusLabel(alert.status)}`}>
@@ -50,6 +51,16 @@ export const AlertCard = React.memo(function AlertCard({ alert, onToggle, onDele
             <View className="px-2 py-1 rounded-md" style={{ backgroundColor: statusColor + '20' }}>
               <Typography variant="caption" weight="bold" style={{ color: statusColor }} className="uppercase tracking-widest text-[11px]">
                 {getStatusLabel(alert.status)}
+              </Typography>
+            </View>
+            <View className="px-2 py-1 rounded-md flex-row items-center gap-1.5" style={{ backgroundColor: colors.bg.modalCard }}>
+              {alert.pushEnabled ? (
+                <Bell size={12} color={pushColor} strokeWidth={2.5} />
+              ) : (
+                <BellOff size={12} color={pushColor} strokeWidth={2.5} />
+              )}
+              <Typography variant="caption" weight="bold" style={{ color: pushColor }} className="uppercase tracking-widest text-[11px]">
+                {alert.pushEnabled ? 'Push on' : 'Push off'}
               </Typography>
             </View>
             {alert.triggerCount > 0 && (
