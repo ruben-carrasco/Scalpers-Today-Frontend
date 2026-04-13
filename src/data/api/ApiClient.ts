@@ -31,8 +31,13 @@ export class ApiClient {
     this._onUnauthorized = callback;
   }
 
+  private shouldLog(): boolean {
+    const environment = typeof process !== 'undefined' ? process.env?.NODE_ENV : undefined;
+    return __DEV__ && environment !== 'test';
+  }
+
   private debugLog(message: string): void {
-    if (__DEV__) {
+    if (this.shouldLog()) {
       console.log(message);
     }
   }
@@ -166,7 +171,9 @@ export class ApiClient {
       } catch {
       }
 
-      if (__DEV__) console.error(`API Error [${response.status}]:`, message);
+      if (this.shouldLog()) {
+        console.error(`API Error [${response.status}]:`, message);
+      }
 
       if (response.status === 401) {
         this._onUnauthorized?.();
