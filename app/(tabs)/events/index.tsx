@@ -167,7 +167,7 @@ export default observer(function EventsScreen() {
         data={events}
         keyExtractor={(item) => item.id}
         renderItem={({ item, index }) => (
-          <AnimatedCard index={index} onPress={() => handleEventPress(item)}>
+          <AnimatedCard index={index}>
             <EventCard event={item} onPress={() => handleEventPress(item)} />
           </AnimatedCard>
         )}

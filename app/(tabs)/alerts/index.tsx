@@ -47,7 +47,12 @@ export default observer(function AlertsScreen() {
     );
   };
 
-  const handleCreateAlert = async (name: string, description: string, conditions: AlertCondition[], pushEnabled: boolean) => {
+  const handleCreateAlert = async (
+    name: string,
+    description: string,
+    conditions: AlertCondition[],
+    pushEnabled: boolean
+  ): Promise<boolean> => {
     const success = await alertsViewModel.createAlert({
       name,
       description: description || undefined,
@@ -59,6 +64,8 @@ export default observer(function AlertsScreen() {
       haptics.success();
       Alert.alert('Alerta creada', 'Tu alerta ha sido creada exitosamente.');
     }
+
+    return success;
   };
 
   const { alerts, isLoading } = alertsViewModel;

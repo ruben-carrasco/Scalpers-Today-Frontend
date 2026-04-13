@@ -13,7 +13,12 @@ import { StepConfirmation } from './steps/StepConfirmation';
 interface CreateAlertModalProps {
   visible: boolean;
   onClose: () => void;
-  onCreate: (name: string, description: string, conditions: AlertCondition[], pushEnabled: boolean) => void;
+  onCreate: (
+    name: string,
+    description: string,
+    conditions: AlertCondition[],
+    pushEnabled: boolean
+  ) => Promise<boolean> | boolean;
   availableCountries: string[];
 }
 
@@ -36,41 +41,41 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
     }
   }, [visible]);
 
-  const handleSheetChanges = useCallback((index: number) => {
-    if (index === -1) {
-      onClose();
-      resetForm();
-    }
-  }, [onClose]);
-
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setName('');
     setDescription('');
     setSelectedTypes([]);
     setConditionValues({} as Record<AlertType, string>);
     setPushEnabled(true);
     setStep(1);
-  };
+  }, []);
 
-  const toggleType = (type: AlertType) => {
-    if (selectedTypes.includes(type)) {
-      setSelectedTypes(selectedTypes.filter(t => t !== type));
-    } else {
-      setSelectedTypes([...selectedTypes, type]);
+  const handleSheetChanges = useCallback((index: number) => {
+    if (index === -1) {
+      onClose();
+      resetForm();
     }
-  };
+  }, [onClose, resetForm]);
 
-  const handleSetConditionValue = (type: AlertType, value: string) => {
-    setConditionValues({ ...conditionValues, [type]: value });
-  };
+  const toggleType = useCallback((type: AlertType) => {
+    setSelectedTypes((prev) =>
+      prev.includes(type) ? prev.filter((current) => current !== type) : [...prev, type]
+    );
+  }, []);
 
-  const handleCreate = () => {
+  const handleSetConditionValue = useCallback((type: AlertType, value: string) => {
+    setConditionValues((prev) => ({ ...prev, [type]: value }));
+  }, []);
+
+  const handleCreate = async () => {
     const conditions: AlertCondition[] = selectedTypes.map(type => ({
       alertType: type,
       value: conditionValues[type] || null,
     }));
-    onCreate(name, description, conditions, pushEnabled);
-    bottomSheetModalRef.current?.dismiss();
+    const created = await onCreate(name, description, conditions, pushEnabled);
+    if (created) {
+      bottomSheetModalRef.current?.dismiss();
+    }
   };
 
   const canProceed = () => {
@@ -160,7 +165,13 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
 
           <TouchableOpacity
             disabled={!canProceed()}
-            onPress={() => step < 3 ? setStep(step + 1) : handleCreate()}
+            onPress={() => {
+              if (step < 3) {
+                setStep(step + 1);
+                return;
+              }
+              void handleCreate();
+            }}
             className="flex-1 h-14 rounded-xl flex-row items-center justify-center gap-2"
             style={{ backgroundColor: canProceed() ? colors.brand.primary : colors.bg.modalCard }}
           >
