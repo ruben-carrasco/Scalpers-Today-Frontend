@@ -27,6 +27,15 @@ interface StepConditionsProps {
 export function StepConditions({ selectedTypes, conditionValues, availableCountries, onToggleType, onSetConditionValue }: StepConditionsProps) {
   return (
     <View className="pb-10">
+      <View className="mb-6 rounded-[28px] border px-5 py-5" style={{ backgroundColor: '#141B28', borderColor: '#203047' }}>
+        <Typography variant="body" weight="bold" className="text-text-primary">
+          Selecciona los disparadores
+        </Typography>
+        <Typography variant="caption" color="secondary" className="mt-2">
+          Puedes mezclar condiciones amplias y específicas para ajustar el ruido y la relevancia de cada aviso.
+        </Typography>
+      </View>
+
       {ALERT_TYPES.map((alertType) => {
         const isSelected = selectedTypes.includes(alertType.type);
         return (
@@ -34,10 +43,10 @@ export function StepConditions({ selectedTypes, conditionValues, availableCountr
             key={alertType.type}
             onPress={() => onToggleType(alertType.type)}
             activeOpacity={0.7}
-            className="flex-row items-center p-4 rounded-2xl mb-3 border"
+            className="mb-3 flex-row items-center rounded-[24px] border p-4"
             style={{ backgroundColor: isSelected ? colors.brand.primary + '1A' : colors.bg.modalCard, borderColor: isSelected ? colors.brand.primary : colors.border.medium }}
           >
-            <View className="w-12 h-12 rounded-xl items-center justify-center mr-4" style={{ backgroundColor: isSelected ? colors.brand.primary : colors.bg.modal }}>
+            <View className="mr-4 h-12 w-12 items-center justify-center rounded-[18px]" style={{ backgroundColor: isSelected ? colors.brand.primary : colors.bg.modal }}>
               <alertType.Icon size={20} color={isSelected ? colors.white : colors.text.icon} strokeWidth={2} />
             </View>
             <View className="flex-1">
@@ -80,7 +89,7 @@ export function StepConditions({ selectedTypes, conditionValues, availableCountr
 
 function ValueSelector({ label, items, selectedValue, onSelect }: { label: string; items: string[]; selectedValue?: string; onSelect: (v: string) => void }) {
   return (
-    <View className="mt-4 p-4 rounded-2xl" style={{ backgroundColor: colors.bg.modalCard }}>
+    <View className="mt-4 rounded-[24px] p-4" style={{ backgroundColor: colors.bg.modalCard }}>
       <Typography variant="label" color="secondary" className="mb-3">{label}</Typography>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         {items.map((item) => {
@@ -89,7 +98,7 @@ function ValueSelector({ label, items, selectedValue, onSelect }: { label: strin
             <TouchableOpacity
               key={item}
               onPress={() => onSelect(item)}
-              className="px-4 py-2 rounded-xl mr-2 border"
+              className="mr-2 rounded-2xl border px-4 py-2"
               style={{ backgroundColor: isSelected ? colors.brand.primary : colors.bg.modal, borderColor: isSelected ? colors.brand.primary : colors.border.medium, borderWidth: isSelected ? 0 : 1 }}
             >
               <Typography variant="body" weight="semibold" style={{ color: isSelected ? colors.text.primary : colors.text.icon }}>
