@@ -40,41 +40,72 @@ export const AlertCard = React.memo(function AlertCard({ alert, onToggle, onDele
   const statusColor = getStatusColor(alert.status);
 
   return (
-    <View className="rounded-3xl p-5 border mb-3" style={{ backgroundColor: colors.bg.modal, borderColor: colors.bg.modalCard }} accessibilityLabel={`Alerta ${alert.name}, estado ${getStatusLabel(alert.status)}`}>
-      <View className="flex-row justify-between items-start mb-4">
-        <View className="flex-1 mr-4">
-          <Typography variant="h3" weight="bold" className="mb-2" style={{ color: colors.text.bright }} numberOfLines={1}>
+    <View
+      className="mb-3 overflow-hidden rounded-[30px] border p-5"
+      style={{ backgroundColor: colors.bg.modal, borderColor: colors.bg.modalCard }}
+      accessibilityLabel={`Alerta ${alert.name}, estado ${getStatusLabel(alert.status)}`}
+    >
+      <View className="mb-4 flex-row items-start justify-between">
+        <View className="mr-4 flex-1">
+          <View className="mb-3 flex-row items-center gap-2">
+            <View className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: statusColor }} />
+            <Typography variant="caption" color="muted" weight="bold" className="uppercase tracking-[0.22em]">
+              Regla automatizada
+            </Typography>
+          </View>
+
+          <Typography
+            variant="h3"
+            weight="bold"
+            className="mb-3"
+            style={{ color: colors.text.bright }}
+            numberOfLines={1}
+          >
             {alert.name}
           </Typography>
+
           <View className="flex-row items-center gap-2">
-            <View className="px-2 py-1 rounded-md" style={{ backgroundColor: statusColor + '20' }}>
-              <Typography variant="caption" weight="bold" style={{ color: statusColor }} className="uppercase tracking-widest text-[11px]">
+            <View className="rounded-full px-3 py-1.5" style={{ backgroundColor: statusColor + '20' }}>
+              <Typography
+                variant="caption"
+                weight="bold"
+                style={{ color: statusColor }}
+                className="text-[11px] uppercase tracking-[0.2em]"
+              >
                 {getStatusLabel(alert.status)}
               </Typography>
             </View>
+
             {alert.triggerCount > 0 && (
-              <View className="flex-row items-center gap-1 ml-2">
+              <View className="ml-1 flex-row items-center gap-1.5 rounded-full px-3 py-1.5" style={{ backgroundColor: colors.bg.modalCard }}>
                 <Zap size={14} color={colors.semantic.warningLight} strokeWidth={2.5} />
                 <Typography variant="caption" color="muted" weight="bold">
-                  {alert.triggerCount}
+                  {alert.triggerCount} disparos
                 </Typography>
               </View>
             )}
           </View>
         </View>
+
         <TouchableOpacity
-          className="rounded-full"
+          className="rounded-[20px]"
           onPress={onToggle}
           disabled={alert.isLoading}
           accessibilityRole="button"
           accessibilityLabel={alert.isActive ? 'Pausar alerta' : 'Activar alerta'}
         >
           {alert.isActive ? (
-            <View className="w-12 h-12 rounded-full items-center justify-center" style={{ backgroundColor: colors.semantic.successLight }}>
+            <View
+              className="h-14 w-14 items-center justify-center rounded-[20px]"
+              style={{ backgroundColor: colors.semantic.successLight }}
+            >
               <Bell size={20} color={colors.black} strokeWidth={2.5} />
             </View>
           ) : (
-            <View className="w-12 h-12 rounded-full items-center justify-center" style={{ backgroundColor: colors.bg.modalCard }}>
+            <View
+              className="h-14 w-14 items-center justify-center rounded-[20px]"
+              style={{ backgroundColor: colors.bg.modalCard }}
+            >
               <BellOff size={20} color={colors.text.muted} strokeWidth={2.5} />
             </View>
           )}
@@ -87,12 +118,16 @@ export const AlertCard = React.memo(function AlertCard({ alert, onToggle, onDele
         </Typography>
       )}
 
-      <View className="flex-row flex-wrap gap-2 mb-5">
+      <View className="mb-5 flex-row flex-wrap gap-2">
         {alert.conditions.map((condition, index) => {
           const alertType = ALERT_TYPES.find((t) => t.type === condition.alertType);
           const CondIcon = alertType?.Icon || Tag;
           return (
-            <View key={index} className="flex-row items-center px-3 py-1.5 rounded-lg gap-2" style={{ backgroundColor: colors.bg.modalCard }}>
+            <View
+              key={index}
+              className="flex-row items-center gap-2 rounded-2xl px-3 py-2"
+              style={{ backgroundColor: colors.bg.modalCard }}
+            >
               <CondIcon size={14} color={colors.text.light} strokeWidth={2} />
               <Typography variant="caption" weight="semibold" style={{ color: colors.text.light }}>
                 {alertType?.label || condition.alertType}
@@ -103,27 +138,32 @@ export const AlertCard = React.memo(function AlertCard({ alert, onToggle, onDele
         })}
       </View>
 
-      <View className="flex-row items-center justify-between pt-4 border-t" style={{ borderTopColor: colors.bg.modalCard }}>
-        {alert.lastTriggeredAt ? (
-          <View className="flex-row items-center gap-2">
-            <Clock size={14} color={colors.text.muted} strokeWidth={2} />
-            <Typography variant="caption" color="muted" weight="semibold">
-              Último: {new Date(alert.lastTriggeredAt).toLocaleDateString('es-ES')}
+      <View className="border-t pt-4" style={{ borderTopColor: colors.bg.modalCard }}>
+        <View className="flex-row items-center justify-between">
+          {alert.lastTriggeredAt ? (
+            <View className="flex-row items-center gap-2">
+              <Clock size={14} color={colors.text.muted} strokeWidth={2} />
+              <Typography variant="caption" color="muted" weight="semibold">
+                Último disparo: {new Date(alert.lastTriggeredAt).toLocaleDateString('es-ES')}
+              </Typography>
+            </View>
+          ) : (
+            <Typography variant="caption" color="muted" weight="medium">
+              Sin disparos registrados
             </Typography>
-          </View>
-        ) : (
-          <Typography variant="caption" color="muted" weight="medium">Nunca disparada</Typography>
-        )}
-        <TouchableOpacity
-          onPress={onDelete}
-          disabled={alert.isDeleting}
-          className="p-2 rounded-full"
-          style={{ backgroundColor: colors.semantic.dangerLight + '1A' }}
-          accessibilityRole="button"
-          accessibilityLabel="Eliminar alerta"
-        >
-          <Trash2 size={18} color={colors.semantic.dangerLight} strokeWidth={2.5} />
-        </TouchableOpacity>
+          )}
+
+          <TouchableOpacity
+            onPress={onDelete}
+            disabled={alert.isDeleting}
+            className="rounded-full p-2.5"
+            style={{ backgroundColor: colors.semantic.dangerLight + '1A' }}
+            accessibilityRole="button"
+            accessibilityLabel="Eliminar alerta"
+          >
+            <Trash2 size={18} color={colors.semantic.dangerLight} strokeWidth={2.5} />
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
