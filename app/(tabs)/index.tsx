@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Calendar, FileText, AlarmClock, Clock, Zap, CloudOff, TrendingUp } from 'lucide-react-native';
+import { Calendar, AlarmClock, Clock, CloudOff, TrendingUp } from 'lucide-react-native';
 import { observer } from 'mobx-react-lite';
 import {
   useHomeViewModel,

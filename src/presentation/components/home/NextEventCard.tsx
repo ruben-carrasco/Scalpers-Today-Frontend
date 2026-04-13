@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
-import { Clock, Sparkles } from 'lucide-react-native';
+import { Sparkles } from 'lucide-react-native';
 import { EconomicEvent } from '../../../domain/entities/EconomicEvent';
 import { Typography } from '../common/Typography';
 import { getImportanceColor } from '../../theme';

@@ -1,6 +1,5 @@
 import React from 'react';
 import { View } from 'react-native';
-import { Activity } from 'lucide-react-native';
 import { Typography } from '../common/Typography';
 
 interface HomeHeaderProps {
