@@ -1,12 +1,11 @@
 import '../global.css';
 import 'reflect-metadata';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { observer } from 'mobx-react-lite';
-import * as Notifications from 'expo-notifications';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { container } from '../src/core/container';
@@ -24,8 +23,6 @@ const RootLayoutNav = observer(function RootLayoutNav() {
   const isAuthenticated = authViewModel.isAuthenticated;
   const inAuthGroup = segments[0] === '(auth)';
   const [isReady, setIsReady] = useState(false);
-  const notificationListenerRef = useRef<Notifications.EventSubscription | null>(null);
-  const responseListenerRef = useRef<Notifications.EventSubscription | null>(null);
 
   useEffect(() => {
     const init = async () => {
@@ -42,19 +39,14 @@ const RootLayoutNav = observer(function RootLayoutNav() {
 
     init();
 
-    notificationListenerRef.current = Notifications.addNotificationReceivedListener(
+    notificationService.setupNotificationListeners(
       (notification) => {
-        if (__DEV__) console.log('Notification received:', notification.request.content);
         const { title, body } = notification.request.content;
         if (title || body) {
           Alert.alert(title || 'Nueva Alerta', body || '');
         }
-      }
-    );
-
-    responseListenerRef.current = Notifications.addNotificationResponseReceivedListener(
+      },
       (response) => {
-        if (__DEV__) console.log('Notification tapped:', response.notification.request.content);
         const data = response.notification.request.content.data;
 
         if (data?.type === 'event' && data?.eventId) {
@@ -66,18 +58,16 @@ const RootLayoutNav = observer(function RootLayoutNav() {
     );
 
     notificationService.getLastNotificationResponse().then((response) => {
-      if (response) {
-        if (__DEV__) console.log('App opened from notification:', response.notification.request.content);
+      const data = response?.notification.request.content.data;
+      if (data?.type === 'event' && data?.eventId) {
+        router.replace(`/(tabs)/events?eventId=${data.eventId}`);
+      } else if (data?.type === 'alert') {
+        router.replace('/(tabs)/alerts');
       }
     });
 
     return () => {
-      if (notificationListenerRef.current) {
-        notificationListenerRef.current.remove();
-      }
-      if (responseListenerRef.current) {
-        responseListenerRef.current.remove();
-      }
+      notificationService.removeNotificationListeners();
     };
   }, [router]);
 

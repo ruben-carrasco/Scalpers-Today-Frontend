@@ -176,6 +176,11 @@ export class EventsViewModel {
   }
 
   reset(): void {
+    if (this._searchDebounceTimer) {
+      clearTimeout(this._searchDebounceTimer);
+      this._searchDebounceTimer = null;
+    }
+
     this.events = [];
     this.upcomingEvents = [];
     this.availableCountries = [];
