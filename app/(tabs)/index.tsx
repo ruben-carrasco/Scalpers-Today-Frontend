@@ -20,7 +20,7 @@ import {
   NextEventCard,
   EventDetailModal,
 } from '../../src/presentation/components/home';
-import { createEventModel } from '../../src/presentation/models/EventModel';
+import { createEventModel, EventModel } from '../../src/presentation/models/EventModel';
 import { HomeSkeleton } from '../../src/presentation/components/home/HomeSkeletons';
 import { FormattedAIText } from '../../src/presentation/components/common/FormattedAIText';
 import { Typography } from '../../src/presentation/components/common/Typography';
@@ -54,7 +54,7 @@ export default observer(function HomeScreen() {
     new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
   );
   const [eventModalVisible, setEventModalVisible] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [selectedEvent, setSelectedEvent] = useState<EventModel | null>(null);
 
   useEffect(() => {
     homeViewModel.refresh();
@@ -64,7 +64,7 @@ export default observer(function HomeScreen() {
     return () => clearInterval(timer);
   }, [homeViewModel]);
 
-  const { summary, briefing, isLoadingSummary, error } = homeViewModel;
+  const { summary, briefing, isLoading, error } = homeViewModel;
   const userName = authViewModel.user?.name?.split(' ')[0] || 'Trader';
 
   const sentiment = summary?.marketSentiment?.overall
@@ -87,7 +87,7 @@ export default observer(function HomeScreen() {
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
-            refreshing={isLoadingSummary}
+            refreshing={isLoading}
             onRefresh={() => homeViewModel.refresh(true)}
             tintColor="#3B82F6"
           />
