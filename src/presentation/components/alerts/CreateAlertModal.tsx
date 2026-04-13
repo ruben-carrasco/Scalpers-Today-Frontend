@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { View, TouchableOpacity, ScrollView } from 'react-native';
 import { BottomSheetModal, BottomSheetView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
-import { CheckCircle, ArrowLeft, ArrowRight, BellRing } from 'lucide-react-native';
+import { CheckCircle, ArrowLeft, ArrowRight } from 'lucide-react-native';
 import { AlertType } from '../../../domain/entities/AlertType';
 import { AlertCondition } from '../../../domain/entities/AlertCondition';
 import { Typography } from '../common/Typography';
@@ -110,32 +110,12 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
       handleIndicatorStyle={{ backgroundColor: colors.border.indicator }}
     >
       <BottomSheetView className="flex-1">
-        <View className="px-6 pb-4 pt-2">
-          <View className="overflow-hidden rounded-[28px] border px-5 pb-5 pt-5" style={{ backgroundColor: '#0C1320', borderColor: '#1E293B' }}>
-            <View className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-[#2563EB]/15" />
-            <View className="absolute -left-4 bottom-0 h-16 w-16 rounded-full bg-[#F59E0B]/10" />
-
-            <View className="mb-4 flex-row items-start justify-between gap-4">
-              <View className="flex-1">
-                <Typography variant="caption" weight="bold" className="mb-2 uppercase tracking-[0.28em] text-[#BFDBFE]">
-                  Asistente de creación
-                </Typography>
-                <Typography variant="h2" weight="bold" className="text-text-primary">
-                  {STEP_TITLES[step - 1]}
-                </Typography>
-                <Typography variant="caption" color="secondary" className="mt-2">
-                  {STEP_SUBTITLES[step - 1]}
-                </Typography>
-              </View>
-
-              <View className="h-12 w-12 items-center justify-center rounded-[18px]" style={{ backgroundColor: colors.brand.primary }}>
-                <BellRing size={20} color={colors.white} strokeWidth={2.4} />
-              </View>
-            </View>
-
-            <ProgressBar currentStep={step} />
-          </View>
+        <View className="px-6 py-4">
+          <Typography variant="h2" weight="bold">{STEP_TITLES[step - 1]}</Typography>
+          <Typography variant="caption" color="secondary" className="mt-1">{STEP_SUBTITLES[step - 1]}</Typography>
         </View>
+
+        <ProgressBar currentStep={step} />
 
         <ScrollView className="flex-1 px-6">
           {step === 1 && (
@@ -167,11 +147,11 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
           )}
         </ScrollView>
 
-        <View className="flex-row border-t p-6 pb-10" style={{ borderTopColor: colors.bg.modalCard }}>
+        <View className="flex-row p-6 pb-10 border-t" style={{ borderTopColor: colors.bg.modalCard }}>
           {step > 1 && (
             <TouchableOpacity
               onPress={() => setStep(step - 1)}
-              className="mr-3 h-14 items-center justify-center rounded-[20px] px-6"
+              className="px-6 h-14 items-center justify-center rounded-xl mr-3"
               style={{ backgroundColor: colors.bg.modalCard }}
             >
               <ArrowLeft size={20} color={colors.text.icon} />
@@ -181,7 +161,7 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
           <TouchableOpacity
             disabled={!canProceed()}
             onPress={() => step < 3 ? setStep(step + 1) : handleCreate()}
-            className="flex-1 h-14 flex-row items-center justify-center gap-2 rounded-[20px]"
+            className="flex-1 h-14 rounded-xl flex-row items-center justify-center gap-2"
             style={{ backgroundColor: canProceed() ? colors.brand.primary : colors.bg.modalCard }}
           >
             <Typography variant="body" weight="bold" style={{ color: canProceed() ? colors.text.primary : colors.text.muted }}>
@@ -197,17 +177,17 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
 
 function ProgressBar({ currentStep }: { currentStep: number }) {
   return (
-    <View className="flex-row items-center justify-center px-2 pt-2">
+    <View className="flex-row items-center justify-center py-4 px-10">
       {[1, 2, 3].map((s) => (
         <View key={s} className="flex-row items-center">
-          <View className="h-9 w-9 items-center justify-center rounded-full" style={{ backgroundColor: s <= currentStep ? colors.brand.primary : colors.bg.modalCard }}>
+          <View className="w-8 h-8 rounded-full items-center justify-center" style={{ backgroundColor: s <= currentStep ? colors.brand.primary : colors.bg.modalCard }}>
             {s < currentStep ? (
               <CheckCircle size={16} color={colors.white} />
             ) : (
               <Typography variant="caption" weight="bold" style={{ color: s <= currentStep ? colors.text.primary : colors.text.muted }}>{s}</Typography>
             )}
           </View>
-          {s < 3 && <View className="mx-2 h-1 w-12 rounded-full" style={{ backgroundColor: s < currentStep ? colors.brand.primary : colors.bg.modalCard }} />}
+          {s < 3 && <View className="w-12 h-1 mx-2 rounded-full" style={{ backgroundColor: s < currentStep ? colors.brand.primary : colors.bg.modalCard }} />}
         </View>
       ))}
     </View>
