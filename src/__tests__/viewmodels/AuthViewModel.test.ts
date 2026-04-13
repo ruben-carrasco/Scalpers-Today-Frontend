@@ -1,5 +1,4 @@
 import { AuthViewModel } from '../../presentation/viewmodels/AuthViewModel';
-import { runInAction } from 'mobx';
 
 // Mock notificationService
 jest.mock('../../services/NotificationService', () => ({

@@ -95,7 +95,7 @@ export class AuthViewModel {
           this.isAuthenticated = false;
         }
       });
-    } catch (err) {
+    } catch {
       runInAction(() => {
         this.user = null;
         this.isAuthenticated = false;

@@ -44,7 +44,7 @@ export default observer(function EventsScreen() {
     return () => {
       if (searchTimeout.current) clearTimeout(searchTimeout.current);
     };
-  }, [params.eventId]);
+  }, [eventsViewModel, params.eventId]);
 
   const handleSearch = useCallback((text: string) => {
     setSearchText(text);
@@ -52,7 +52,7 @@ export default observer(function EventsScreen() {
     searchTimeout.current = setTimeout(() => {
       eventsViewModel.setSearchFilter(text || undefined);
     }, 400);
-  }, []);
+  }, [eventsViewModel]);
 
   const handleImportanceFilter = (importance: number | undefined) => {
     haptics.selection();

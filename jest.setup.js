@@ -1,3 +1,5 @@
+const { jest } = require('@jest/globals');
+
 // Mock reflect-metadata for inversify
 require('reflect-metadata');
 

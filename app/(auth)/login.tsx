@@ -28,7 +28,7 @@ export default observer(function LoginScreen() {
 
   useEffect(() => {
     authViewModel.clearError();
-  }, []);
+  }, [authViewModel]);
 
   const validateForm = useCallback((): boolean => {
     const newErrors: { email?: string; password?: string } = {};

@@ -12,7 +12,6 @@ import { Importance } from '../../domain/entities/Importance';
 import { Surprise } from '../../domain/entities/Surprise';
 import { HomeSummary } from '../../domain/entities/HomeSummary';
 import { DailyBriefing } from '../../domain/entities/DailyBriefing';
-import { BriefingStats } from '../../domain/entities/BriefingStats';
 import { ApiAIAnalysis, ApiEvent, ApiFilteredEventsResponse, ApiUpcomingResponse, ApiHomeSummary, ApiBriefing } from './types';
 
 @injectable()

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
-import { Clock, TrendingUp, TrendingDown, MinusCircle, Sparkles } from 'lucide-react-native';
+import { TrendingUp, TrendingDown, MinusCircle, Sparkles } from 'lucide-react-native';
 import { EventModel } from '../../models/EventModel';
 import { Typography } from '../common/Typography';
 import { getImportanceColor } from '../../theme';

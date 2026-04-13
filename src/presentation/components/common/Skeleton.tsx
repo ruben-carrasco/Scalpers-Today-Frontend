@@ -28,7 +28,7 @@ export function Skeleton({ className = '', style, width, height, borderRadius, .
       -1,
       true
     );
-  }, []);
+  }, [opacity]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,

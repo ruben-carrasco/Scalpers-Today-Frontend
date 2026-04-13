@@ -24,7 +24,7 @@ export default observer(function AlertsScreen() {
     if (eventsViewModel.availableCountries.length === 0) {
       eventsViewModel.loadEvents();
     }
-  }, []);
+  }, [alertsViewModel, eventsViewModel]);
 
   const handleToggleAlert = (alertId: string) => {
     haptics.impactLight();

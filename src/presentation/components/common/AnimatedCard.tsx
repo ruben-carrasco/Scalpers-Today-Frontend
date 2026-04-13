@@ -40,7 +40,7 @@ export function AnimatedCard({
     }, delay);
 
     return () => clearTimeout(timeout);
-  }, []);
+  }, [delay, fadeAnim, translateY]);
 
   const handlePressIn = () => {
     Animated.spring(scaleAnim, {

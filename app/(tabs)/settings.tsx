@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { ShieldCheck, HelpCircle, Mail, Info, ChevronRight, User, LogOut, BarChart3 } from 'lucide-react-native';
+import { ShieldCheck, Mail, Info, ChevronRight, LogOut } from 'lucide-react-native';
 import { observer } from 'mobx-react-lite';
 import { useAuthViewModel } from '../../src/presentation/hooks';
 import { Typography } from '../../src/presentation/components/common/Typography';

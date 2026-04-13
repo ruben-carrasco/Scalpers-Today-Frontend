@@ -93,7 +93,7 @@ export default observer(function HomeScreen() {
       setCurrentTime(new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }));
     }, 60000);
     return () => clearInterval(timer);
-  }, []);
+  }, [homeViewModel]);
 
   const { summary, briefing, isLoadingSummary, error } = homeViewModel;
   const userName = authViewModel.user?.name?.split(' ')[0] || 'Trader';

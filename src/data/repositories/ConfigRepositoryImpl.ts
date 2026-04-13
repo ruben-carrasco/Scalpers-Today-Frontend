@@ -9,10 +9,10 @@ import { HealthStatus } from '../../domain/interfaces/repositories/HealthStatus'
 
 interface ApiCountriesResponse {
   total_countries: number;
-  countries: Array<{
+  countries: {
     name: string;
     event_count: number;
-  }>;
+  }[];
 }
 
 interface ApiHealthResponse {

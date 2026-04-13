@@ -21,6 +21,8 @@ const authViewModel = container.get<AuthViewModel>(TYPES.AuthViewModel);
 const RootLayoutNav = observer(function RootLayoutNav() {
   const router = useRouter();
   const segments = useSegments();
+  const isAuthenticated = authViewModel.isAuthenticated;
+  const inAuthGroup = segments[0] === '(auth)';
   const [isReady, setIsReady] = useState(false);
   const notificationListenerRef = useRef<Notifications.EventSubscription | null>(null);
   const responseListenerRef = useRef<Notifications.EventSubscription | null>(null);
@@ -77,20 +79,17 @@ const RootLayoutNav = observer(function RootLayoutNav() {
         responseListenerRef.current.remove();
       }
     };
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     if (!isReady) return;
-
-    const inAuthGroup = segments[0] === '(auth)';
-    const isAuthenticated = authViewModel.isAuthenticated;
 
     if (!isAuthenticated && !inAuthGroup) {
       router.replace('/(auth)/login');
     } else if (isAuthenticated && inAuthGroup) {
       router.replace('/(tabs)');
     }
-  }, [isReady, authViewModel.isAuthenticated, segments]);
+  }, [inAuthGroup, isAuthenticated, isReady, router]);
 
   if (!isReady) {
     return (

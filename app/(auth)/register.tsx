@@ -8,7 +8,6 @@ import {
   ScrollView,
   ActivityIndicator,
   StatusBar,
-  Image,
 } from 'react-native';
 import { User, Mail, Lock, Eye, EyeOff, AlertCircle, ArrowLeft, CheckCircle, Circle } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
@@ -56,7 +55,7 @@ export default observer(function RegisterScreen() {
 
   useEffect(() => {
     authViewModel.clearError();
-  }, []);
+  }, [authViewModel]);
 
   const validateForm = useCallback((): boolean => {
     const newErrors: FormErrors = {};

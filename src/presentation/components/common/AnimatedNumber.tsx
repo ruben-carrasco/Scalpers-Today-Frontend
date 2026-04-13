@@ -32,7 +32,7 @@ export function AnimatedNumber({
     return () => {
       animValue.removeListener(listener);
     };
-  }, [value]);
+  }, [animValue, duration, value]);
 
   return <Text style={style}>{display}</Text>;
 }
