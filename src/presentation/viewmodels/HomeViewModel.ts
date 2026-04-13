@@ -21,6 +21,7 @@ export class HomeViewModel {
   summaryError: string | null = null;
   briefingError: string | null = null;
   private lastFetchTime: number = 0;
+  private _refreshPromise: Promise<void> | null = null;
 
   constructor(
     @inject(TYPES.GetHomeSummaryUseCase)
@@ -32,6 +33,7 @@ export class HomeViewModel {
   ) {
     makeAutoObservable(this, {
       lastFetchTime: false,
+      _refreshPromise: false,
     } as Record<string, boolean>);
   }
 
@@ -106,25 +108,45 @@ export class HomeViewModel {
   }
 
   async refresh(force: boolean = false): Promise<void> {
-    const now = Date.now();
-    if (!force && this.summary && now - this.lastFetchTime < CACHE_TTL_MS) {
-      return;
-    }
-    this.lastFetchTime = now;
-    
-    // Quick load from cache first for instant UI response if we have it
-    if (!this.summary) {
-      const [cachedSummary, cachedBriefing] = await Promise.all([
-        this.cacheService.get<HomeSummary>(SUMMARY_CACHE_KEY),
-        this.cacheService.get<DailyBriefing>(BRIEFING_CACHE_KEY)
-      ]);
-      runInAction(() => {
-        if (cachedSummary) this.summary = cachedSummary;
-        if (cachedBriefing) this.briefing = cachedBriefing;
-      });
+    if (this._refreshPromise) {
+      return this._refreshPromise;
     }
 
-    await Promise.all([this.loadSummary(), this.loadBriefing()]);
+    const now = Date.now();
+    const hasFreshSummary = this.summary && now - this.lastFetchTime < CACHE_TTL_MS;
+    const hasFreshBriefing = this.briefing && now - this.lastFetchTime < CACHE_TTL_MS;
+
+    if (!force && hasFreshSummary && hasFreshBriefing) {
+      return;
+    }
+
+    this._refreshPromise = (async () => {
+      // Quick load from cache first for instant UI response if we have it
+      if (!this.summary || !this.briefing) {
+        const [cachedSummary, cachedBriefing] = await Promise.all([
+          this.cacheService.get<HomeSummary>(SUMMARY_CACHE_KEY),
+          this.cacheService.get<DailyBriefing>(BRIEFING_CACHE_KEY),
+        ]);
+        runInAction(() => {
+          if (!this.summary && cachedSummary) this.summary = cachedSummary;
+          if (!this.briefing && cachedBriefing) this.briefing = cachedBriefing;
+        });
+      }
+
+      await Promise.all([this.loadSummary(), this.loadBriefing()]);
+
+      runInAction(() => {
+        this.lastFetchTime = Date.now();
+      });
+    })();
+
+    try {
+      await this._refreshPromise;
+    } finally {
+      runInAction(() => {
+        this._refreshPromise = null;
+      });
+    }
   }
 
   reset(): void {
@@ -133,5 +155,6 @@ export class HomeViewModel {
     this.summaryError = null;
     this.briefingError = null;
     this.lastFetchTime = 0;
+    this._refreshPromise = null;
   }
 }
