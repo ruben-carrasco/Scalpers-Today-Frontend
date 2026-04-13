@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { View, TouchableOpacity, ScrollView } from 'react-native';
-import { BottomSheetModal, BottomSheetView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
+import { View, TouchableOpacity } from 'react-native';
+import {
+  BottomSheetModal,
+  BottomSheetView,
+  BottomSheetBackdrop,
+  BottomSheetFooter,
+  BottomSheetFooterProps,
+  BottomSheetScrollView,
+} from '@gorhom/bottom-sheet';
 import { CheckCircle, ArrowLeft, ArrowRight } from 'lucide-react-native';
 import { AlertType } from '../../../domain/entities/AlertType';
 import { AlertCondition } from '../../../domain/entities/AlertCondition';
@@ -67,7 +74,7 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
     setConditionValues((prev) => ({ ...prev, [type]: value }));
   }, []);
 
-  const handleCreate = async () => {
+  const handleCreate = useCallback(async () => {
     const conditions: AlertCondition[] = selectedTypes.map(type => ({
       alertType: type,
       value: conditionValues[type] || null,
@@ -76,7 +83,7 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
     if (created) {
       bottomSheetModalRef.current?.dismiss();
     }
-  };
+  }, [conditionValues, description, name, onCreate, pushEnabled, selectedTypes]);
 
   const canProceed = () => {
     if (step === 1) return name.trim().length > 0;
@@ -103,6 +110,44 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
 
   const STEP_TITLES = ['Nueva Alerta', 'Condiciones', 'Confirmación'];
   const STEP_SUBTITLES = ['Información básica', 'Configura cuándo quieres que te avisemos', 'Revisa tu alerta'];
+  const isNextEnabled = canProceed();
+
+  const renderFooter = useCallback(
+    (props: BottomSheetFooterProps) => (
+      <BottomSheetFooter {...props} bottomInset={24}>
+        <View className="flex-row px-6 pt-4 pb-2 border-t" style={{ borderTopColor: colors.bg.modalCard, backgroundColor: colors.bg.modal }}>
+          {step > 1 && (
+            <TouchableOpacity
+              onPress={() => setStep(step - 1)}
+              className="px-6 h-14 items-center justify-center rounded-xl mr-3"
+              style={{ backgroundColor: colors.bg.modalCard }}
+            >
+              <ArrowLeft size={20} color={colors.text.icon} />
+            </TouchableOpacity>
+          )}
+
+          <TouchableOpacity
+            disabled={!isNextEnabled}
+            onPress={() => {
+              if (step < 3) {
+                setStep(step + 1);
+                return;
+              }
+              void handleCreate();
+            }}
+            className="flex-1 h-14 rounded-xl flex-row items-center justify-center gap-2"
+            style={{ backgroundColor: isNextEnabled ? colors.brand.primary : colors.bg.modalCard }}
+          >
+            <Typography variant="body" weight="bold" style={{ color: isNextEnabled ? colors.text.primary : colors.text.muted }}>
+              {step < 3 ? 'Siguiente' : 'Confirmar y Crear'}
+            </Typography>
+            {step < 3 && <ArrowRight size={20} color={isNextEnabled ? colors.white : colors.text.muted} />}
+          </TouchableOpacity>
+        </View>
+      </BottomSheetFooter>
+    ),
+    [handleCreate, isNextEnabled, step]
+  );
 
   return (
     <BottomSheetModal
@@ -112,6 +157,7 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
       enableDynamicSizing={false}
       onChange={handleSheetChanges}
       backdropComponent={renderBackdrop}
+      footerComponent={renderFooter}
       backgroundStyle={{ backgroundColor: colors.bg.modal }}
       handleIndicatorStyle={{ backgroundColor: colors.border.indicator }}
     >
@@ -123,9 +169,9 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
 
         <ProgressBar currentStep={step} />
 
-        <ScrollView
+        <BottomSheetScrollView
           className="flex-1"
-          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 24 }}
+          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 120 }}
           keyboardShouldPersistTaps="handled"
         >
           {step === 1 && (
@@ -155,37 +201,7 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
               onPushEnabledChange={setPushEnabled}
             />
           )}
-        </ScrollView>
-
-        <View className="flex-row px-6 pt-4 pb-8 border-t" style={{ borderTopColor: colors.bg.modalCard }}>
-          {step > 1 && (
-            <TouchableOpacity
-              onPress={() => setStep(step - 1)}
-              className="px-6 h-14 items-center justify-center rounded-xl mr-3"
-              style={{ backgroundColor: colors.bg.modalCard }}
-            >
-              <ArrowLeft size={20} color={colors.text.icon} />
-            </TouchableOpacity>
-          )}
-
-          <TouchableOpacity
-            disabled={!canProceed()}
-            onPress={() => {
-              if (step < 3) {
-                setStep(step + 1);
-                return;
-              }
-              void handleCreate();
-            }}
-            className="flex-1 h-14 rounded-xl flex-row items-center justify-center gap-2"
-            style={{ backgroundColor: canProceed() ? colors.brand.primary : colors.bg.modalCard }}
-          >
-            <Typography variant="body" weight="bold" style={{ color: canProceed() ? colors.text.primary : colors.text.muted }}>
-              {step < 3 ? 'Siguiente' : 'Confirmar y Crear'}
-            </Typography>
-            {step < 3 && <ArrowRight size={20} color={canProceed() ? colors.white : colors.text.muted} />}
-          </TouchableOpacity>
-        </View>
+        </BottomSheetScrollView>
       </BottomSheetView>
     </BottomSheetModal>
   );
