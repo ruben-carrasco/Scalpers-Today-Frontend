@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity, LayoutChangeEvent } from 'react-native';
 import {
   BottomSheetModal,
   BottomSheetView,
@@ -39,6 +39,7 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
   const [conditionValues, setConditionValues] = useState<Record<AlertType, string>>({} as Record<AlertType, string>);
   const [pushEnabled, setPushEnabled] = useState(true);
   const [step, setStep] = useState(1);
+  const [footerHeight, setFooterHeight] = useState(96);
 
   useEffect(() => {
     if (visible) {
@@ -114,8 +115,17 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
 
   const renderFooter = useCallback(
     (props: BottomSheetFooterProps) => (
-      <BottomSheetFooter {...props} bottomInset={24}>
-        <View className="flex-row px-6 pt-4 pb-2 border-t" style={{ borderTopColor: colors.bg.modalCard, backgroundColor: colors.bg.modal }}>
+      <BottomSheetFooter {...props} bottomInset={0}>
+        <View
+          className="flex-row px-6 pt-4 pb-6 border-t"
+          style={{ borderTopColor: colors.bg.modalCard, backgroundColor: colors.bg.modal }}
+          onLayout={(event: LayoutChangeEvent) => {
+            const nextHeight = Math.ceil(event.nativeEvent.layout.height);
+            if (nextHeight !== footerHeight) {
+              setFooterHeight(nextHeight);
+            }
+          }}
+        >
           {step > 1 && (
             <TouchableOpacity
               onPress={() => setStep(step - 1)}
@@ -146,7 +156,7 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
         </View>
       </BottomSheetFooter>
     ),
-    [handleCreate, isNextEnabled, step]
+    [footerHeight, handleCreate, isNextEnabled, step]
   );
 
   return (
@@ -171,7 +181,7 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
 
         <BottomSheetScrollView
           className="flex-1"
-          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 120 }}
+          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: footerHeight + 16 }}
           keyboardShouldPersistTaps="handled"
         >
           {step === 1 && (
