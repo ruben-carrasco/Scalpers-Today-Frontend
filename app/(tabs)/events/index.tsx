@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import {
   View,
   TextInput,
@@ -22,24 +22,47 @@ import { Typography } from '../../../src/presentation/components/common/Typograp
 export default observer(function EventsScreen() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
+  const requestedEventId = typeof params.eventId === 'string' ? params.eventId : undefined;
   const [searchText, setSearchText] = useState('');
   const [selectedEvent, setSelectedEvent] = useState<EventModel | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
   const eventsViewModel = useEventsViewModel();
   const haptics = useHaptics();
+  const openedEventIdRef = useRef<string | null>(null);
 
   useEffect(() => {
-    eventsViewModel.loadEvents().then(() => {
-      if (params.eventId && typeof params.eventId === 'string') {
-        const eventToOpen = eventsViewModel.events.find(e => e.id === params.eventId);
-        if (eventToOpen) {
-          setSelectedEvent(eventToOpen);
-          setModalVisible(true);
-        }
-      }
-    });
-  }, [eventsViewModel, params.eventId]);
+    openedEventIdRef.current = null;
+
+    if (!requestedEventId) {
+      void eventsViewModel.loadEvents();
+      return;
+    }
+
+    setSearchText('');
+
+    if (Object.keys(eventsViewModel.filters).length > 0) {
+      eventsViewModel.clearFilters();
+      return;
+    }
+
+    void eventsViewModel.loadEvents(true);
+  }, [eventsViewModel, requestedEventId]);
+
+  useEffect(() => {
+    if (!requestedEventId || openedEventIdRef.current === requestedEventId) {
+      return;
+    }
+
+    const eventToOpen = eventsViewModel.events.find(event => event.id === requestedEventId);
+    if (!eventToOpen) {
+      return;
+    }
+
+    openedEventIdRef.current = requestedEventId;
+    setSelectedEvent(eventToOpen);
+    setModalVisible(true);
+  }, [eventsViewModel.events, requestedEventId]);
 
   const handleSearch = useCallback((text: string) => {
     setSearchText(text);
