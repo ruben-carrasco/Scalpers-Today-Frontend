@@ -18,6 +18,7 @@ export class AlertsViewModel {
   isCreating: boolean = false;
   includeDeleted: boolean = false;
   error: string | null = null;
+  private _loadRequestId: number = 0;
 
   constructor(
     @inject(TYPES.CreateAlertUseCase)
@@ -29,20 +30,25 @@ export class AlertsViewModel {
     @inject(TYPES.DeleteAlertUseCase)
     private deleteAlertUseCase: IDeleteAlertUseCase
   ) {
-    makeAutoObservable(this);
+    makeAutoObservable(this, {
+      _loadRequestId: false,
+    } as Record<string, boolean>);
   }
 
   async loadAlerts(): Promise<void> {
+    const requestId = ++this._loadRequestId;
     this.isLoading = true;
     this.error = null;
 
     try {
       const alerts = await this.listAlertsUseCase.execute(this.includeDeleted);
       runInAction(() => {
+        if (requestId !== this._loadRequestId) return;
         this.alerts = alerts.map(a => createAlertModel(a));
       });
     } catch (err) {
       runInAction(() => {
+        if (requestId !== this._loadRequestId) return;
         if (err instanceof NetworkError) {
           this.error = 'Sin conexión a internet.';
         } else {
@@ -51,6 +57,7 @@ export class AlertsViewModel {
       });
     } finally {
       runInAction(() => {
+        if (requestId !== this._loadRequestId) return;
         this.isLoading = false;
       });
     }
@@ -164,8 +171,11 @@ export class AlertsViewModel {
   }
 
   reset(): void {
+    this._loadRequestId += 1;
     this.alerts = [];
     this.error = null;
     this.includeDeleted = false;
+    this.isLoading = false;
+    this.isCreating = false;
   }
 }
