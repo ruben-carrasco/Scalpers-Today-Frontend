@@ -24,6 +24,7 @@ export class EventsViewModel {
   private lastFetchTime: number = 0;
   private lastFiltersKey: string = '';
   private _loadRequestId: number = 0;
+  private _upcomingRequestId: number = 0;
   private _searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
@@ -38,6 +39,7 @@ export class EventsViewModel {
       lastFetchTime: false,
       lastFiltersKey: false,
       _loadRequestId: false,
+      _upcomingRequestId: false,
       _searchDebounceTimer: false,
     } as Record<string, boolean>);
   }
@@ -155,15 +157,22 @@ export class EventsViewModel {
   }
 
   async loadUpcoming(limit: number = 5): Promise<void> {
+    const requestId = ++this._upcomingRequestId;
     this.isLoadingUpcoming = true;
 
     try {
       const result = await this.getUpcomingEventsUseCase.execute(limit);
       runInAction(() => {
+        if (requestId !== this._upcomingRequestId) {
+          return;
+        }
         this.upcomingEvents = result.events.map(e => createEventModel(e));
       });
     } catch (err) {
       runInAction(() => {
+        if (requestId !== this._upcomingRequestId) {
+          return;
+        }
         if (err instanceof NetworkError) {
           this.error = 'Sin conexión a internet.';
         } else {
@@ -172,7 +181,9 @@ export class EventsViewModel {
       });
     } finally {
       runInAction(() => {
-        this.isLoadingUpcoming = false;
+        if (requestId === this._upcomingRequestId) {
+          this.isLoadingUpcoming = false;
+        }
       });
     }
   }
@@ -223,5 +234,7 @@ export class EventsViewModel {
     this.error = null;
     this.lastFetchTime = 0;
     this.lastFiltersKey = '';
+    this._loadRequestId += 1;
+    this._upcomingRequestId += 1;
   }
 }
