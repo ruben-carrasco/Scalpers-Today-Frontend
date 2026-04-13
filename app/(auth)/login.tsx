@@ -49,6 +49,10 @@ export default observer(function LoginScreen() {
   }, [email, password]);
 
   const handleLogin = async () => {
+    if (isSubmitting || authViewModel.isLoading) {
+      return;
+    }
+
     authViewModel.clearError();
 
     if (!validateForm()) {
@@ -57,16 +61,12 @@ export default observer(function LoginScreen() {
 
     setIsSubmitting(true);
 
-    try {
-      const success = await authViewModel.login(email.trim(), password);
-      if (success) {
-        router.replace('/(tabs)');
-      }
-    } catch (error: any) {
-      console.error('Login error:', error);
-    } finally {
-      setIsSubmitting(false);
+    const success = await authViewModel.login(email.trim(), password);
+    if (success) {
+      router.replace('/(tabs)');
     }
+
+    setIsSubmitting(false);
   };
 
   const handleEmailChange = (text: string) => {

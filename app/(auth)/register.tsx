@@ -92,6 +92,10 @@ export default observer(function RegisterScreen() {
   }, [name, email, password, confirmPassword]);
 
   const handleRegister = async () => {
+    if (isSubmitting || authViewModel.isLoading) {
+      return;
+    }
+
     authViewModel.clearError();
 
     if (!validateForm()) {
@@ -100,22 +104,18 @@ export default observer(function RegisterScreen() {
 
     setIsSubmitting(true);
 
-    try {
-      const success = await authViewModel.register(
-        email.trim(),
-        password,
-        name.trim(),
-        'es',
-        'usd'
-      );
-      if (success) {
-        router.replace('/(tabs)');
-      }
-    } catch (error: any) {
-      console.error('Register error:', error);
-    } finally {
-      setIsSubmitting(false);
+    const success = await authViewModel.register(
+      email.trim(),
+      password,
+      name.trim(),
+      'es',
+      'usd'
+    );
+    if (success) {
+      router.replace('/(tabs)');
     }
+
+    setIsSubmitting(false);
   };
 
   const clearFieldError = (field: keyof FormErrors) => {

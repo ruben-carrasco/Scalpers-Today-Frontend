@@ -56,6 +56,15 @@ export class AuthViewModel {
     } as Record<string, boolean>);
   }
 
+  private debugLog(message: string, error?: unknown): void {
+    if (!__DEV__) return;
+    if (error !== undefined) {
+      console.log(message, error);
+      return;
+    }
+    console.log(message);
+  }
+
   private async registerPushToken(): Promise<void> {
     if (this._registeringPushToken) return;
     this._registeringPushToken = true;
@@ -71,10 +80,10 @@ export class AuthViewModel {
         runInAction(() => {
           this.pushToken = token;
         });
-        if (__DEV__) console.log('Push token registered successfully');
+        this.debugLog('Push token registered successfully');
       }
     } catch (error) {
-      if (__DEV__) console.error('Error registering push token:', error);
+      this.debugLog('Error registering push token', error);
     } finally {
       this._registeringPushToken = false;
     }
