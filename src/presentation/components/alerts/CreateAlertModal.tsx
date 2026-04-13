@@ -49,6 +49,14 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
     }
   }, [visible]);
 
+  useEffect(() => {
+    if (!visible) {
+      return;
+    }
+
+    bottomSheetModalRef.current?.snapToIndex(step === 2 ? 1 : 0);
+  }, [step, visible]);
+
   const resetForm = useCallback(() => {
     setName('');
     setDescription('');
