@@ -10,9 +10,10 @@ interface EventHeaderProps {
   event: EventModel;
   impColor: string;
   bottomSheetModalRef: React.RefObject<BottomSheetModal | null>;
+  onClose: () => void;
 }
 
-export function EventHeader({ event, impColor, bottomSheetModalRef }: EventHeaderProps) {
+export function EventHeader({ event, impColor, bottomSheetModalRef, onClose }: EventHeaderProps) {
   return (
     <>
       <View className="flex-row justify-between items-center px-6 py-4">
@@ -26,7 +27,14 @@ export function EventHeader({ event, impColor, bottomSheetModalRef }: EventHeade
             {event.importanceStars}
           </Typography>
         </View>
-        <TouchableOpacity onPress={() => bottomSheetModalRef.current?.dismiss()} className="w-10 h-10 rounded-full items-center justify-center" style={{ backgroundColor: colors.bg.modalCard }}>
+        <TouchableOpacity
+          onPress={() => {
+            onClose();
+            bottomSheetModalRef.current?.dismiss();
+          }}
+          className="w-10 h-10 rounded-full items-center justify-center"
+          style={{ backgroundColor: colors.bg.modalCard }}
+        >
           <X size={20} color={colors.text.icon} strokeWidth={2.5} />
         </TouchableOpacity>
       </View>

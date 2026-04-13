@@ -21,6 +21,7 @@ interface EventDetailModalProps {
 export function EventDetailModal({ event, visible, onClose }: EventDetailModalProps) {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const lastEventRef = useRef<EventModel | null>(null);
+  const hasNotifiedCloseRef = useRef(false);
   const snapPoints = useMemo(() => ['65%', '90%'], []);
 
   // Keep last event data so content stays visible during close animation
@@ -30,15 +31,31 @@ export function EventDetailModal({ event, visible, onClose }: EventDetailModalPr
 
   useEffect(() => {
     if (visible && event) {
+      hasNotifiedCloseRef.current = false;
       bottomSheetModalRef.current?.present();
+      return;
+    }
+
+    if (!visible) {
+      bottomSheetModalRef.current?.dismiss();
     }
   }, [visible, event]);
 
+  const notifyClosed = useCallback(() => {
+    if (hasNotifiedCloseRef.current) {
+      return;
+    }
+
+    hasNotifiedCloseRef.current = true;
+    onClose();
+  }, [onClose]);
+
   const handleSheetChanges = useCallback((index: number) => {
     if (index === -1) {
-      onClose();
+      lastEventRef.current = null;
+      notifyClosed();
     }
-  }, [onClose]);
+  }, [notifyClosed]);
 
   const renderBackdrop = useCallback(
     (props: any) => (
@@ -62,13 +79,20 @@ export function EventDetailModal({ event, visible, onClose }: EventDetailModalPr
       ref={bottomSheetModalRef}
       index={0}
       snapPoints={snapPoints}
+      enableDynamicSizing={false}
       onChange={handleSheetChanges}
+      onDismiss={notifyClosed}
       backdropComponent={renderBackdrop}
       backgroundStyle={{ backgroundColor: colors.bg.modal }}
       handleIndicatorStyle={{ backgroundColor: colors.border.indicator }}
     >
       <BottomSheetView className="flex-1">
-        <EventHeader event={displayEvent} impColor={impColor} bottomSheetModalRef={bottomSheetModalRef} />
+        <EventHeader
+          event={displayEvent}
+          impColor={impColor}
+          bottomSheetModalRef={bottomSheetModalRef}
+          onClose={notifyClosed}
+        />
 
         <ScrollView showsVerticalScrollIndicator={false} className="px-6">
           <EventDataSection event={displayEvent} />
