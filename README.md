@@ -1,82 +1,192 @@
-# ScalperToday - React Native App
+# ScalperToday Frontend
 
-Aplicación móvil profesional de calendario económico con análisis de IA, alertas y notificaciones push en tiempo real.
+Aplicación móvil de `ScalperToday` construida con React Native + Expo. Consume el backend del proyecto para mostrar eventos macroeconómicos, briefing diario, alertas personalizadas y análisis enriquecidos con IA.
 
-## 🛠️ Stack Tecnológico
+Este README está orientado a desarrollador y mantenimiento técnico del TFG.
 
-- **Framework**: Expo 50.x + Expo Router 3.x
-- **Lenguaje**: TypeScript 5.x
-- **Gestión de Estado**: MobX 6.x
-- **Inyección de Dependencias**: InversifyJS 6.x
-- **Estilos**: NativeWind (Tailwind CSS)
-- **Feedback**: Expo Haptics (Vibración premium)
-- **Notificaciones**: Expo Notifications
+## Objetivo de la app
 
-## 🏛️ Arquitectura (Clean Architecture + MVVM)
+La app resuelve cuatro casos principales:
 
-Separación estricta de responsabilidades para un código escalable y mantenible:
+- autenticación de usuario;
+- consulta del calendario económico diario;
+- visualización de briefing y highlights;
+- creación y gestión de alertas con notificaciones push.
 
+## Stack técnico
+
+- React Native `0.81`
+- Expo `54`
+- Expo Router
+- TypeScript
+- InversifyJS para DI
+- MobX + `mobx-react-lite`
+- NativeWind para estilos utilitarios
+- `@gorhom/bottom-sheet` para modales inferiores
+- Jest + `jest-expo`
+- ESLint
+
+Dependencias y scripts: [package.json](/Users/rubencarrascofrias/Documents/TFG/proyectoFrontend/package.json)
+
+## Arquitectura real
+
+La app sigue una arquitectura inspirada en Clean Architecture + MVVM.
+
+```text
+src/
+├── core/           # Contenedor DI, types, token manager
+├── data/           # API client, endpoint provider, repositorios
+├── domain/         # Entidades, interfaces y casos de uso
+├── presentation/   # pantallas, componentes, hooks, viewmodels, modelos
+├── services/       # caché y notificaciones
+└── config/         # configuración de API
 ```
-┌─────────────────────────────────────────────────┐
-│  PRESENTATION (Screens, ViewModels, Components) │
-├─────────────────────────────────────────────────┤
-│  DOMAIN (Entities, UseCases, Interfaces)        │
-├─────────────────────────────────────────────────┤
-│  DATA (API, Repositories, Mappers)              │
-├─────────────────────────────────────────────────┤
-│  CORE (DI Container, Storage, Validation)       │
-└─────────────────────────────────────────────────┘
+
+### Capa `core`
+
+- contenedor Inversify: [container.ts](/Users/rubencarrascofrias/Documents/TFG/proyectoFrontend/src/core/container.ts)
+- identificadores de DI: [types.ts](/Users/rubencarrascofrias/Documents/TFG/proyectoFrontend/src/core/types.ts)
+- gestión segura del token JWT
+
+### Capa `data`
+
+- `ApiClient` centraliza fetch, timeout, retry y errores
+- `ApiEndpointProvider` construye las rutas del backend
+- los repositorios convierten DTO/API -> entidades de dominio
+
+### Capa `domain`
+
+- contiene entidades (`Alert`, `EconomicEvent`, `HomeSummary`, etc.)
+- define interfaces de repositorio y contratos de casos de uso
+- los casos de uso encapsulan operaciones de negocio consumidas por los ViewModels
+
+### Capa `presentation`
+
+- `app/` define la navegación con Expo Router
+- `viewmodels/` contienen el estado observable de cada área funcional
+- `components/` agrupan UI reutilizable
+- `hooks/` conectan las pantallas con el contenedor DI
+
+## Navegación
+
+La navegación principal se organiza así:
+
+- grupo `(auth)` para login y registro
+- grupo `(tabs)` para home, eventos, alertas y ajustes
+- layout raíz con proveedor de bottom sheets y manejo de notificaciones
+
+Archivo principal de navegación: [app/_layout.tsx](/Users/rubencarrascofrias/Documents/TFG/proyectoFrontend/app/_layout.tsx)
+
+## Integración con backend
+
+La app consume el backend REST en `/api/v1`.
+
+Configuración por defecto: [api.config.ts](/Users/rubencarrascofrias/Documents/TFG/proyectoFrontend/src/config/api.config.ts)
+
+Por defecto apunta a:
+
+- `https://scalpertoday-ruben.azurewebsites.net/api/v1`
+
+Se puede sobreescribir con:
+
+```bash
+EXPO_PUBLIC_API_URL=https://tu-backend/api/v1
 ```
 
-## 🚀 Inicio Rápido
+## Variables y configuración
+
+Actualmente la app no depende de un `.env` complejo. La única sobreescritura prevista en runtime es:
+
+- `EXPO_PUBLIC_API_URL`
+
+Si no está definida, se usa la URL por defecto de Azure configurada en `api.config.ts`.
+
+## Ejecución local
+
+### 1. Instalar dependencias
 
 ```bash
 cd proyectoFrontend
 npm install
-npx expo start
 ```
 
-### 🔐 Configuración de API
-La aplicación está configurada para conectar automáticamente con el backend en Azure. Si deseas usar un backend local, configura la variable de entorno:
+### 2. Lanzar la app
 
-```env
-EXPO_PUBLIC_API_URL=http://tu-ip-local:8000/api/v1
+```bash
+npm run start
 ```
 
-## ✨ Características Premium
+También disponibles:
 
-- **Dashboard Inteligente**: Saludos dinámicos, estadísticas del día y próximo evento.
-- **AI Briefing**: Resumen diario del mercado generado por Inteligencia Artificial.
-- **Featured Events**: Acceso rápido a las noticias más importantes con un toque.
-- **Haptic Experience**: Respuesta táctil en todas las interacciones clave.
-- **Notificaciones Push**: Registro de tokens para recibir alertas personalizadas.
-- **Filtros Avanzados**: Búsqueda por país, importancia y divisa.
-
-## 📂 Estructura del Proyecto
-
-```
-proyectoFrontend/
-├── app/                          # Expo Router (Sistema de rutas)
-│   ├── (auth)/                   # Login y Registro
-│   └── (tabs)/                   # Dashboard, Eventos, Alertas, Ajustes
-├── src/
-│   ├── core/                     # InversifyJS, Errores, TokenManager
-│   ├── domain/                   # Entidades, Casos de Uso e Interfaces
-│   ├── data/                     # Cliente API y Repositorios
-│   ├── presentation/             # ViewModels, Componentes y Hooks
-│   └── services/                 # Servicios nativos (Notificaciones)
+```bash
+npm run android
+npm run ios
+npm run web
 ```
 
-## 📡 Endpoints de la API
+## Calidad y validación
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/home/summary` | Resumen del Dashboard (Datos Reales) |
-| GET | `/brief` | Briefing generado por IA |
-| GET | `/macro` | Listado completo de eventos |
-| POST | `/alerts` | Gestión de alertas personalizadas |
-| POST | `/alerts/device-token` | Registro para notificaciones push |
+### Lint
 
-## ⚖️ Licencia
+```bash
+npm run lint
+```
 
-MIT - Rubén Carrasco Frías
+### Tipos
+
+```bash
+npx tsc --noEmit
+```
+
+### Tests
+
+```bash
+npm test -- --runInBand
+```
+
+## Áreas funcionales importantes
+
+### Home
+
+- resumen del día
+- briefing generado por IA
+- próximo evento
+- highlights
+
+### Events
+
+- lista del día
+- filtros por importancia, país y búsqueda
+- detalle de evento en bottom sheet
+- análisis detallado en modal independiente y scrolleable
+
+### Alerts
+
+- listado de alertas
+- creación guiada por pasos
+- gestión de `status` y `pushEnabled`
+- registro de token de dispositivo para notificaciones
+
+### Settings
+
+- estado de sesión
+- configuración básica del usuario y sesión
+
+## Decisiones técnicas relevantes
+
+- `ViewModels` en singleton para compartir estado entre pantallas y evitar reconstrucciones innecesarias.
+- `CacheService` para respuesta rápida en `home` y `events`.
+- `ApiClient` con retry controlado para errores transitorios.
+- `status` de alerta y `pushEnabled` se modelan por separado; la UI debe reflejar ambos conceptos sin mezclarlos.
+- algunos flujos complejos de bottom sheets se resolvieron moviendo contenido largo a modales dedicados para evitar conflictos de scroll.
+
+## Limitaciones actuales
+
+- la app depende de un backend propio; no funciona de forma aislada.
+- el estado offline es parcial, no una estrategia completa offline-first.
+- los tests cubren lógica técnica importante, pero no sustituyen validación visual en dispositivo real.
+
+## Documentación relacionada
+
+- arquitectura frontend: [ARCHITECTURE.md](/Users/rubencarrascofrias/Documents/TFG/proyectoFrontend/docs/ARCHITECTURE.md)
+- backend del sistema: [README.md](/Users/rubencarrascofrias/Documents/TFG/proyecto/README.md)
