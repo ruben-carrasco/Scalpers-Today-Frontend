@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, LayoutAnimation } from 'react-native';
+import { View, TouchableOpacity, LayoutAnimation, ScrollView, Modal } from 'react-native';
 import {
   Sparkles, BarChart3, Globe, Crosshair, Lightbulb,
-  ChevronDown, ChevronUp, Minus,
+  ChevronRight, Minus, X,
 } from 'lucide-react-native';
 import { FormattedAIText } from '../../common/FormattedAIText';
 import { Typography } from '../../common/Typography';
@@ -31,7 +31,7 @@ interface EventAnalysisSectionProps {
 }
 
 export function EventAnalysisSection({ ai }: EventAnalysisSectionProps) {
-  const [deepOpen, setDeepOpen] = useState(false);
+  const [detailsVisible, setDetailsVisible] = useState(false);
 
   const SentimentIcon = getSentimentIcon(ai.sentiment) || Minus;
 
@@ -41,9 +41,9 @@ export function EventAnalysisSection({ ai }: EventAnalysisSectionProps) {
     ai.tradingStrategies ? { icon: Lightbulb, title: 'Estrategias', text: ai.tradingStrategies } : null,
   ].filter(Boolean) as { icon: any; title: string; text: string }[];
 
-  const toggleDeep = () => {
+  const openDetails = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setDeepOpen(!deepOpen);
+    setDetailsVisible(true);
   };
 
   return (
@@ -78,36 +78,64 @@ export function EventAnalysisSection({ ai }: EventAnalysisSectionProps) {
           <TouchableOpacity
             className="flex-row items-center justify-between pt-4 border-t"
             style={{ borderTopColor: colors.border.medium }}
-            onPress={toggleDeep}
+            onPress={openDetails}
             activeOpacity={0.7}
           >
             <Typography variant="body" weight="semibold" style={{ color: colors.brand.primaryLight }}>
               Análisis detallado
             </Typography>
-            {deepOpen ? (
-              <ChevronUp size={18} color={colors.brand.primaryLight} strokeWidth={2.5} />
-            ) : (
-              <ChevronDown size={18} color={colors.brand.primaryLight} strokeWidth={2.5} />
-            )}
+            <ChevronRight size={18} color={colors.brand.primaryLight} strokeWidth={2.5} />
           </TouchableOpacity>
-
-          {deepOpen && (
-            <View className="mt-4 gap-4">
-              {deepSections.map((s, i) => (
-                <View key={i} className={`pt-4 ${i > 0 ? 'border-t' : ''}`} style={i > 0 ? { borderTopColor: colors.border.medium } : undefined}>
-                  <View className="flex-row items-center gap-2 mb-2">
-                    <s.icon size={16} color={colors.brand.primaryLight} strokeWidth={2} />
-                    <Typography variant="caption" weight="bold" style={{ color: colors.brand.primaryLight }} className="uppercase tracking-widest">
-                      {s.title}
-                    </Typography>
-                  </View>
-                  <FormattedAIText text={s.text} />
-                </View>
-              ))}
-            </View>
-          )}
         </>
       )}
+
+      <Modal
+        visible={detailsVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setDetailsVisible(false)}
+      >
+        <View className="flex-1" style={{ backgroundColor: colors.bg.modal }}>
+          <View
+            className="flex-row items-center justify-between px-6 py-4 border-b"
+            style={{ borderBottomColor: colors.border.medium }}
+          >
+            <Typography variant="h2" weight="bold">
+              Análisis detallado
+            </Typography>
+            <TouchableOpacity
+              onPress={() => setDetailsVisible(false)}
+              className="w-10 h-10 rounded-full items-center justify-center"
+              style={{ backgroundColor: colors.bg.modalCard }}
+            >
+              <X size={18} color={colors.text.icon} strokeWidth={2.5} />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView
+            className="flex-1"
+            contentContainerStyle={{ padding: 24, paddingBottom: 40, gap: 16 }}
+            showsVerticalScrollIndicator
+            keyboardShouldPersistTaps="handled"
+          >
+            {deepSections.map((s, i) => (
+              <View
+                key={i}
+                className="rounded-2xl p-5 border"
+                style={{ backgroundColor: colors.bg.modalCard, borderColor: colors.border.medium }}
+              >
+                <View className="flex-row items-center gap-2 mb-3">
+                  <s.icon size={16} color={colors.brand.primaryLight} strokeWidth={2} />
+                  <Typography variant="caption" weight="bold" style={{ color: colors.brand.primaryLight }} className="uppercase tracking-widest">
+                    {s.title}
+                  </Typography>
+                </View>
+                <FormattedAIText text={s.text} />
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+      </Modal>
     </View>
   );
 }

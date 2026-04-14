@@ -1,6 +1,11 @@
 import React, { useRef, useEffect, useCallback, useMemo } from 'react';
-import { View, ScrollView, Platform, UIManager } from 'react-native';
-import { BottomSheetModal, BottomSheetView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
+import { Platform, UIManager } from 'react-native';
+import {
+  BottomSheetModal,
+  BottomSheetView,
+  BottomSheetBackdrop,
+  BottomSheetScrollView,
+} from '@gorhom/bottom-sheet';
 import { EventModel } from '../../models/EventModel';
 import { getImportanceColor } from '../../theme';
 import { colors } from '../../theme/tokens';
@@ -33,6 +38,7 @@ export function EventDetailModal({ event, visible, onClose }: EventDetailModalPr
     if (visible && event) {
       hasNotifiedCloseRef.current = false;
       bottomSheetModalRef.current?.present();
+      bottomSheetModalRef.current?.snapToIndex(event.aiAnalysis ? 1 : 0);
       return;
     }
 
@@ -94,15 +100,19 @@ export function EventDetailModal({ event, visible, onClose }: EventDetailModalPr
           onClose={notifyClosed}
         />
 
-        <ScrollView showsVerticalScrollIndicator={false} className="px-6">
+        <BottomSheetScrollView
+          key={displayEvent.id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 40 }}
+          keyboardShouldPersistTaps="handled"
+        >
           <EventDataSection event={displayEvent} />
 
           {displayEvent.aiAnalysis && (
             <EventAnalysisSection ai={displayEvent.aiAnalysis} />
           )}
 
-          <View className="h-10" />
-        </ScrollView>
+        </BottomSheetScrollView>
       </BottomSheetView>
     </BottomSheetModal>
   );
