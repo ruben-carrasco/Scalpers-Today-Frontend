@@ -10,7 +10,17 @@ import {
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
-import { Search, X, Flame, TrendingUp, MinusCircle, Globe, Calendar } from 'lucide-react-native';
+import {
+  Search,
+  X,
+  Flame,
+  TrendingUp,
+  MinusCircle,
+  Globe,
+  Calendar,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react-native';
 import { observer } from 'mobx-react-lite';
 import { useEventsViewModel, useHaptics } from '../../../src/presentation/hooks';
 import { EventCard, EventDetailModal } from '../../../src/presentation/components/events';
@@ -26,6 +36,7 @@ export default observer(function EventsScreen() {
   const [searchText, setSearchText] = useState('');
   const [selectedEvent, setSelectedEvent] = useState<EventModel | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [isDaySelectorOpen, setIsDaySelectorOpen] = useState(false);
 
   const eventsViewModel = useEventsViewModel();
   const haptics = useHaptics();
@@ -43,7 +54,6 @@ export default observer(function EventsScreen() {
 
     if (Object.keys(eventsViewModel.filters).length > 0) {
       eventsViewModel.clearFilters();
-      return;
     }
 
     void eventsViewModel.loadEvents(true);
@@ -54,15 +64,20 @@ export default observer(function EventsScreen() {
       return;
     }
 
-    const eventToOpen = eventsViewModel.events.find(event => event.id === requestedEventId);
+    const eventToOpen = eventsViewModel.findEventById(requestedEventId);
     if (!eventToOpen) {
+      return;
+    }
+
+    if (eventToOpen.eventDate && eventsViewModel.selectedDate !== eventToOpen.eventDate) {
+      eventsViewModel.setSelectedDate(eventToOpen.eventDate);
       return;
     }
 
     openedEventIdRef.current = requestedEventId;
     setSelectedEvent(eventToOpen);
     setModalVisible(true);
-  }, [eventsViewModel.events, requestedEventId]);
+  }, [eventsViewModel, eventsViewModel.events, eventsViewModel.selectedDate, requestedEventId]);
 
   const handleSearch = useCallback((text: string) => {
     setSearchText(text);
@@ -85,20 +100,89 @@ export default observer(function EventsScreen() {
     setModalVisible(true);
   };
 
-  const { events, isLoading, filters, total, availableCountries } = eventsViewModel;
+  const handleSelectDay = (date: string) => {
+    haptics.selection();
+    eventsViewModel.setSelectedDate(date);
+    setIsDaySelectorOpen(false);
+  };
+
+  const {
+    events,
+    isLoading,
+    filters,
+    total,
+    availableCountries,
+    weekDays,
+    selectedDate,
+    selectedDayLabel,
+  } = eventsViewModel;
+
+  const selectedDay = weekDays.find(day => day.date === selectedDate);
 
   return (
     <View className="flex-1 bg-bg-primary">
       <StatusBar barStyle="light-content" />
 
-      {/* Header */}
-      <View style={{ paddingTop: insets.top + 20 }} className="px-6 pb-4 bg-bg-primary">
-        <View className="flex-row justify-between items-end mb-6">
+      <View style={{ paddingTop: insets.top + 20 }} className="px-6 pb-4 bg-bg-primary gap-4">
+        <View className="flex-row justify-between items-end">
           <View>
             <Typography variant="h1" weight="bold" className="text-text-primary">Calendario</Typography>
-            <Typography variant="body" color="muted" weight="medium" className="mt-1">{total} eventos hoy</Typography>
+            <Typography variant="body" color="muted" weight="medium" className="mt-1">
+              {total} eventos · {selectedDayLabel}
+            </Typography>
           </View>
         </View>
+
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => setIsDaySelectorOpen(value => !value)}
+          className="bg-[#18181B] border border-[#27272A] rounded-2xl px-4 py-3 gap-2"
+        >
+          <View className="flex-row items-center justify-between">
+            <View className="gap-1">
+              <Typography variant="caption" color="muted" weight="semibold">Semana actual</Typography>
+              <Typography variant="body" weight="semibold" color="primary">
+                {selectedDay?.fullLabel ?? selectedDayLabel}
+              </Typography>
+            </View>
+            {isDaySelectorOpen ? (
+              <ChevronUp size={18} color="#A1A1AA" strokeWidth={2.5} />
+            ) : (
+              <ChevronDown size={18} color="#A1A1AA" strokeWidth={2.5} />
+            )}
+          </View>
+          <Typography variant="caption" color="muted">
+            {selectedDay?.count ?? 0} eventos programados ese día
+          </Typography>
+        </TouchableOpacity>
+
+        {isDaySelectorOpen && (
+          <View className="bg-[#18181B] border border-[#27272A] rounded-2xl overflow-hidden">
+            {weekDays.map(day => {
+              const isActive = day.date === selectedDate;
+              return (
+                <TouchableOpacity
+                  key={day.date}
+                  activeOpacity={0.8}
+                  onPress={() => handleSelectDay(day.date)}
+                  className={`px-4 py-3 flex-row items-center justify-between ${isActive ? 'bg-[#27272A]' : ''}`}
+                >
+                  <View>
+                    <Typography variant="body" weight="semibold" style={{ color: isActive ? '#FFFFFF' : '#D4D4D8' }}>
+                      {day.fullLabel}
+                    </Typography>
+                    <Typography variant="caption" color="muted">
+                      {day.isToday ? 'Hoy' : day.shortLabel}
+                    </Typography>
+                  </View>
+                  <Typography variant="caption" weight="semibold" style={{ color: isActive ? '#FFFFFF' : '#A1A1AA' }}>
+                    {day.count} eventos
+                  </Typography>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
 
         <View className="flex-row items-center bg-[#18181B] rounded-2xl px-4 h-12 gap-3 border border-[#27272A]">
           <Search size={20} color="#71717A" strokeWidth={2.5} />
@@ -117,7 +201,6 @@ export default observer(function EventsScreen() {
         </View>
       </View>
 
-      {/* Filters */}
       <View className="py-2 bg-bg-primary border-b border-[#27272A]">
         <ScrollView
           horizontal
@@ -158,7 +241,7 @@ export default observer(function EventsScreen() {
               Todos
             </Typography>
           </TouchableOpacity>
-          
+
           {availableCountries.map((country) => {
             const isCountryActive = filters.country === country;
             return (
@@ -177,7 +260,6 @@ export default observer(function EventsScreen() {
         </ScrollView>
       </View>
 
-      {/* List */}
       <FlashList
         data={events}
         keyExtractor={(item) => item.id}
@@ -201,8 +283,8 @@ export default observer(function EventsScreen() {
         ListEmptyComponent={
           isLoading ? (
             <View className="gap-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <EventCardSkeleton key={i} />
+              {Array.from({ length: 5 }).map((_, index) => (
+                <EventCardSkeleton key={index} />
               ))}
             </View>
           ) : (
@@ -210,7 +292,9 @@ export default observer(function EventsScreen() {
               <Calendar size={48} color="#3F3F46" strokeWidth={2} />
               <Typography variant="h2" weight="bold" color="secondary">No hay eventos</Typography>
               <Typography variant="body" color="muted" className="text-center">
-                {searchText ? 'Intenta con otros términos' : 'No se encontraron eventos para hoy'}
+                {searchText
+                  ? 'Intenta con otros términos'
+                  : `No se encontraron eventos para ${selectedDay?.fullLabel ?? 'el día seleccionado'}`}
               </Typography>
             </View>
           )

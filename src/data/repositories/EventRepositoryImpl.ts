@@ -12,7 +12,7 @@ import { Importance } from '../../domain/entities/Importance';
 import { Surprise } from '../../domain/entities/Surprise';
 import { HomeSummary } from '../../domain/entities/HomeSummary';
 import { DailyBriefing } from '../../domain/entities/DailyBriefing';
-import { ApiAIAnalysis, ApiEvent, ApiFilteredEventsResponse, ApiUpcomingResponse, ApiHomeSummary, ApiBriefing } from './types';
+import { ApiAIAnalysis, ApiEvent, ApiWeekEvent, ApiFilteredEventsResponse, ApiUpcomingResponse, ApiHomeSummary, ApiBriefing } from './types';
 
 @injectable()
 export class EventRepositoryImpl implements IEventRepository {
@@ -59,6 +59,7 @@ export class EventRepositoryImpl implements IEventRepository {
   private mapEvent(api: ApiEvent): EconomicEvent {
     return {
       id: api.id,
+      eventDate: undefined,
       time: api.time,
       title: api.title,
       country: api.country,
@@ -73,9 +74,16 @@ export class EventRepositoryImpl implements IEventRepository {
     };
   }
 
+  private mapWeekEvent(api: ApiWeekEvent): EconomicEvent {
+    return {
+      ...this.mapEvent(api),
+      eventDate: api.event_date,
+    };
+  }
+
   async getAllEvents(): Promise<EconomicEvent[]> {
-    const response = await this.apiClient.get<ApiEvent[]>(this.endpoints.macro);
-    return response.map(e => this.mapEvent(e));
+    const response = await this.apiClient.get<ApiWeekEvent[]>(this.endpoints.eventsWeek);
+    return response.map(e => this.mapWeekEvent(e));
   }
 
   async getFilteredEvents(filters?: EventFilters): Promise<FilteredEventsResult> {
