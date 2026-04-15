@@ -4,6 +4,7 @@ import { AIAnalysis } from './AIAnalysis';
 
 export interface EconomicEvent {
   id: string;
+  eventDate?: string;
   time: string;
   title: string;
   country: string;

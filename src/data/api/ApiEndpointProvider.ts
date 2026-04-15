@@ -37,6 +37,10 @@ export class ApiEndpointProvider {
     return `${this.baseUrl}/events/filtered`;
   }
 
+  get eventsWeek(): string {
+    return `${this.baseUrl}/events/week`;
+  }
+
   eventsByImportance(importance: number): string {
     return `${this.baseUrl}/events/by-importance/${importance}`;
   }
