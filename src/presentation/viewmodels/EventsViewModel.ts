@@ -185,7 +185,7 @@ export class EventsViewModel {
       return true;
     });
 
-    const countries = [...new Set(this.allWeekEvents.map(event => event.country).filter(Boolean))];
+    const countries = [...new Set(selectedDayEvents.map(event => event.country).filter(Boolean))];
     this.availableCountries = countries.sort((left, right) => left.localeCompare(right));
     this.weekDays = buildWeekDayOptions(this.allWeekEvents);
     this.events = filteredEvents;
