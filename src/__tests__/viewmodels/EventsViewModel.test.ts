@@ -20,6 +20,8 @@ const mockCacheService = {
   remove: jest.fn().mockResolvedValue(undefined),
 };
 
+const TEST_DATE = '2026-04-26';
+
 function createViewModel(): EventsViewModel {
   const vm = Object.create(EventsViewModel.prototype);
   // Manually set the private dependencies (bypassing inversify)
@@ -27,9 +29,12 @@ function createViewModel(): EventsViewModel {
   vm.getUpcomingEventsUseCase = mockGetUpcomingEvents;
   vm.cacheService = mockCacheService;
   // Initialize observable properties
+  vm.allWeekEvents = [];
   vm.events = [];
   vm.upcomingEvents = [];
   vm.availableCountries = [];
+  vm.weekDays = [];
+  vm.selectedDate = TEST_DATE;
   vm.total = 0;
   vm.filters = {};
   vm.isLoading = false;
@@ -38,8 +43,35 @@ function createViewModel(): EventsViewModel {
   vm.lastFetchTime = 0;
   vm.lastFiltersKey = '';
   vm._loadRequestId = 0;
+  vm._upcomingRequestId = 0;
   vm._searchDebounceTimer = null;
   return vm;
+}
+
+function makeEvent(overrides: Record<string, any> = {}) {
+  return {
+    id: '1',
+    eventDate: TEST_DATE,
+    time: '10:00',
+    title: 'US CPI',
+    country: 'US',
+    currency: 'USD',
+    importance: 3,
+    actual: '2.5%',
+    forecast: '2.3%',
+    previous: '2.1%',
+    surprise: 'positive',
+    url: null,
+    aiAnalysis: null,
+    isExpanded: false,
+    isLoading: false,
+    showAnalysis: false,
+    importanceStars: '★★★',
+    importanceColor: '#EF4444',
+    hasData: true,
+    surpriseIcon: '↑',
+    ...overrides,
+  };
 }
 
 beforeEach(() => {
@@ -55,21 +87,22 @@ describe('EventsViewModel', () => {
   describe('setSearchFilter', () => {
     it('applies debounce of 300ms', () => {
       const vm = createViewModel();
+      vm.allWeekEvents = [makeEvent(), makeEvent({ id: '2', title: 'German GDP', country: 'DE', currency: 'EUR' })];
 
       vm.setSearchFilter('test');
       expect(vm.filters.search).toBe('test');
-      // loadEvents should NOT have been called yet (debounced)
-      expect(mockGetFilteredEvents.execute).not.toHaveBeenCalled();
+      expect(vm.events).toEqual([]);
 
       // Fast-forward 300ms
       jest.advanceTimersByTime(300);
 
-      // Now it should have been called
-      expect(mockGetFilteredEvents.execute).toHaveBeenCalled();
+      expect(vm.events).toEqual([]);
+      expect(vm.total).toBe(0);
     });
 
     it('cancels previous debounce on rapid typing', () => {
       const vm = createViewModel();
+      vm.allWeekEvents = [makeEvent({ title: 'US Test Event' }), makeEvent({ id: '2', title: 'German GDP' })];
 
       vm.setSearchFilter('t');
       vm.setSearchFilter('te');
@@ -78,40 +111,47 @@ describe('EventsViewModel', () => {
 
       jest.advanceTimersByTime(300);
 
-      // Should only call loadEvents once (last debounce)
-      expect(mockGetFilteredEvents.execute).toHaveBeenCalledTimes(1);
+      expect(vm.events.map(event => event.id)).toEqual(['1']);
     });
   });
 
   describe('setImportanceFilter', () => {
     it('sets the importance filter and triggers load', () => {
       const vm = createViewModel();
+      vm.allWeekEvents = [makeEvent({ importance: 3 }), makeEvent({ id: '2', importance: 1 })];
       vm.setImportanceFilter(3);
       expect(vm.filters.importance).toBe(3);
+      expect(vm.events.map(event => event.id)).toEqual(['1']);
     });
 
     it('clears importance filter with undefined', () => {
       const vm = createViewModel();
+      vm.allWeekEvents = [makeEvent({ importance: 3 }), makeEvent({ id: '2', importance: 1 })];
       vm.setImportanceFilter(3);
       vm.setImportanceFilter(undefined);
       expect(vm.filters.importance).toBeUndefined();
+      expect(vm.events.map(event => event.id)).toEqual(['1', '2']);
     });
   });
 
   describe('setCountryFilter', () => {
     it('sets the country filter', () => {
       const vm = createViewModel();
+      vm.allWeekEvents = [makeEvent({ country: 'US' }), makeEvent({ id: '2', country: 'DE' })];
       vm.setCountryFilter('US');
       expect(vm.filters.country).toBe('US');
+      expect(vm.events.map(event => event.id)).toEqual(['1']);
     });
   });
 
   describe('clearFilters', () => {
     it('resets all filters', () => {
       const vm = createViewModel();
+      vm.allWeekEvents = [makeEvent({ country: 'US' }), makeEvent({ id: '2', country: 'DE' })];
       vm.filters = { importance: 3, country: 'US', search: 'test' };
       vm.clearFilters();
       expect(vm.filters).toEqual({});
+      expect(vm.events.map(event => event.id)).toEqual(['1', '2']);
     });
   });
 
@@ -139,6 +179,7 @@ describe('EventsViewModel', () => {
         { id: '1', isExpanded: false } as any,
         { id: '2', isExpanded: false } as any,
       ];
+      vm.allWeekEvents = vm.events.map(event => makeEvent(event));
 
       vm.toggleEventExpanded('1');
       expect(vm.events[0].isExpanded).toBe(true);

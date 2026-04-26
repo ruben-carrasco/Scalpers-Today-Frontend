@@ -35,6 +35,20 @@ export class EventRepositoryImpl implements IEventRepository {
     'NEUTRO': 'NEUTRAL', 'NEUTRAL': 'NEUTRAL',
   };
 
+  private static normalizeEventUrl(url: string | null): string | null {
+    const trimmedUrl = url?.trim();
+    if (!trimmedUrl || !/^https?:\/\//i.test(trimmedUrl)) {
+      return null;
+    }
+
+    const lowerUrl = trimmedUrl.toLowerCase();
+    const isInternalFeedUrl =
+      lowerUrl.includes('nfs.faireconomy.media/ff_calendar') ||
+      lowerUrl.includes('economic-calendar-api.p.rapidapi.com/calendar');
+
+    return isInternalFeedUrl ? null : trimmedUrl;
+  }
+
   private mapAnalysis(api: ApiAIAnalysis | null): AIAnalysis | null {
     if (!api) return null;
 
@@ -69,7 +83,7 @@ export class EventRepositoryImpl implements IEventRepository {
       forecast: api.forecast,
       previous: api.previous,
       surprise: (api.surprise as Surprise) || null,
-      url: api.url,
+      url: EventRepositoryImpl.normalizeEventUrl(api.url),
       aiAnalysis: this.mapAnalysis(api.ai_analysis),
     };
   }
