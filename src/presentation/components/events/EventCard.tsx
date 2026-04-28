@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
-import { TrendingUp, TrendingDown, MinusCircle, Sparkles } from 'lucide-react-native';
+import { TrendingUp, TrendingDown, MinusCircle, Sparkles, Clock3 } from 'lucide-react-native';
 import { EventModel } from '../../models/EventModel';
 import { Typography } from '../common/Typography';
 import { getImportanceColor } from '../../theme';
@@ -25,6 +25,19 @@ export const EventCard = React.memo(function EventCard({ event, onPress }: Event
   const impColor = getImportanceColor(event.importance);
   const surpriseInfo = getSurpriseInfo(event.surprise);
   const hasAnyDataValue = [event.actual, event.forecast, event.previous].some(hasEventValue);
+  const aiStatus = event.aiAnalysis
+    ? {
+        Icon: Sparkles,
+        label: 'Análisis IA',
+        color: colors.brand.primaryLight,
+        backgroundColor: colors.brand.primary + '18',
+      }
+    : {
+        Icon: Clock3,
+        label: 'IA pendiente',
+        color: colors.semantic.warningLight,
+        backgroundColor: colors.semantic.warning + '16',
+      };
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.7} className="w-full mb-3" accessibilityRole="button" accessibilityLabel={`Evento ${event.title}, ${event.country}, importancia ${event.importance}, a las ${event.time}`}>
@@ -78,14 +91,22 @@ export const EventCard = React.memo(function EventCard({ event, onPress }: Event
           </View>
         )}
 
-        {event.aiAnalysis && (
-          <View style={{ borderTopColor: colors.bg.modalCard }} className="flex-row items-center gap-1.5 mt-4 pt-3 border-t">
-            <Sparkles size={14} color={colors.brand.primaryLight} strokeWidth={2.5} />
-            <Typography variant="caption" weight="bold" style={{ color: colors.brand.primaryLight }}>
-              Análisis IA
+        <View style={{ borderTopColor: colors.bg.modalCard }} className="flex-row items-center justify-between gap-2 mt-4 pt-3 border-t">
+          <View
+            className="flex-row items-center gap-1.5 px-2.5 py-1.5 rounded-lg"
+            style={{ backgroundColor: aiStatus.backgroundColor }}
+          >
+            <aiStatus.Icon size={14} color={aiStatus.color} strokeWidth={2.5} />
+            <Typography variant="caption" weight="bold" style={{ color: aiStatus.color }}>
+              {aiStatus.label}
             </Typography>
           </View>
-        )}
+          {!event.aiAnalysis && (
+            <Typography variant="caption" color="muted" weight="semibold">
+              Ver datos
+            </Typography>
+          )}
+        </View>
       </View>
     </TouchableOpacity>
   );
