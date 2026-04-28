@@ -11,7 +11,10 @@ import { getImportanceColor } from '../../theme';
 import { colors } from '../../theme/tokens';
 import { EventHeader } from './sections/EventHeader';
 import { EventDataSection } from './sections/EventDataSection';
-import { EventAnalysisSection } from './sections/EventAnalysisSection';
+import {
+  EventAnalysisSection,
+  EventAnalysisUnavailableSection,
+} from './sections/EventAnalysisSection';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -108,8 +111,10 @@ export function EventDetailModal({ event, visible, onClose }: EventDetailModalPr
         >
           <EventDataSection event={displayEvent} />
 
-          {displayEvent.aiAnalysis && (
+          {displayEvent.aiAnalysis ? (
             <EventAnalysisSection ai={displayEvent.aiAnalysis} />
+          ) : (
+            <EventAnalysisUnavailableSection />
           )}
 
         </BottomSheetScrollView>
