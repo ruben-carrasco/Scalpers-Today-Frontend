@@ -163,6 +163,13 @@ export default observer(function EventsScreen() {
   const selectedDay = weekDays.find(day => day.date === selectedDate);
   const selectedEvent = selectedEventId ? eventsViewModel.findEventById(selectedEventId) ?? null : null;
   const selectedDayTone = getDayTone(selectedDay?.count ?? 0);
+  const hasActiveFilters = Boolean(searchText || filters.importance || filters.country);
+
+  const handleClearVisibleFilters = () => {
+    haptics.selection();
+    setSearchText('');
+    eventsViewModel.clearFilters();
+  };
 
   return (
     <View className="flex-1 bg-bg-primary">
@@ -371,10 +378,37 @@ export default observer(function EventsScreen() {
               <Calendar size={48} color="#3F3F46" strokeWidth={2} />
               <Typography variant="h2" weight="bold" color="secondary">No hay eventos</Typography>
               <Typography variant="body" color="muted" className="text-center">
-                {searchText
-                  ? 'Intenta con otros términos'
-                  : `No se encontraron eventos para ${selectedDay?.fullLabel ?? 'el día seleccionado'}`}
+                {hasActiveFilters
+                  ? 'No hay eventos que coincidan con los filtros aplicados.'
+                  : `No se encontraron eventos para ${selectedDay?.fullLabel ?? 'el día seleccionado'}.`}
               </Typography>
+
+              {hasActiveFilters ? (
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={handleClearVisibleFilters}
+                  className="px-5 py-3 rounded-2xl border"
+                  style={{ backgroundColor: '#27272A', borderColor: '#3F3F46' }}
+                >
+                  <Typography variant="body" weight="bold" style={{ color: '#FFFFFF' }}>
+                    Limpiar filtros
+                  </Typography>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={async () => {
+                    await eventsViewModel.loadEvents(true);
+                    haptics.success();
+                  }}
+                  className="px-5 py-3 rounded-2xl border"
+                  style={{ backgroundColor: '#1D4ED833', borderColor: '#1D4ED8' }}
+                >
+                  <Typography variant="body" weight="bold" style={{ color: '#60A5FA' }}>
+                    Actualizar calendario
+                  </Typography>
+                </TouchableOpacity>
+              )}
             </View>
           )
         }
