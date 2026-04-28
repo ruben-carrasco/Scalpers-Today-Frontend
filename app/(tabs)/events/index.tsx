@@ -100,7 +100,9 @@ export default observer(function EventsScreen() {
   const eventsListRef = useRef<FlashList<EventModel>>(null);
 
   const scrollEventsToTop = useCallback((animated: boolean = true) => {
-    eventsListRef.current?.scrollToOffset({ offset: 0, animated });
+    requestAnimationFrame(() => {
+      eventsListRef.current?.scrollToOffset({ offset: 0, animated });
+    });
   }, []);
 
   useEffect(() => {
@@ -143,16 +145,19 @@ export default observer(function EventsScreen() {
   const handleSearch = useCallback((text: string) => {
     setSearchText(text);
     eventsViewModel.setSearchFilter(text || undefined);
-  }, [eventsViewModel]);
+    scrollEventsToTop(false);
+  }, [eventsViewModel, scrollEventsToTop]);
 
   const handleImportanceFilter = (importance: number | undefined) => {
     haptics.selection();
     eventsViewModel.setImportanceFilter(importance);
+    scrollEventsToTop(false);
   };
 
   const handleCountryFilter = (country: string | undefined) => {
     haptics.selection();
     eventsViewModel.setCountryFilter(country);
+    scrollEventsToTop(false);
   };
 
   const handleEventPress = (event: EventModel) => {
@@ -188,6 +193,12 @@ export default observer(function EventsScreen() {
     getImportanceLabel(filters.importance),
     filters.country ? filters.country : null,
   ].filter(Boolean);
+  const listContextKey = [
+    selectedDate,
+    searchText.trim(),
+    filters.importance ?? 'all-importance',
+    filters.country ?? 'all-countries',
+  ].join(':');
 
   const handleClearVisibleFilters = () => {
     haptics.selection();
@@ -389,8 +400,10 @@ export default observer(function EventsScreen() {
       </View>
 
       <FlashList
+        key={listContextKey}
         ref={eventsListRef}
         data={events}
+        extraData={listContextKey}
         keyExtractor={(item) => item.id}
         renderItem={({ item, index }) => (
           <AnimatedCard index={index}>
