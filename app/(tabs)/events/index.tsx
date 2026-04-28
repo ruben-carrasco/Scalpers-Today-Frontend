@@ -29,6 +29,49 @@ import { AnimatedCard } from '../../../src/presentation/components/common/Animat
 import { EventModel } from '../../../src/presentation/models/EventModel';
 import { Typography } from '../../../src/presentation/components/common/Typography';
 
+type DayTone = {
+  label: string;
+  color: string;
+  backgroundColor: string;
+  borderColor: string;
+};
+
+function getDayTone(count: number): DayTone {
+  if (count === 0) {
+    return {
+      label: 'Sin eventos',
+      color: '#71717A',
+      backgroundColor: '#18181B',
+      borderColor: '#27272A',
+    };
+  }
+
+  if (count >= 40) {
+    return {
+      label: 'Alta actividad',
+      color: '#FF453A',
+      backgroundColor: '#7F1D1D33',
+      borderColor: '#991B1B',
+    };
+  }
+
+  if (count >= 15) {
+    return {
+      label: 'Día activo',
+      color: '#FBBF24',
+      backgroundColor: '#78350F33',
+      borderColor: '#92400E',
+    };
+  }
+
+  return {
+    label: 'Agenda ligera',
+    color: '#60A5FA',
+    backgroundColor: '#1D4ED833',
+    borderColor: '#1D4ED8',
+  };
+}
+
 export default observer(function EventsScreen() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
@@ -119,6 +162,7 @@ export default observer(function EventsScreen() {
 
   const selectedDay = weekDays.find(day => day.date === selectedDate);
   const selectedEvent = selectedEventId ? eventsViewModel.findEventById(selectedEventId) ?? null : null;
+  const selectedDayTone = getDayTone(selectedDay?.count ?? 0);
 
   return (
     <View className="flex-1 bg-bg-primary">
@@ -146,11 +190,24 @@ export default observer(function EventsScreen() {
                 {selectedDay?.fullLabel ?? selectedDayLabel}
               </Typography>
             </View>
-            {isDaySelectorOpen ? (
-              <ChevronUp size={18} color="#A1A1AA" strokeWidth={2.5} />
-            ) : (
-              <ChevronDown size={18} color="#A1A1AA" strokeWidth={2.5} />
-            )}
+            <View className="flex-row items-center gap-3">
+              <View
+                className="px-3 py-1 rounded-full border"
+                style={{
+                  backgroundColor: selectedDayTone.backgroundColor,
+                  borderColor: selectedDayTone.borderColor,
+                }}
+              >
+                <Typography variant="caption" weight="bold" style={{ color: selectedDayTone.color }}>
+                  {selectedDayTone.label}
+                </Typography>
+              </View>
+              {isDaySelectorOpen ? (
+                <ChevronUp size={18} color="#A1A1AA" strokeWidth={2.5} />
+              ) : (
+                <ChevronDown size={18} color="#A1A1AA" strokeWidth={2.5} />
+              )}
+            </View>
           </View>
           <Typography variant="caption" color="muted">
             {selectedDay?.count ?? 0} eventos programados ese día
@@ -161,24 +218,45 @@ export default observer(function EventsScreen() {
           <View className="bg-[#18181B] border border-[#27272A] rounded-2xl overflow-hidden">
             {weekDays.map(day => {
               const isActive = day.date === selectedDate;
+              const tone = getDayTone(day.count);
+              const titleColor = isActive ? '#FFFFFF' : day.count === 0 ? '#71717A' : '#D4D4D8';
               return (
                 <TouchableOpacity
                   key={day.date}
                   activeOpacity={0.8}
                   onPress={() => handleSelectDay(day.date)}
-                  className={`px-4 py-3 flex-row items-center justify-between ${isActive ? 'bg-[#27272A]' : ''}`}
+                  className={`px-4 py-3 flex-row items-center justify-between border-b border-[#27272A] ${isActive ? 'bg-[#27272A]' : ''}`}
                 >
                   <View>
-                    <Typography variant="body" weight="semibold" style={{ color: isActive ? '#FFFFFF' : '#D4D4D8' }}>
+                    <Typography variant="body" weight="semibold" style={{ color: titleColor }}>
                       {day.fullLabel}
                     </Typography>
-                    <Typography variant="caption" color="muted">
-                      {day.isToday ? 'Hoy' : day.shortLabel}
+                    <View className="flex-row items-center gap-2 mt-1">
+                      <Typography variant="caption" color="muted">
+                        {day.shortLabel}
+                      </Typography>
+                      {day.isToday && (
+                        <View className="px-2 py-0.5 rounded-full" style={{ backgroundColor: '#2563EB33' }}>
+                          <Typography variant="caption" weight="bold" style={{ color: '#60A5FA' }}>
+                            Hoy
+                          </Typography>
+                        </View>
+                      )}
+                    </View>
+                  </View>
+                  <View className="items-end gap-1">
+                    <View
+                      className="px-2.5 py-1 rounded-full border"
+                      style={{ backgroundColor: tone.backgroundColor, borderColor: tone.borderColor }}
+                    >
+                      <Typography variant="caption" weight="bold" style={{ color: tone.color }}>
+                        {tone.label}
+                      </Typography>
+                    </View>
+                    <Typography variant="caption" weight="semibold" style={{ color: isActive ? '#FFFFFF' : '#A1A1AA' }}>
+                      {day.count} eventos
                     </Typography>
                   </View>
-                  <Typography variant="caption" weight="semibold" style={{ color: isActive ? '#FFFFFF' : '#A1A1AA' }}>
-                    {day.count} eventos
-                  </Typography>
                 </TouchableOpacity>
               );
             })}
