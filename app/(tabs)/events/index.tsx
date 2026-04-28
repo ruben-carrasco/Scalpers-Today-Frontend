@@ -34,7 +34,7 @@ export default observer(function EventsScreen() {
   const params = useLocalSearchParams();
   const requestedEventId = typeof params.eventId === 'string' ? params.eventId : undefined;
   const [searchText, setSearchText] = useState('');
-  const [selectedEvent, setSelectedEvent] = useState<EventModel | null>(null);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [isDaySelectorOpen, setIsDaySelectorOpen] = useState(false);
 
@@ -75,7 +75,7 @@ export default observer(function EventsScreen() {
     }
 
     openedEventIdRef.current = requestedEventId;
-    setSelectedEvent(eventToOpen);
+    setSelectedEventId(eventToOpen.id);
     setModalVisible(true);
   }, [eventsViewModel, eventsViewModel.events, eventsViewModel.selectedDate, requestedEventId]);
 
@@ -96,7 +96,7 @@ export default observer(function EventsScreen() {
 
   const handleEventPress = (event: EventModel) => {
     haptics.impactLight();
-    setSelectedEvent(event);
+    setSelectedEventId(event.id);
     setModalVisible(true);
   };
 
@@ -118,6 +118,7 @@ export default observer(function EventsScreen() {
   } = eventsViewModel;
 
   const selectedDay = weekDays.find(day => day.date === selectedDate);
+  const selectedEvent = selectedEventId ? eventsViewModel.findEventById(selectedEventId) ?? null : null;
 
   return (
     <View className="flex-1 bg-bg-primary">
@@ -305,7 +306,10 @@ export default observer(function EventsScreen() {
       <EventDetailModal
         event={selectedEvent}
         visible={modalVisible}
-        onClose={() => setModalVisible(false)}
+        onClose={() => {
+          setModalVisible(false);
+          setSelectedEventId(null);
+        }}
       />
     </View>
   );
