@@ -97,6 +97,11 @@ export default observer(function EventsScreen() {
   const eventsViewModel = useEventsViewModel();
   const haptics = useHaptics();
   const openedEventIdRef = useRef<string | null>(null);
+  const eventsListRef = useRef<FlashList<EventModel>>(null);
+
+  const scrollEventsToTop = useCallback((animated: boolean = true) => {
+    eventsListRef.current?.scrollToOffset({ offset: 0, animated });
+  }, []);
 
   useEffect(() => {
     openedEventIdRef.current = null;
@@ -159,6 +164,7 @@ export default observer(function EventsScreen() {
   const handleSelectDay = (date: string) => {
     haptics.selection();
     eventsViewModel.setSelectedDate(date);
+    scrollEventsToTop(false);
     setIsDaySelectorOpen(false);
   };
 
@@ -187,6 +193,7 @@ export default observer(function EventsScreen() {
     haptics.selection();
     setSearchText('');
     eventsViewModel.clearFilters();
+    scrollEventsToTop();
   };
 
   return (
@@ -382,6 +389,7 @@ export default observer(function EventsScreen() {
       </View>
 
       <FlashList
+        ref={eventsListRef}
         data={events}
         keyExtractor={(item) => item.id}
         renderItem={({ item, index }) => (
