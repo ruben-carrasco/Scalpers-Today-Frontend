@@ -72,6 +72,19 @@ function getDayTone(count: number): DayTone {
   };
 }
 
+function getImportanceLabel(importance: number | undefined): string | null {
+  switch (importance) {
+    case 3:
+      return 'Alto impacto';
+    case 2:
+      return 'Impacto medio';
+    case 1:
+      return 'Bajo impacto';
+    default:
+      return null;
+  }
+}
+
 export default observer(function EventsScreen() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
@@ -164,6 +177,11 @@ export default observer(function EventsScreen() {
   const selectedEvent = selectedEventId ? eventsViewModel.findEventById(selectedEventId) ?? null : null;
   const selectedDayTone = getDayTone(selectedDay?.count ?? 0);
   const hasActiveFilters = Boolean(searchText || filters.importance || filters.country);
+  const activeFilterLabels = [
+    searchText ? `“${searchText}”` : null,
+    getImportanceLabel(filters.importance),
+    filters.country ? filters.country : null,
+  ].filter(Boolean);
 
   const handleClearVisibleFilters = () => {
     haptics.selection();
@@ -344,6 +362,34 @@ export default observer(function EventsScreen() {
             );
           })}
         </ScrollView>
+
+        {hasActiveFilters && (
+          <View className="px-6 pt-3">
+            <View
+              className="flex-row items-center justify-between gap-3 rounded-2xl border px-4 py-3"
+              style={{ backgroundColor: '#18181B', borderColor: '#27272A' }}
+            >
+              <View className="flex-1">
+                <Typography variant="caption" color="muted" weight="bold" className="uppercase tracking-widest">
+                  Filtros activos
+                </Typography>
+                <Typography variant="body" weight="semibold" style={{ color: '#E4E4E7' }} numberOfLines={1}>
+                  {activeFilterLabels.join(' · ')}
+                </Typography>
+              </View>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={handleClearVisibleFilters}
+                className="px-3 py-2 rounded-xl"
+                style={{ backgroundColor: '#27272A' }}
+              >
+                <Typography variant="caption" weight="bold" style={{ color: '#FFFFFF' }}>
+                  Limpiar
+                </Typography>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
       </View>
 
       <FlashList
