@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, TouchableOpacity, LayoutAnimation, ScrollView, Modal } from 'react-native';
 import {
   Sparkles, BarChart3, Globe, Crosshair, Lightbulb,
-  ChevronRight, Minus, X,
+  ChevronRight, Minus, X, Clock3,
 } from 'lucide-react-native';
 import { FormattedAIText } from '../../common/FormattedAIText';
 import { Typography } from '../../common/Typography';
@@ -30,6 +30,37 @@ interface EventAnalysisSectionProps {
   ai: AIAnalysis;
 }
 
+export function EventAnalysisUnavailableSection() {
+  return (
+    <View
+      className="rounded-3xl p-5 mb-8 border"
+      style={{ backgroundColor: colors.bg.modalCard, borderColor: colors.border.medium }}
+    >
+      <View className="flex-row items-center gap-3 mb-3">
+        <View
+          className="w-10 h-10 rounded-2xl items-center justify-center"
+          style={{ backgroundColor: colors.semantic.warning + '20' }}
+        >
+          <Clock3 size={18} color={colors.semantic.warningLight} strokeWidth={2.5} />
+        </View>
+        <View className="flex-1">
+          <Typography variant="body" weight="bold" style={{ color: colors.text.primary }}>
+            Análisis IA no disponible
+          </Typography>
+          <Typography variant="caption" color="muted" className="mt-1">
+            El evento está en calendario, pero todavía no tiene análisis generado.
+          </Typography>
+        </View>
+      </View>
+
+      <Typography variant="body" color="secondary">
+        Revisa los datos publicados del evento. El análisis aparece cuando el backend lo genera para
+        eventos relevantes o cuando se actualiza el dato económico.
+      </Typography>
+    </View>
+  );
+}
+
 export function EventAnalysisSection({ ai }: EventAnalysisSectionProps) {
   const [detailsVisible, setDetailsVisible] = useState(false);
 
@@ -51,7 +82,7 @@ export function EventAnalysisSection({ ai }: EventAnalysisSectionProps) {
       <View className="flex-row items-center justify-between mb-5">
         <View className="flex-row items-center gap-2">
           <Sparkles size={18} color={colors.brand.primaryLight} strokeWidth={2.5} />
-          <Typography variant="body" weight="bold" style={{ color: colors.brand.primaryLight }}>IA Analysis</Typography>
+          <Typography variant="body" weight="bold" style={{ color: colors.brand.primaryLight }}>Análisis IA</Typography>
         </View>
         <View className="flex-row gap-2">
           <Badge color={getImpactColor(ai.impact)} icon={BarChart3} label={IMPACT_LABELS[ai.impact] || ai.impact} />
