@@ -311,6 +311,23 @@ export default observer(function EventsScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerClassName="px-6 gap-2"
         >
+          {hasActiveFilters && (
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={handleClearVisibleFilters}
+              className="flex-row items-center px-4 py-2.5 rounded-xl border gap-2"
+              style={{ backgroundColor: '#27272A', borderColor: '#3F3F46' }}
+            >
+              <X size={14} color="#FFFFFF" strokeWidth={2.5} />
+              <Typography variant="body" weight="semibold" style={{ color: '#FFFFFF' }}>
+                Limpiar filtros
+              </Typography>
+              <Typography variant="caption" weight="semibold" color="muted" numberOfLines={1}>
+                {activeFilterLabels.join(' · ')}
+              </Typography>
+            </TouchableOpacity>
+          )}
+
           {[
             { label: 'Todos', value: undefined, Icon: null, color: '#FFFFFF' },
             { label: 'Alto', value: 3, Icon: Flame, color: '#FF453A' },
@@ -362,34 +379,6 @@ export default observer(function EventsScreen() {
             );
           })}
         </ScrollView>
-
-        {hasActiveFilters && (
-          <View className="px-6 pt-3">
-            <View
-              className="flex-row items-center justify-between gap-3 rounded-2xl border px-4 py-3"
-              style={{ backgroundColor: '#18181B', borderColor: '#27272A' }}
-            >
-              <View className="flex-1">
-                <Typography variant="caption" color="muted" weight="bold" className="uppercase tracking-widest">
-                  Filtros activos
-                </Typography>
-                <Typography variant="body" weight="semibold" style={{ color: '#E4E4E7' }} numberOfLines={1}>
-                  {activeFilterLabels.join(' · ')}
-                </Typography>
-              </View>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={handleClearVisibleFilters}
-                className="px-3 py-2 rounded-xl"
-                style={{ backgroundColor: '#27272A' }}
-              >
-                <Typography variant="caption" weight="bold" style={{ color: '#FFFFFF' }}>
-                  Limpiar
-                </Typography>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
       </View>
 
       <FlashList
