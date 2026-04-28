@@ -5,6 +5,7 @@ import { ExternalLink } from 'lucide-react-native';
 import { EventModel } from '../../../models/EventModel';
 import { Typography } from '../../common/Typography';
 import { colors } from '../../../theme/tokens';
+import { formatEventValue, hasEventValue } from '../../../utils/eventValues';
 
 interface EventDataSectionProps {
   event: EventModel;
@@ -35,14 +36,14 @@ export function EventDataSection({ event }: EventDataSectionProps) {
 }
 
 function DataCell({ label, value, highlight }: { label: string; value: string | null; highlight?: boolean }) {
-  const hasVal = !!value;
+  const hasVal = hasEventValue(value);
   return (
     <View className="flex-1 items-center py-4 rounded-xl" style={highlight && hasVal ? { backgroundColor: colors.brand.primary + '20', borderColor: colors.brand.primary + '30', borderWidth: 1 } : undefined}>
       <Typography variant="caption" color="muted" weight="bold" className="uppercase tracking-widest mb-1 text-[11px]">
         {label}
       </Typography>
       <Typography variant="h2" weight="bold" className="font-mono" style={{ color: highlight && hasVal ? colors.brand.primaryLight : colors.text.primary }}>
-        {value || '--'}
+        {formatEventValue(value)}
       </Typography>
     </View>
   );

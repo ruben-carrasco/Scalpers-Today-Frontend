@@ -1,6 +1,7 @@
 
 import { EconomicEvent } from '../../domain/entities/EconomicEvent';
 import { Importance } from '../../domain/entities/Importance';
+import { hasEventValue } from '../utils/eventValues';
 
 export interface EventModel extends EconomicEvent {
   isExpanded: boolean;
@@ -38,7 +39,7 @@ export function createEventModel(event: EconomicEvent): EventModel {
     showAnalysis: false,
     importanceStars: importanceStars[event.importance],
     importanceColor: importanceColors[event.importance],
-    hasData: event.actual !== null,
+    hasData: hasEventValue(event.actual),
     surpriseIcon: event.surprise ? surpriseIcons[event.surprise] : null,
   };
 }

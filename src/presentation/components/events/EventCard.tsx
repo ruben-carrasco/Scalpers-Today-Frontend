@@ -5,6 +5,7 @@ import { EventModel } from '../../models/EventModel';
 import { Typography } from '../common/Typography';
 import { getImportanceColor } from '../../theme';
 import { colors } from '../../theme/tokens';
+import { formatEventValue, hasEventValue } from '../../utils/eventValues';
 
 interface EventCardProps {
   event: EventModel;
@@ -23,6 +24,7 @@ const getSurpriseInfo = (surprise: string | null) => {
 export const EventCard = React.memo(function EventCard({ event, onPress }: EventCardProps) {
   const impColor = getImportanceColor(event.importance);
   const surpriseInfo = getSurpriseInfo(event.surprise);
+  const hasAnyDataValue = [event.actual, event.forecast, event.previous].some(hasEventValue);
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.7} className="w-full mb-3" accessibilityRole="button" accessibilityLabel={`Evento ${event.title}, ${event.country}, importancia ${event.importance}, a las ${event.time}`}>
@@ -48,19 +50,19 @@ export const EventCard = React.memo(function EventCard({ event, onPress }: Event
           {event.title}
         </Typography>
 
-        {(event.actual || event.forecast || event.previous) && (
+        {hasAnyDataValue && (
           <View style={{ borderTopColor: colors.bg.modalCard }} className="flex-row justify-between pt-4 border-t">
             <View className="items-start flex-1">
               <Typography variant="caption" color="muted" weight="semibold" className="uppercase mb-1">Act</Typography>
-              <Typography variant="body" weight="bold" className="text-text-primary">{event.actual || '--'}</Typography>
+              <Typography variant="body" weight="bold" className="text-text-primary">{formatEventValue(event.actual)}</Typography>
             </View>
             <View className="items-start flex-1">
               <Typography variant="caption" color="muted" weight="semibold" className="uppercase mb-1">Prev</Typography>
-              <Typography variant="body" weight="semibold" color="secondary">{event.forecast || '--'}</Typography>
+              <Typography variant="body" weight="semibold" color="secondary">{formatEventValue(event.forecast)}</Typography>
             </View>
             <View className="items-start flex-1">
               <Typography variant="caption" color="muted" weight="semibold" className="uppercase mb-1">Ant</Typography>
-              <Typography variant="body" weight="semibold" color="secondary">{event.previous || '--'}</Typography>
+              <Typography variant="body" weight="semibold" color="secondary">{formatEventValue(event.previous)}</Typography>
             </View>
 
             {surpriseInfo ? (
