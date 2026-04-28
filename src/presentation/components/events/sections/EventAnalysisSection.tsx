@@ -45,17 +45,17 @@ export function EventAnalysisUnavailableSection() {
         </View>
         <View className="flex-1">
           <Typography variant="body" weight="bold" style={{ color: colors.text.primary }}>
-            Análisis IA no disponible
+            Sin comentario de mercado
           </Typography>
           <Typography variant="caption" color="muted" className="mt-1">
-            El evento está en calendario, pero todavía no tiene análisis generado.
+            Aún puedes consultar los datos clave del evento.
           </Typography>
         </View>
       </View>
 
       <Typography variant="body" color="secondary">
-        Revisa los datos publicados del evento. El análisis aparece cuando el backend lo genera para
-        eventos relevantes o cuando se actualiza el dato económico.
+        Este indicador no tiene una lectura automática preparada. Revisa el dato actual, el previsto
+        y el anterior para valorar si puede mover el mercado.
       </Typography>
     </View>
   );
