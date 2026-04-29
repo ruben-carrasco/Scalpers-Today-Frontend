@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   View,
   ScrollView,
   RefreshControl,
   StatusBar,
   TouchableOpacity,
+  AppState,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect } from 'expo-router';
 import { Calendar, AlarmClock, Clock, CloudOff, TrendingUp } from 'lucide-react-native';
 import { observer } from 'mobx-react-lite';
 import {
@@ -63,6 +65,22 @@ export default observer(function HomeScreen() {
     }, 60000);
     return () => clearInterval(timer);
   }, [homeViewModel]);
+
+  useFocusEffect(
+    useCallback(() => {
+      homeViewModel.refresh();
+
+      const subscription = AppState.addEventListener('change', (nextState) => {
+        if (nextState === 'active') {
+          homeViewModel.refresh();
+        }
+      });
+
+      return () => {
+        subscription.remove();
+      };
+    }, [homeViewModel])
+  );
 
   const { summary, briefing, isLoading, error } = homeViewModel;
   const userName = authViewModel.user?.name?.split(' ')[0] || 'Trader';
