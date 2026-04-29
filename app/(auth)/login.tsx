@@ -27,11 +27,17 @@ const googleAuthConfig = {
   webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
 };
 
-const hasGoogleClientId = Boolean(
-  googleAuthConfig.iosClientId ||
-    googleAuthConfig.androidClientId ||
-    googleAuthConfig.webClientId
-);
+const platformGoogleClientId = Platform.select({
+  ios: googleAuthConfig.iosClientId,
+  android: googleAuthConfig.androidClientId,
+  default: googleAuthConfig.webClientId,
+});
+const hasGoogleClientId = Boolean(platformGoogleClientId);
+const safeGoogleAuthConfig = {
+  iosClientId: googleAuthConfig.iosClientId ?? 'missing-ios-google-client-id',
+  androidClientId: googleAuthConfig.androidClientId ?? 'missing-android-google-client-id',
+  webClientId: googleAuthConfig.webClientId ?? 'missing-web-google-client-id',
+};
 
 export default observer(function LoginScreen() {
   const router = useRouter();
@@ -44,7 +50,7 @@ export default observer(function LoginScreen() {
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
   const [googleError, setGoogleError] = useState<string | null>(null);
   const [googleRequest, , promptGoogleSignIn] = Google.useIdTokenAuthRequest({
-    ...googleAuthConfig,
+    ...safeGoogleAuthConfig,
     scopes: ['openid', 'profile', 'email'],
     selectAccount: true,
   });
