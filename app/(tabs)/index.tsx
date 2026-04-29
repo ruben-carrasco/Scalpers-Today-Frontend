@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
-import { Calendar, AlarmClock, Clock, CloudOff, TrendingUp } from 'lucide-react-native';
+import { Calendar, AlarmClock, Clock, CloudOff, TrendingUp, CheckCircle2, RotateCw } from 'lucide-react-native';
 import { observer } from 'mobx-react-lite';
 import {
   useHomeViewModel,
@@ -95,6 +95,8 @@ export default observer(function HomeScreen() {
 
   // --- REMOVED MOCK DATA PARA PROBAR LOS DESTACADOS ---
   const activeSummary = summary;
+  const hasHighlights = Boolean(activeSummary?.highlights?.length);
+  const isAgendaComplete = Boolean(activeSummary && !activeSummary.nextEvent && !hasHighlights);
 
   return (
     <View className="flex-1 bg-bg-primary">
@@ -125,7 +127,39 @@ export default observer(function HomeScreen() {
                 sentiment={sentiment}
                 volatility={volatility}
               />
+              <View className="mt-3 flex-row items-center justify-between rounded-2xl border border-[#27272A] bg-[#0F172A] px-4 py-3">
+                <View className="flex-row items-center gap-2">
+                  <RotateCw size={14} color="#60A5FA" strokeWidth={2.5} />
+                  <Typography variant="caption" color="muted" weight="semibold">
+                    Actualizado a las {activeSummary.welcome.time}
+                  </Typography>
+                </View>
+                <Typography variant="caption" weight="bold" style={{ color: '#8DEBFF' }}>
+                  Madrid
+                </Typography>
+              </View>
             </View>
+
+            {isAgendaComplete && (
+              <View className="mb-8 rounded-3xl border border-[#0F766E]/40 bg-[#042F2E]/30 p-6">
+                <View className="flex-row items-center gap-3 mb-3">
+                  <View className="w-11 h-11 rounded-2xl items-center justify-center" style={{ backgroundColor: '#0F766E33' }}>
+                    <CheckCircle2 size={24} color="#5EEAD4" strokeWidth={2.5} />
+                  </View>
+                  <View className="flex-1">
+                    <Typography variant="h2" weight="bold" style={{ color: '#CCFBF1' }}>
+                      Agenda completada
+                    </Typography>
+                    <Typography variant="caption" color="muted" weight="semibold">
+                      Sin eventos pendientes para hoy
+                    </Typography>
+                  </View>
+                </View>
+                <Typography variant="body" color="secondary" className="leading-relaxed">
+                  No quedan publicaciones macro relevantes en la sesión de hoy. Puedes revisar el calendario semanal o esperar a la próxima actualización.
+                </Typography>
+              </View>
+            )}
 
             <View className="mb-8">
               <Typography variant="h2" weight="bold" className="mb-4 text-text-primary">
@@ -145,8 +179,8 @@ export default observer(function HomeScreen() {
                   <Typography variant="body" weight="semibold" color="secondary" className="mt-4">
                     No hay más eventos hoy
                   </Typography>
-                  <Typography variant="caption" color="muted" className="mt-1">
-                    El mercado ha cerrado su agenda económica
+                  <Typography variant="caption" color="muted" className="mt-1 text-center">
+                    La agenda económica pendiente está despejada
                   </Typography>
                 </View>
               )}
@@ -203,7 +237,7 @@ export default observer(function HomeScreen() {
               </View>
             )}
 
-            {activeSummary.highlights && activeSummary.highlights.length > 0 && (
+            {hasHighlights && (
               <View className="mb-8">
                 <Typography variant="h2" weight="bold" className="mb-4">
                   Destacados
