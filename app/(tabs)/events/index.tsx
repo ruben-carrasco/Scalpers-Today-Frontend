@@ -6,6 +6,8 @@ import {
   RefreshControl,
   StatusBar,
   ScrollView,
+  FlatList,
+  Platform,
 } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -25,7 +27,6 @@ import { observer } from 'mobx-react-lite';
 import { useEventsViewModel, useHaptics } from '../../../src/presentation/hooks';
 import { EventCard, EventDetailModal } from '../../../src/presentation/components/events';
 import { EventCardSkeleton } from '../../../src/presentation/components/events/EventCardSkeleton';
-import { AnimatedCard } from '../../../src/presentation/components/common/AnimatedCard';
 import { EventModel } from '../../../src/presentation/models/EventModel';
 import { Typography } from '../../../src/presentation/components/common/Typography';
 
@@ -97,7 +98,7 @@ export default observer(function EventsScreen() {
   const eventsViewModel = useEventsViewModel();
   const haptics = useHaptics();
   const openedEventIdRef = useRef<string | null>(null);
-  const eventsListRef = useRef<FlashList<EventModel>>(null);
+  const eventsListRef = useRef<FlashList<EventModel> | FlatList<EventModel>>(null);
 
   const scrollEventsToTop = useCallback((animated: boolean = true) => {
     requestAnimationFrame(() => {
@@ -199,6 +200,7 @@ export default observer(function EventsScreen() {
     filters.importance ?? 'all-importance',
     filters.country ?? 'all-countries',
   ].join(':');
+  const isIOS = Platform.OS === 'ios';
 
   const handleClearVisibleFilters = () => {
     haptics.selection();
@@ -206,6 +208,66 @@ export default observer(function EventsScreen() {
     eventsViewModel.clearFilters();
     scrollEventsToTop();
   };
+
+  const renderEventItem = ({ item }: { item: EventModel }) => (
+    <EventCard event={item} onPress={() => handleEventPress(item)} />
+  );
+
+  const eventsRefreshControl = (
+    <RefreshControl
+      refreshing={isLoading}
+      onRefresh={async () => {
+        await eventsViewModel.loadEvents(true);
+        haptics.success();
+      }}
+      tintColor="#3B82F6"
+    />
+  );
+
+  const emptyEventsComponent = isLoading ? (
+    <View className="gap-3">
+      {Array.from({ length: 5 }).map((_, index) => (
+        <EventCardSkeleton key={index} />
+      ))}
+    </View>
+  ) : (
+    <View className="items-center pt-20 px-8 gap-4">
+      <Calendar size={48} color="#3F3F46" strokeWidth={2} />
+      <Typography variant="h2" weight="bold" color="secondary">No hay eventos</Typography>
+      <Typography variant="body" color="muted" className="text-center">
+        {hasActiveFilters
+          ? 'No hay eventos que coincidan con los filtros aplicados.'
+          : `No se encontraron eventos para ${selectedDay?.fullLabel ?? 'el día seleccionado'}.`}
+      </Typography>
+
+      {hasActiveFilters ? (
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={handleClearVisibleFilters}
+          className="px-5 py-3 rounded-2xl border"
+          style={{ backgroundColor: '#27272A', borderColor: '#3F3F46' }}
+        >
+          <Typography variant="body" weight="bold" style={{ color: '#FFFFFF' }}>
+            Limpiar filtros
+          </Typography>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={async () => {
+            await eventsViewModel.loadEvents(true);
+            haptics.success();
+          }}
+          className="px-5 py-3 rounded-2xl border"
+          style={{ backgroundColor: '#1D4ED833', borderColor: '#1D4ED8' }}
+        >
+          <Typography variant="body" weight="bold" style={{ color: '#60A5FA' }}>
+            Actualizar calendario
+          </Typography>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
 
   return (
     <View className="flex-1 bg-bg-primary">
@@ -399,77 +461,36 @@ export default observer(function EventsScreen() {
         </ScrollView>
       </View>
 
-      <FlashList
-        key={listContextKey}
-        ref={eventsListRef}
-        data={events}
-        extraData={listContextKey}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item, index }) => (
-          <AnimatedCard index={index}>
-            <EventCard event={item} onPress={() => handleEventPress(item)} />
-          </AnimatedCard>
-        )}
-        contentContainerStyle={{ padding: 24, paddingBottom: 120 }}
-        keyboardShouldPersistTaps="handled"
-        refreshControl={
-          <RefreshControl
-            refreshing={isLoading}
-            onRefresh={async () => {
-              await eventsViewModel.loadEvents(true);
-              haptics.success();
-            }}
-            tintColor="#3B82F6"
-          />
-        }
-        ListEmptyComponent={
-          isLoading ? (
-            <View className="gap-3">
-              {Array.from({ length: 5 }).map((_, index) => (
-                <EventCardSkeleton key={index} />
-              ))}
-            </View>
-          ) : (
-            <View className="items-center pt-20 px-8 gap-4">
-              <Calendar size={48} color="#3F3F46" strokeWidth={2} />
-              <Typography variant="h2" weight="bold" color="secondary">No hay eventos</Typography>
-              <Typography variant="body" color="muted" className="text-center">
-                {hasActiveFilters
-                  ? 'No hay eventos que coincidan con los filtros aplicados.'
-                  : `No se encontraron eventos para ${selectedDay?.fullLabel ?? 'el día seleccionado'}.`}
-              </Typography>
-
-              {hasActiveFilters ? (
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={handleClearVisibleFilters}
-                  className="px-5 py-3 rounded-2xl border"
-                  style={{ backgroundColor: '#27272A', borderColor: '#3F3F46' }}
-                >
-                  <Typography variant="body" weight="bold" style={{ color: '#FFFFFF' }}>
-                    Limpiar filtros
-                  </Typography>
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={async () => {
-                    await eventsViewModel.loadEvents(true);
-                    haptics.success();
-                  }}
-                  className="px-5 py-3 rounded-2xl border"
-                  style={{ backgroundColor: '#1D4ED833', borderColor: '#1D4ED8' }}
-                >
-                  <Typography variant="body" weight="bold" style={{ color: '#60A5FA' }}>
-                    Actualizar calendario
-                  </Typography>
-                </TouchableOpacity>
-              )}
-            </View>
-          )
-        }
-        showsVerticalScrollIndicator={false}
-      />
+      {isIOS ? (
+        <FlatList
+          key={listContextKey}
+          ref={eventsListRef}
+          data={events}
+          extraData={listContextKey}
+          keyExtractor={(item) => item.id}
+          renderItem={renderEventItem}
+          contentContainerStyle={{ padding: 24, paddingBottom: 120 }}
+          keyboardShouldPersistTaps="handled"
+          refreshControl={eventsRefreshControl}
+          ListEmptyComponent={emptyEventsComponent}
+          showsVerticalScrollIndicator={false}
+          removeClippedSubviews={false}
+        />
+      ) : (
+        <FlashList
+          key={listContextKey}
+          ref={eventsListRef}
+          data={events}
+          extraData={listContextKey}
+          keyExtractor={(item) => item.id}
+          renderItem={renderEventItem}
+          contentContainerStyle={{ padding: 24, paddingBottom: 120 }}
+          keyboardShouldPersistTaps="handled"
+          refreshControl={eventsRefreshControl}
+          ListEmptyComponent={emptyEventsComponent}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
 
       <EventDetailModal
         event={selectedEvent}
