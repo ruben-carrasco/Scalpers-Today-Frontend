@@ -1,26 +1,37 @@
 <svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="1024" height="1024" fill="#000000"/>
   <defs>
-    <linearGradient id="scalperGradient" x1="200" y1="800" x2="800" y2="200" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#3B82F6" />
-      <stop offset="100%" stop-color="#8B5CF6" />
+    <radialGradient id="bgGlow" cx="50%" cy="35%" r="70%">
+      <stop offset="0%" stop-color="#11233A"/>
+      <stop offset="58%" stop-color="#07111F"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </radialGradient>
+    <linearGradient id="markGradient" x1="276" y1="760" x2="748" y2="264" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="48%" stop-color="#0EA5E9"/>
+      <stop offset="100%" stop-color="#2DD4BF"/>
     </linearGradient>
-    <linearGradient id="scalperGradientDark" x1="200" y1="800" x2="800" y2="200" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#1E3A8A" />
-      <stop offset="100%" stop-color="#4C1D95" />
+    <linearGradient id="edgeGradient" x1="214" y1="214" x2="810" y2="810" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1E3A5F"/>
+      <stop offset="100%" stop-color="#0F766E"/>
     </linearGradient>
+    <filter id="softShadow" x="148" y="156" width="728" height="760" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="24" stdDeviation="28" flood-color="#000000" flood-opacity="0.38"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="18" flood-color="#0EA5E9" flood-opacity="0.22"/>
+    </filter>
   </defs>
 
-  <!-- Sombra exterior para dar profundidad (Neón) -->
-  <path d="M680 200 L850 200 L450 824 L280 824 Z" fill="url(#scalperGradientDark)" opacity="0.5" filter="blur(20px)" />
-  <path d="M480 200 L650 200 L250 824 L80 824 Z" fill="url(#scalperGradientDark)" opacity="0.5" filter="blur(20px)" />
+  <rect width="1024" height="1024" fill="url(#bgGlow)"/>
+  <circle cx="512" cy="512" r="356" fill="#07111F" stroke="url(#edgeGradient)" stroke-width="18"/>
+  <circle cx="512" cy="512" r="292" stroke="#12324E" stroke-width="2" stroke-dasharray="10 18" opacity="0.7"/>
 
-  <!-- Forma principal 'S' de Scalper: Dos flechas afiladas y diagonales -->
-  <!-- Flecha Derecha/Arriba (Alcista) -->
-  <path d="M500 250 L800 250 L600 560 L450 560 Z" fill="url(#scalperGradient)" />
-  <!-- Flecha Izquierda/Abajo (Base de la S) -->
-  <path d="M420 480 L570 480 L350 780 L180 780 Z" fill="url(#scalperGradient)" />
-  
-  <!-- Detalle central de corte para separar ambas formas -->
-  <path d="M400 520 L620 520" stroke="#000000" stroke-width="40" stroke-linecap="round" />
+  <g filter="url(#softShadow)">
+    <path d="M646 318C597 276 450 274 394 340C333 413 384 484 514 509C648 535 700 600 636 680C576 755 426 750 356 696" stroke="url(#markGradient)" stroke-width="78" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M330 292H704" stroke="url(#markGradient)" stroke-width="72" stroke-linecap="round"/>
+    <path d="M512 292V744" stroke="url(#markGradient)" stroke-width="72" stroke-linecap="round"/>
+    <path d="M330 292H704" stroke="#DFFBFF" stroke-width="18" stroke-linecap="round" opacity="0.72"/>
+    <path d="M512 292V744" stroke="#DFFBFF" stroke-width="18" stroke-linecap="round" opacity="0.58"/>
+  </g>
+
+  <path d="M312 748L396 672L470 710L575 584L644 626L724 514" stroke="#8DEBFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M724 514L716 591L662 538" stroke="#8DEBFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
