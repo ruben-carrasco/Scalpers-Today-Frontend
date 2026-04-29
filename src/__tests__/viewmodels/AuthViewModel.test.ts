@@ -17,6 +17,10 @@ const mockLoginUseCase = {
   execute: jest.fn(),
 };
 
+const mockGoogleLoginUseCase = {
+  execute: jest.fn(),
+};
+
 const mockRegisterUseCase = {
   execute: jest.fn(),
 };
@@ -41,6 +45,7 @@ const mockSettingsViewModel = { reset: jest.fn() };
 function createViewModel(): AuthViewModel {
   const vm = Object.create(AuthViewModel.prototype);
   vm.loginUseCase = mockLoginUseCase;
+  vm.googleLoginUseCase = mockGoogleLoginUseCase;
   vm.registerUseCase = mockRegisterUseCase;
   vm.getCurrentUserUseCase = mockGetCurrentUserUseCase;
   vm.logoutUseCase = mockLogoutUseCase;
@@ -106,6 +111,38 @@ describe('AuthViewModel', () => {
 
       expect(loadingDuringExec).toBe(true);
       expect(vm.isLoading).toBe(false);
+    });
+  });
+
+  describe('loginWithGoogle', () => {
+    it('sets isAuthenticated on success', async () => {
+      const vm = createViewModel();
+      const mockUser = { id: '1', email: 'google@test.com', name: 'Google User' };
+      mockGoogleLoginUseCase.execute.mockResolvedValue({
+        user: mockUser,
+        token: 'jwt-token',
+      });
+
+      const result = await vm.loginWithGoogle('google-id-token');
+
+      expect(result).toBe(true);
+      expect(mockGoogleLoginUseCase.execute).toHaveBeenCalledWith({
+        id_token: 'google-id-token',
+      });
+      expect(vm.isAuthenticated).toBe(true);
+      expect(vm.user).toBeTruthy();
+      expect(vm.error).toBeNull();
+    });
+
+    it('sets error on failure', async () => {
+      const vm = createViewModel();
+      mockGoogleLoginUseCase.execute.mockRejectedValue(new Error('Invalid Google token'));
+
+      const result = await vm.loginWithGoogle('bad-token');
+
+      expect(result).toBe(false);
+      expect(vm.isAuthenticated).toBe(false);
+      expect(vm.error).toBeTruthy();
     });
   });
 

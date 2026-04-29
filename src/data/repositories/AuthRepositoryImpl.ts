@@ -5,6 +5,7 @@ import { ApiClient } from '../api/ApiClient';
 import { ApiEndpointProvider } from '../api/ApiEndpointProvider';
 import { ITokenManager } from '../../core/storage/TokenManager';
 import { IAuthRepository } from '../../domain/interfaces/repositories/IAuthRepository';
+import { GoogleLoginParams } from '../../domain/interfaces/repositories/GoogleLoginParams';
 import { LoginParams } from '../../domain/interfaces/repositories/LoginParams';
 import { RegisterParams } from '../../domain/interfaces/repositories/RegisterParams';
 import { User } from '../../domain/entities/User';
@@ -79,6 +80,14 @@ export class AuthRepositoryImpl implements IAuthRepository {
   async login(params: LoginParams): Promise<AuthResult> {
     const response = await this.apiClient.post<ApiAuthResponse>(
       this.endpoints.login,
+      params
+    );
+    return this.mapAuthResult(response);
+  }
+
+  async googleLogin(params: GoogleLoginParams): Promise<AuthResult> {
+    const response = await this.apiClient.post<ApiAuthResponse>(
+      this.endpoints.googleLogin,
       params
     );
     return this.mapAuthResult(response);

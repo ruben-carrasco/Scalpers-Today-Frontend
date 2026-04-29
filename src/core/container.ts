@@ -19,11 +19,13 @@ import { AlertRepositoryImpl } from '../data/repositories/AlertRepositoryImpl';
 import { ConfigRepositoryImpl } from '../data/repositories/ConfigRepositoryImpl';
 
 import { ILoginUseCase } from '../domain/interfaces/usecases/ILoginUseCase';
+import { IGoogleLoginUseCase } from '../domain/interfaces/usecases/IGoogleLoginUseCase';
 import { IRegisterUseCase } from '../domain/interfaces/usecases/IRegisterUseCase';
 import { IGetCurrentUserUseCase } from '../domain/interfaces/usecases/IGetCurrentUserUseCase';
 import { ILogoutUseCase } from '../domain/interfaces/usecases/ILogoutUseCase';
 
 import { LoginUseCase } from '../domain/usecases/auth/LoginUseCase';
+import { GoogleLoginUseCase } from '../domain/usecases/auth/GoogleLoginUseCase';
 import { RegisterUseCase } from '../domain/usecases/auth/RegisterUseCase';
 import { GetCurrentUserUseCase } from '../domain/usecases/auth/GetCurrentUserUseCase';
 import { LogoutUseCase } from '../domain/usecases/auth/LogoutUseCase';
@@ -100,6 +102,10 @@ container.bind<IConfigRepository>(TYPES.ConfigRepository)
 
 container.bind<ILoginUseCase>(TYPES.LoginUseCase)
   .to(LoginUseCase)
+  .inTransientScope();
+
+container.bind<IGoogleLoginUseCase>(TYPES.GoogleLoginUseCase)
+  .to(GoogleLoginUseCase)
   .inTransientScope();
 
 container.bind<IRegisterUseCase>(TYPES.RegisterUseCase)

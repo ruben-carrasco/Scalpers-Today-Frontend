@@ -4,6 +4,7 @@ import { injectable, inject } from 'inversify';
 import { makeAutoObservable, runInAction } from 'mobx';
 import { TYPES } from '../../core/types';
 import { ILoginUseCase } from '../../domain/interfaces/usecases/ILoginUseCase';
+import { IGoogleLoginUseCase } from '../../domain/interfaces/usecases/IGoogleLoginUseCase';
 import { IRegisterUseCase } from '../../domain/interfaces/usecases/IRegisterUseCase';
 import { IGetCurrentUserUseCase } from '../../domain/interfaces/usecases/IGetCurrentUserUseCase';
 import { ILogoutUseCase } from '../../domain/interfaces/usecases/ILogoutUseCase';
@@ -34,6 +35,8 @@ export class AuthViewModel {
   constructor(
     @inject(TYPES.LoginUseCase)
     private loginUseCase: ILoginUseCase,
+    @inject(TYPES.GoogleLoginUseCase)
+    private googleLoginUseCase: IGoogleLoginUseCase,
     @inject(TYPES.RegisterUseCase)
     private registerUseCase: IRegisterUseCase,
     @inject(TYPES.GetCurrentUserUseCase)
@@ -134,6 +137,40 @@ export class AuthViewModel {
           this.error = 'Sin conexión a internet. Verifica tu conexión.';
         } else if (err instanceof AuthError) {
           this.error = 'Credenciales incorrectas. Verifica tu email y contraseña.';
+        } else if (err instanceof ApiError) {
+          this.error = translateApiError(err.message);
+        } else if (err instanceof Error) {
+          this.error = translateApiError(err.message);
+        } else {
+          this.error = 'Ha ocurrido un error inesperado. Intenta de nuevo.';
+        }
+      });
+      return false;
+    } finally {
+      runInAction(() => {
+        this.isLoading = false;
+      });
+    }
+  }
+
+  async loginWithGoogle(idToken: string): Promise<boolean> {
+    this.isLoading = true;
+    this.error = null;
+
+    try {
+      const result = await this.googleLoginUseCase.execute({ id_token: idToken });
+      runInAction(() => {
+        this.user = createUserModel(result.user);
+        this.isAuthenticated = true;
+      });
+      this.registerPushToken();
+      return true;
+    } catch (err) {
+      runInAction(() => {
+        if (err instanceof NetworkError) {
+          this.error = 'Sin conexión a internet. Verifica tu conexión.';
+        } else if (err instanceof AuthError) {
+          this.error = 'No se pudo iniciar sesión con Google. Intenta de nuevo.';
         } else if (err instanceof ApiError) {
           this.error = translateApiError(err.message);
         } else if (err instanceof Error) {

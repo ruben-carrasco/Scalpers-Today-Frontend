@@ -9,7 +9,7 @@ import {
   FlatList,
   Platform,
 } from 'react-native';
-import { FlashList } from '@shopify/flash-list';
+import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
 import {
@@ -98,11 +98,13 @@ export default observer(function EventsScreen() {
   const eventsViewModel = useEventsViewModel();
   const haptics = useHaptics();
   const openedEventIdRef = useRef<string | null>(null);
-  const eventsListRef = useRef<FlashList<EventModel> | FlatList<EventModel>>(null);
+  const flatEventsListRef = useRef<FlatList<EventModel>>(null);
+  const flashEventsListRef = useRef<FlashListRef<EventModel>>(null);
 
   const scrollEventsToTop = useCallback((animated: boolean = true) => {
     requestAnimationFrame(() => {
-      eventsListRef.current?.scrollToOffset({ offset: 0, animated });
+      const listRef = Platform.OS === 'ios' ? flatEventsListRef : flashEventsListRef;
+      listRef.current?.scrollToOffset({ offset: 0, animated });
     });
   }, []);
 
@@ -464,7 +466,7 @@ export default observer(function EventsScreen() {
       {isIOS ? (
         <FlatList
           key={listContextKey}
-          ref={eventsListRef}
+          ref={flatEventsListRef}
           data={events}
           extraData={listContextKey}
           keyExtractor={(item) => item.id}
@@ -479,7 +481,7 @@ export default observer(function EventsScreen() {
       ) : (
         <FlashList
           key={listContextKey}
-          ref={eventsListRef}
+          ref={flashEventsListRef}
           data={events}
           extraData={listContextKey}
           keyExtractor={(item) => item.id}

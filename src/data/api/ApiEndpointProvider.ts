@@ -13,6 +13,10 @@ export class ApiEndpointProvider {
     return `${this.baseUrl}/auth/login`;
   }
 
+  get googleLogin(): string {
+    return `${this.baseUrl}/auth/google`;
+  }
+
   get register(): string {
     return `${this.baseUrl}/auth/register`;
   }
