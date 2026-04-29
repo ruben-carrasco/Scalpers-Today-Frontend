@@ -25,7 +25,6 @@ import { observer } from 'mobx-react-lite';
 import { useEventsViewModel, useHaptics } from '../../../src/presentation/hooks';
 import { EventCard, EventDetailModal } from '../../../src/presentation/components/events';
 import { EventCardSkeleton } from '../../../src/presentation/components/events/EventCardSkeleton';
-import { AnimatedCard } from '../../../src/presentation/components/common/AnimatedCard';
 import { EventModel } from '../../../src/presentation/models/EventModel';
 import { Typography } from '../../../src/presentation/components/common/Typography';
 
@@ -405,10 +404,8 @@ export default observer(function EventsScreen() {
         data={events}
         extraData={listContextKey}
         keyExtractor={(item) => item.id}
-        renderItem={({ item, index }) => (
-          <AnimatedCard index={index}>
-            <EventCard event={item} onPress={() => handleEventPress(item)} />
-          </AnimatedCard>
+        renderItem={({ item }) => (
+          <EventCard event={item} onPress={() => handleEventPress(item)} />
         )}
         contentContainerStyle={{ padding: 24, paddingBottom: 120 }}
         keyboardShouldPersistTaps="handled"
