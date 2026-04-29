@@ -11,11 +11,27 @@ import {
   Image,
 } from 'react-native';
 import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react-native';
+import * as Google from 'expo-auth-session/providers/google';
+import * as WebBrowser from 'expo-web-browser';
 import { Link, useRouter } from 'expo-router';
 import { observer } from 'mobx-react-lite';
 import { useAuthViewModel } from '../../src/presentation/hooks';
 import { emailValidator } from '../../src/core/validation';
 import { Typography } from '../../src/presentation/components/common/Typography';
+
+WebBrowser.maybeCompleteAuthSession();
+
+const googleAuthConfig = {
+  iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+  androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
+  webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+};
+
+const hasGoogleClientId = Boolean(
+  googleAuthConfig.iosClientId ||
+    googleAuthConfig.androidClientId ||
+    googleAuthConfig.webClientId
+);
 
 export default observer(function LoginScreen() {
   const router = useRouter();
@@ -25,6 +41,13 @@ export default observer(function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
+  const [googleError, setGoogleError] = useState<string | null>(null);
+  const [googleRequest, , promptGoogleSignIn] = Google.useIdTokenAuthRequest({
+    ...googleAuthConfig,
+    scopes: ['openid', 'profile', 'email'],
+    selectAccount: true,
+  });
 
   useEffect(() => {
     authViewModel.clearError();
@@ -54,6 +77,7 @@ export default observer(function LoginScreen() {
     }
 
     authViewModel.clearError();
+    setGoogleError(null);
 
     if (!validateForm()) {
       return;
@@ -67,6 +91,44 @@ export default observer(function LoginScreen() {
     }
 
     setIsSubmitting(false);
+  };
+
+  const handleGoogleLogin = async () => {
+    if (isLoading || !googleRequest || !hasGoogleClientId) {
+      return;
+    }
+
+    authViewModel.clearError();
+    setGoogleError(null);
+    setIsGoogleSubmitting(true);
+
+    try {
+      const result = await promptGoogleSignIn();
+
+      if (result.type === 'cancel' || result.type === 'dismiss') {
+        return;
+      }
+
+      if (result.type !== 'success') {
+        setGoogleError('No se pudo completar el inicio de sesión con Google.');
+        return;
+      }
+
+      const idToken = result.params?.id_token;
+      if (!idToken) {
+        setGoogleError('Google no devolvió una credencial válida. Intenta de nuevo.');
+        return;
+      }
+
+      const success = await authViewModel.loginWithGoogle(idToken);
+      if (success) {
+        router.replace('/(tabs)');
+      }
+    } catch {
+      setGoogleError('No se pudo abrir Google. Revisa tu conexión e intenta de nuevo.');
+    } finally {
+      setIsGoogleSubmitting(false);
+    }
   };
 
   const handleEmailChange = (text: string) => {
@@ -83,7 +145,8 @@ export default observer(function LoginScreen() {
     }
   };
 
-  const isLoading = authViewModel.isLoading || isSubmitting;
+  const isLoading = authViewModel.isLoading || isSubmitting || isGoogleSubmitting;
+  const isGoogleDisabled = isLoading || !googleRequest || !hasGoogleClientId;
 
   return (
     <View className="flex-1 bg-bg-primary">
@@ -175,6 +238,13 @@ export default observer(function LoginScreen() {
               </View>
             )}
 
+            {googleError && (
+              <View className="flex-row items-center bg-semantic-danger/10 p-4 rounded-2xl gap-3 mb-6 border border-semantic-danger/20">
+                <AlertCircle size={20} color="#FF453A" strokeWidth={2} />
+                <Typography variant="body" color="danger" weight="semibold" className="flex-1">{googleError}</Typography>
+              </View>
+            )}
+
             {/* Submit Button */}
             <TouchableOpacity
               onPress={handleLogin}
@@ -188,6 +258,34 @@ export default observer(function LoginScreen() {
                 <ActivityIndicator color="#fff" size="small" />
               ) : (
                 <Typography variant="body" weight="bold" className="text-text-primary">Iniciar Sesión</Typography>
+              )}
+            </TouchableOpacity>
+
+            <View className="flex-row items-center gap-4 my-6">
+              <View className="h-px flex-1 bg-border-subtle" />
+              <Typography variant="caption" color="muted" weight="semibold">O continúa con</Typography>
+              <View className="h-px flex-1 bg-border-subtle" />
+            </View>
+
+            <TouchableOpacity
+              onPress={handleGoogleLogin}
+              disabled={isGoogleDisabled}
+              activeOpacity={0.85}
+              className={`h-16 rounded-full border border-border-subtle bg-bg-card flex-row items-center justify-center gap-3 ${isGoogleDisabled ? 'opacity-50' : 'opacity-100'}`}
+              accessibilityRole="button"
+              accessibilityLabel="Iniciar sesión con Google"
+            >
+              {isGoogleSubmitting ? (
+                <ActivityIndicator color="#fff" size="small" />
+              ) : (
+                <>
+                  <View className="w-8 h-8 rounded-full bg-text-primary items-center justify-center">
+                    <Typography variant="body" weight="bold" className="text-bg-primary">G</Typography>
+                  </View>
+                  <Typography variant="body" weight="bold" className="text-text-primary">
+                    Iniciar sesión con Google
+                  </Typography>
+                </>
               )}
             </TouchableOpacity>
           </View>

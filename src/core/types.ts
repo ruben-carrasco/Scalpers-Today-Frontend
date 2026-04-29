@@ -11,6 +11,7 @@ export const TYPES = {
   ConfigRepository: Symbol.for('ConfigRepository'),
 
   LoginUseCase: Symbol.for('LoginUseCase'),
+  GoogleLoginUseCase: Symbol.for('GoogleLoginUseCase'),
   RegisterUseCase: Symbol.for('RegisterUseCase'),
   GetCurrentUserUseCase: Symbol.for('GetCurrentUserUseCase'),
   LogoutUseCase: Symbol.for('LogoutUseCase'),
