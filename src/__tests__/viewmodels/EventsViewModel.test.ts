@@ -1,4 +1,5 @@
 import { EventsViewModel } from '../../presentation/viewmodels/EventsViewModel';
+import { EventModel } from '../../presentation/models/EventModel';
 
 // Create mock dependencies
 const mockGetFilteredEvents = {
@@ -48,7 +49,7 @@ function createViewModel(): EventsViewModel {
   return vm;
 }
 
-function makeEvent(overrides: Record<string, any> = {}) {
+function makeEvent(overrides: Partial<EventModel> = {}): EventModel {
   return {
     id: '1',
     eventDate: TEST_DATE,
