@@ -288,7 +288,7 @@ export default observer(function EventsScreen() {
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={() => setIsControlsOpen(value => !value)}
-          className="bg-[#18181B] border border-[#27272A] rounded-2xl px-4 py-3"
+          className="bg-[#18181B] border border-[#27272A] rounded-2xl px-4 py-3 gap-2"
         >
           <View className="flex-row items-center justify-between">
             <View className="gap-1">
@@ -316,6 +316,9 @@ export default observer(function EventsScreen() {
               )}
             </View>
           </View>
+          <Typography variant="caption" color="muted">
+            {selectedDay?.count ?? 0} eventos · {hasActiveFilters ? `${activeFilterLabels.length} filtros activos` : 'sin filtros activos'}
+          </Typography>
         </TouchableOpacity>
 
         <View className="flex-row items-center bg-[#18181B] rounded-2xl px-4 h-12 gap-3 border border-[#27272A]">
@@ -336,105 +339,136 @@ export default observer(function EventsScreen() {
       </View>
 
       {isControlsOpen && (
-        <View className="py-2 bg-bg-primary border-b border-[#27272A] gap-2">
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerClassName="px-6 gap-2"
-          >
-            {weekDays.map(day => {
-              const isActive = day.date === selectedDate;
-              return (
-                <TouchableOpacity
-                  key={day.date}
-                  onPress={() => handleSelectDay(day.date)}
-                  activeOpacity={0.7}
-                  className={`px-4 py-2.5 rounded-xl border ${isActive ? 'bg-[#27272A] border-[#3F3F46]' : 'bg-[#18181B] border-[#27272A]'}`}
-                >
-                  <Typography variant="body" weight="semibold" style={{ color: isActive ? '#FFFFFF' : '#A1A1AA' }}>
-                    {day.shortLabel}
+        <View className="mx-6 mb-2 bg-[#18181B] border border-[#27272A] rounded-2xl overflow-hidden">
+          <View className="px-4 py-3 border-b border-[#27272A]">
+            <Typography variant="caption" color="muted" weight="semibold">Seleccionar día</Typography>
+          </View>
+
+          {weekDays.map(day => {
+            const isActive = day.date === selectedDate;
+            const tone = getDayTone(day.count);
+            const titleColor = isActive ? '#FFFFFF' : day.count === 0 ? '#71717A' : '#D4D4D8';
+            return (
+              <TouchableOpacity
+                key={day.date}
+                activeOpacity={0.8}
+                onPress={() => handleSelectDay(day.date)}
+                className={`px-4 py-3 flex-row items-center justify-between border-b border-[#27272A] ${isActive ? 'bg-[#27272A]' : ''}`}
+              >
+                <View>
+                  <Typography variant="body" weight="semibold" style={{ color: titleColor }}>
+                    {day.fullLabel}
                   </Typography>
-                  <Typography variant="caption" style={{ color: isActive ? '#D4D4D8' : '#71717A' }}>
+                  <View className="flex-row items-center gap-2 mt-1">
+                    <Typography variant="caption" color="muted">
+                      {day.shortLabel}
+                    </Typography>
+                    {day.isToday && (
+                      <View className="px-2 py-0.5 rounded-full" style={{ backgroundColor: '#2563EB33' }}>
+                        <Typography variant="caption" weight="bold" style={{ color: '#60A5FA' }}>
+                          Hoy
+                        </Typography>
+                      </View>
+                    )}
+                  </View>
+                </View>
+                <View className="items-end gap-1">
+                  <View
+                    className="px-2.5 py-1 rounded-full border"
+                    style={{ backgroundColor: tone.backgroundColor, borderColor: tone.borderColor }}
+                  >
+                    <Typography variant="caption" weight="bold" style={{ color: tone.color }}>
+                      {tone.label}
+                    </Typography>
+                  </View>
+                  <Typography variant="caption" weight="semibold" style={{ color: isActive ? '#FFFFFF' : '#A1A1AA' }}>
                     {day.count} eventos
                   </Typography>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerClassName="px-6 gap-2"
-          >
-            {hasActiveFilters && (
+          <View className="px-4 pt-3 pb-2 border-b border-[#27272A]">
+            <Typography variant="caption" color="muted" weight="semibold">Filtros</Typography>
+          </View>
+
+          <View className="py-3 gap-2">
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerClassName="px-4 gap-2"
+            >
+              {hasActiveFilters && (
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={handleClearVisibleFilters}
+                  className="flex-row items-center px-4 py-2.5 rounded-xl border gap-2"
+                  style={{ backgroundColor: '#27272A', borderColor: '#3F3F46' }}
+                >
+                  <X size={14} color="#FFFFFF" strokeWidth={2.5} />
+                  <Typography variant="body" weight="semibold" style={{ color: '#FFFFFF' }}>
+                    Limpiar filtros
+                  </Typography>
+                </TouchableOpacity>
+              )}
+
+              {[
+                { label: 'Todos', value: undefined, Icon: null, color: '#FFFFFF' },
+                { label: 'Alto', value: 3, Icon: Flame, color: '#FF453A' },
+                { label: 'Medio', value: 2, Icon: TrendingUp, color: '#FBBF24' },
+                { label: 'Bajo', value: 1, Icon: MinusCircle, color: '#A1A1AA' },
+              ].map((item) => {
+                const isActive = filters.importance === item.value;
+                return (
+                  <TouchableOpacity
+                    key={item.label}
+                    onPress={() => handleImportanceFilter(item.value)}
+                    activeOpacity={0.7}
+                    className={`flex-row items-center px-4 py-2.5 rounded-xl border gap-2 ${isActive ? 'bg-[#27272A] border-[#3F3F46]' : 'bg-[#18181B] border-[#27272A]'}`}
+                  >
+                    {item.Icon && <item.Icon size={14} color={isActive ? item.color : '#71717A'} strokeWidth={2.5} />}
+                    <Typography variant="body" weight="semibold" style={isActive ? { color: item.color } : { color: '#A1A1AA' }}>
+                      {item.label}
+                    </Typography>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerClassName="px-4 gap-2"
+            >
               <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={handleClearVisibleFilters}
-                className="flex-row items-center px-4 py-2.5 rounded-xl border gap-2"
-                style={{ backgroundColor: '#27272A', borderColor: '#3F3F46' }}
+                onPress={() => handleCountryFilter(undefined)}
+                activeOpacity={0.7}
+                className={`flex-row items-center px-4 py-2.5 rounded-xl border gap-2 ${!filters.country ? 'bg-[#27272A] border-[#3F3F46]' : 'bg-[#18181B] border-[#27272A]'}`}
               >
-                <X size={14} color="#FFFFFF" strokeWidth={2.5} />
-                <Typography variant="body" weight="semibold" style={{ color: '#FFFFFF' }}>
-                  Limpiar filtros
-                </Typography>
-                <Typography variant="caption" weight="semibold" color="muted" numberOfLines={1}>
-                  {activeFilterLabels.join(' · ')}
+                <Globe size={14} color={!filters.country ? '#FFFFFF' : '#71717A'} strokeWidth={2.5} />
+                <Typography variant="body" weight="semibold" style={!filters.country ? { color: '#FFFFFF' } : { color: '#A1A1AA' }}>
+                  Todos
                 </Typography>
               </TouchableOpacity>
-            )}
 
-            {[
-              { label: 'Todos', value: undefined, Icon: null, color: '#FFFFFF' },
-              { label: 'Alto', value: 3, Icon: Flame, color: '#FF453A' },
-              { label: 'Medio', value: 2, Icon: TrendingUp, color: '#FBBF24' },
-              { label: 'Bajo', value: 1, Icon: MinusCircle, color: '#A1A1AA' },
-            ].map((item) => {
-              const isActive = filters.importance === item.value;
-              return (
-                <TouchableOpacity
-                  key={item.label}
-                  onPress={() => handleImportanceFilter(item.value)}
-                  activeOpacity={0.7}
-                  className={`flex-row items-center px-4 py-2.5 rounded-xl border gap-2 ${isActive ? 'bg-[#27272A] border-[#3F3F46]' : 'bg-[#18181B] border-[#27272A]'}`}
-                >
-                  {item.Icon && <item.Icon size={14} color={isActive ? item.color : '#71717A'} strokeWidth={2.5} />}
-                  <Typography variant="body" weight="semibold" style={isActive ? { color: item.color } : { color: '#A1A1AA' }}>
-                    {item.label}
-                  </Typography>
-                </TouchableOpacity>
-              );
-            })}
-
-            <View className="w-px h-6 bg-[#27272A] self-center mx-2" />
-
-            <TouchableOpacity
-              onPress={() => handleCountryFilter(undefined)}
-              activeOpacity={0.7}
-              className={`flex-row items-center px-4 py-2.5 rounded-xl border gap-2 ${!filters.country ? 'bg-[#27272A] border-[#3F3F46]' : 'bg-[#18181B] border-[#27272A]'}`}
-            >
-              <Globe size={14} color={!filters.country ? '#FFFFFF' : '#71717A'} strokeWidth={2.5} />
-              <Typography variant="body" weight="semibold" style={!filters.country ? { color: '#FFFFFF' } : { color: '#A1A1AA' }}>
-                Todos
-              </Typography>
-            </TouchableOpacity>
-
-            {availableCountries.map((country) => {
-              const isCountryActive = filters.country === country;
-              return (
-                <TouchableOpacity
-                  key={country}
-                  onPress={() => handleCountryFilter(country)}
-                  activeOpacity={0.7}
-                  className={`flex-row items-center px-4 py-2.5 rounded-xl border gap-2 ${isCountryActive ? 'bg-[#27272A] border-[#3F3F46]' : 'bg-[#18181B] border-[#27272A]'}`}
-                >
-                  <Typography variant="body" weight="semibold" style={isCountryActive ? { color: '#FFFFFF' } : { color: '#A1A1AA' }}>
-                    {country}
-                  </Typography>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
+              {availableCountries.map((country) => {
+                const isCountryActive = filters.country === country;
+                return (
+                  <TouchableOpacity
+                    key={country}
+                    onPress={() => handleCountryFilter(country)}
+                    activeOpacity={0.7}
+                    className={`flex-row items-center px-4 py-2.5 rounded-xl border gap-2 ${isCountryActive ? 'bg-[#27272A] border-[#3F3F46]' : 'bg-[#18181B] border-[#27272A]'}`}
+                  >
+                    <Typography variant="body" weight="semibold" style={isCountryActive ? { color: '#FFFFFF' } : { color: '#A1A1AA' }}>
+                      {country}
+                    </Typography>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
         </View>
       )}
 
