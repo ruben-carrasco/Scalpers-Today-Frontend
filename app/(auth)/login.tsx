@@ -11,6 +11,7 @@ import {
   Image,
 } from 'react-native';
 import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react-native';
+import { FontAwesome } from '@expo/vector-icons';
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import { Link, useRouter } from 'expo-router';
@@ -279,17 +280,15 @@ export default observer(function LoginScreen() {
               activeOpacity={0.85}
               className={`h-16 rounded-full border border-border-subtle bg-bg-card flex-row items-center justify-center gap-3 ${isGoogleDisabled ? 'opacity-50' : 'opacity-100'}`}
               accessibilityRole="button"
-              accessibilityLabel="Iniciar sesión con Google"
+              accessibilityLabel="Continuar con Google"
             >
               {isGoogleSubmitting ? (
                 <ActivityIndicator color="#fff" size="small" />
               ) : (
                 <>
-                  <View className="w-8 h-8 rounded-full bg-text-primary items-center justify-center">
-                    <Typography variant="body" weight="bold" className="text-bg-primary">G</Typography>
-                  </View>
+                  <FontAwesome name="google" size={20} color="#DB4437" />
                   <Typography variant="body" weight="bold" className="text-text-primary">
-                    Iniciar sesión con Google
+                    Continuar con Google
                   </Typography>
                 </>
               )}

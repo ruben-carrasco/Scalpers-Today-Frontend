@@ -4,13 +4,18 @@ import { View, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Typography } from '../../src/presentation/components/common/Typography';
 import { useHaptics } from '../../src/presentation/hooks/useHaptics';
+import { useThemeMode } from '../../src/presentation/theme/ThemeModeContext';
 
 function CustomTabBar({ state, descriptors, navigation }: any) {
   const insets = useSafeAreaInsets();
   const haptics = useHaptics();
+  const { isDarkMode } = useThemeMode();
 
   return (
-    <View style={{ paddingBottom: insets.bottom, backgroundColor: '#000000' }} className="border-t border-[#27272A] flex-row pt-2">
+    <View
+      style={{ paddingBottom: insets.bottom, backgroundColor: isDarkMode ? '#000000' : '#FFFFFF' }}
+      className={`flex-row pt-2 ${isDarkMode ? 'border-t border-[#27272A]' : 'border-t border-[#E4E4E7]'}`}
+    >
       {state.routes.map((route: any, index: number) => {
         const { options } = descriptors[route.key];
         const label = options.tabBarLabel !== undefined ? options.tabBarLabel : options.title !== undefined ? options.title : route.name;
@@ -30,7 +35,13 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
         };
 
         const Icon = options.tabBarIcon;
-        const color = isFocused ? '#FFFFFF' : '#71717A';
+        const color = isFocused
+          ? isDarkMode
+            ? '#FFFFFF'
+            : '#111827'
+          : isDarkMode
+            ? '#71717A'
+            : '#71717A';
 
         return (
           <TouchableOpacity
@@ -51,12 +62,14 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
 }
 
 export default function TabsLayout() {
+  const { isDarkMode } = useThemeMode();
+
   return (
     <Tabs
       tabBar={props => <CustomTabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        sceneStyle: { backgroundColor: '#000000' }
+        sceneStyle: { backgroundColor: isDarkMode ? '#000000' : '#F4F4F5' }
       }}
     >
       <Tabs.Screen
