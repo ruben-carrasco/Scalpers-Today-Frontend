@@ -8,6 +8,7 @@ import {
   ScrollView,
   FlatList,
   Platform,
+  Modal,
 } from 'react-native';
 import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -94,7 +95,7 @@ export default observer(function EventsScreen() {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [isControlsOpen, setIsControlsOpen] = useState(false);
-  const [isFiltersPanelOpen, setIsFiltersPanelOpen] = useState(false);
+  const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false);
 
   const eventsViewModel = useEventsViewModel();
   const haptics = useHaptics();
@@ -402,29 +403,78 @@ export default observer(function EventsScreen() {
         <View className="px-6">
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => setIsFiltersPanelOpen(value => !value)}
-            className="self-start px-4 py-2 rounded-xl border border-[#27272A] bg-[#18181B] flex-row items-center gap-2"
+            onPress={() => setIsFiltersModalOpen(true)}
+            className="self-start px-3 py-1.5 rounded-lg border border-[#27272A] bg-[#18181B] flex-row items-center gap-2"
           >
-            <Typography variant="body" weight="semibold" style={{ color: '#FFFFFF' }}>
+            <Typography variant="caption" weight="semibold" style={{ color: '#FFFFFF' }}>
               Filtros
             </Typography>
             {hasActiveFilters && (
-              <View className="px-2 py-0.5 rounded-full bg-[#2563EB33] border border-[#1D4ED8]">
+              <View className="px-1.5 py-0.5 rounded-full bg-[#2563EB33] border border-[#1D4ED8]">
                 <Typography variant="caption" weight="bold" style={{ color: '#60A5FA' }}>
                   {activeFilterLabels.length}
                 </Typography>
               </View>
             )}
-            {isFiltersPanelOpen ? (
-              <ChevronUp size={14} color="#A1A1AA" strokeWidth={2.5} />
-            ) : (
-              <ChevronDown size={14} color="#A1A1AA" strokeWidth={2.5} />
-            )}
           </TouchableOpacity>
         </View>
+      </View>
 
-        {isFiltersPanelOpen && (
-          <View className="pt-2 gap-2">
+      {isIOS ? (
+        <FlatList
+          key={listContextKey}
+          ref={flatEventsListRef}
+          data={events}
+          extraData={listContextKey}
+          keyExtractor={(item) => item.id}
+          renderItem={renderEventItem}
+          contentContainerStyle={{ padding: 24, paddingBottom: 120 }}
+          keyboardShouldPersistTaps="handled"
+          refreshControl={eventsRefreshControl}
+          ListEmptyComponent={emptyEventsComponent}
+          showsVerticalScrollIndicator={false}
+          removeClippedSubviews={false}
+        />
+      ) : (
+        <FlashList
+          key={listContextKey}
+          ref={flashEventsListRef}
+          data={events}
+          extraData={listContextKey}
+          keyExtractor={(item) => item.id}
+          renderItem={renderEventItem}
+          contentContainerStyle={{ padding: 24, paddingBottom: 120 }}
+          keyboardShouldPersistTaps="handled"
+          refreshControl={eventsRefreshControl}
+          ListEmptyComponent={emptyEventsComponent}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
+
+      <EventDetailModal
+        event={selectedEvent}
+        visible={modalVisible}
+        onClose={() => {
+          setModalVisible(false);
+          setSelectedEventId(null);
+        }}
+      />
+
+      <Modal
+        visible={isFiltersModalOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIsFiltersModalOpen(false)}
+      >
+        <View className="flex-1 bg-black/60 justify-end">
+          <View className="bg-[#111113] rounded-t-3xl border-t border-[#27272A] pb-8 pt-4 gap-3">
+            <View className="px-6 flex-row items-center justify-between">
+              <Typography variant="h2" weight="bold" color="secondary">Filtros</Typography>
+              <TouchableOpacity onPress={() => setIsFiltersModalOpen(false)} className="p-2">
+                <X size={20} color="#A1A1AA" strokeWidth={2.5} />
+              </TouchableOpacity>
+            </View>
+
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -500,48 +550,8 @@ export default observer(function EventsScreen() {
               })}
             </ScrollView>
           </View>
-        )}
-      </View>
-
-      {isIOS ? (
-        <FlatList
-          key={listContextKey}
-          ref={flatEventsListRef}
-          data={events}
-          extraData={listContextKey}
-          keyExtractor={(item) => item.id}
-          renderItem={renderEventItem}
-          contentContainerStyle={{ padding: 24, paddingBottom: 120 }}
-          keyboardShouldPersistTaps="handled"
-          refreshControl={eventsRefreshControl}
-          ListEmptyComponent={emptyEventsComponent}
-          showsVerticalScrollIndicator={false}
-          removeClippedSubviews={false}
-        />
-      ) : (
-        <FlashList
-          key={listContextKey}
-          ref={flashEventsListRef}
-          data={events}
-          extraData={listContextKey}
-          keyExtractor={(item) => item.id}
-          renderItem={renderEventItem}
-          contentContainerStyle={{ padding: 24, paddingBottom: 120 }}
-          keyboardShouldPersistTaps="handled"
-          refreshControl={eventsRefreshControl}
-          ListEmptyComponent={emptyEventsComponent}
-          showsVerticalScrollIndicator={false}
-        />
-      )}
-
-      <EventDetailModal
-        event={selectedEvent}
-        visible={modalVisible}
-        onClose={() => {
-          setModalVisible(false);
-          setSelectedEventId(null);
-        }}
-      />
+        </View>
+      </Modal>
     </View>
   );
 });
