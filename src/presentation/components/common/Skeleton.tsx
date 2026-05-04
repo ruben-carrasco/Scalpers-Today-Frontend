@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { DimensionValue, ViewProps } from 'react-native';
+import { useColorScheme } from 'nativewind';
 import Animated, { 
   useAnimatedStyle, 
   useSharedValue, 
@@ -18,6 +19,8 @@ export interface SkeletonProps extends ViewProps {
 
 export function Skeleton({ className = '', style, width, height, borderRadius, ...props }: SkeletonProps) {
   const opacity = useSharedValue(0.3);
+  const { colorScheme } = useColorScheme();
+  const isDarkMode = colorScheme !== 'light';
 
   useEffect(() => {
     opacity.value = withRepeat(
@@ -37,7 +40,7 @@ export function Skeleton({ className = '', style, width, height, borderRadius, .
   return (
     <Animated.View
       style={[{ width, height, borderRadius }, style, animatedStyle]}
-      className={`bg-[#27272A] rounded-2xl ${className}`}
+      className={`${isDarkMode ? 'bg-[#27272A]' : 'bg-[#CBD5E1]'} rounded-2xl ${className}`}
       {...props}
     />
   );

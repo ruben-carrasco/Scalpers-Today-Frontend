@@ -9,6 +9,7 @@ import {
 import { EventModel } from '../../models/EventModel';
 import { getImportanceColor } from '../../theme';
 import { colors } from '../../theme/tokens';
+import { useThemeMode } from '../../theme/ThemeModeContext';
 import { EventHeader } from './sections/EventHeader';
 import { EventDataSection } from './sections/EventDataSection';
 import {
@@ -31,6 +32,7 @@ export function EventDetailModal({ event, visible, onClose }: EventDetailModalPr
   const lastEventRef = useRef<EventModel | null>(null);
   const hasNotifiedCloseRef = useRef(false);
   const snapPoints = useMemo(() => ['65%', '90%'], []);
+  const { isDarkMode } = useThemeMode();
 
   // Keep last event data so content stays visible during close animation
   if (event) {
@@ -92,8 +94,8 @@ export function EventDetailModal({ event, visible, onClose }: EventDetailModalPr
       onChange={handleSheetChanges}
       onDismiss={notifyClosed}
       backdropComponent={renderBackdrop}
-      backgroundStyle={{ backgroundColor: colors.bg.modal }}
-      handleIndicatorStyle={{ backgroundColor: colors.border.indicator }}
+      backgroundStyle={{ backgroundColor: isDarkMode ? colors.bg.modal : '#FFFFFF' }}
+      handleIndicatorStyle={{ backgroundColor: isDarkMode ? colors.border.indicator : '#CBD5E1' }}
     >
       <BottomSheetView className="flex-1">
         <EventHeader

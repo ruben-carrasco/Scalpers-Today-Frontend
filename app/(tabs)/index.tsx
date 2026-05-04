@@ -26,6 +26,7 @@ import { createEventModel, EventModel } from '../../src/presentation/models/Even
 import { HomeSkeleton } from '../../src/presentation/components/home/HomeSkeletons';
 import { FormattedAIText } from '../../src/presentation/components/common/FormattedAIText';
 import { Typography } from '../../src/presentation/components/common/Typography';
+import { useThemeMode } from '../../src/presentation/theme/ThemeModeContext';
 
 const translateSentiment = (sentiment: string): { text: string; type: 'bullish' | 'bearish' | 'neutral' } => {
   const lower = sentiment?.toLowerCase() || '';
@@ -51,6 +52,45 @@ export default observer(function HomeScreen() {
   const homeViewModel = useHomeViewModel();
   const authViewModel = useAuthViewModel();
   const haptics = useHaptics();
+  const { isDarkMode } = useThemeMode();
+
+  const palette = isDarkMode
+    ? {
+        screenBg: '#000000',
+        statusBar: 'light-content' as const,
+        textPrimary: '#FFFFFF',
+        updateCardBg: '#0F172A',
+        updateCardBorder: '#27272A',
+        emptyCardBg: '#18181B',
+        emptyCardBorder: '#27272A',
+        cardBg: '#18181B',
+        cardBorder: '#27272A',
+        mutedLine: '#27272A',
+        cityAccent: '#8DEBFF',
+        agendaCardBg: 'rgba(4,47,46,0.30)',
+        agendaCardBorder: 'rgba(15,118,110,0.40)',
+        agendaIconBg: '#0F766E33',
+        agendaTitle: '#CCFBF1',
+        agendaIcon: '#5EEAD4',
+      }
+    : {
+        screenBg: '#F4F4F5',
+        statusBar: 'dark-content' as const,
+        textPrimary: '#18181B',
+        updateCardBg: '#FFFFFF',
+        updateCardBorder: '#E4E4E7',
+        emptyCardBg: '#FFFFFF',
+        emptyCardBorder: '#E4E4E7',
+        cardBg: '#FFFFFF',
+        cardBorder: '#E4E4E7',
+        mutedLine: '#E4E4E7',
+        cityAccent: '#1D4ED8',
+        agendaCardBg: '#ECFDF5',
+        agendaCardBorder: '#A7F3D0',
+        agendaIconBg: '#D1FAE5',
+        agendaTitle: '#065F46',
+        agendaIcon: '#0F766E',
+      };
 
   const [currentTime, setCurrentTime] = useState(() =>
     new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
@@ -99,8 +139,8 @@ export default observer(function HomeScreen() {
   const isAgendaComplete = Boolean(activeSummary && !activeSummary.nextEvent && !hasHighlights);
 
   return (
-    <View className="flex-1 bg-bg-primary">
-      <StatusBar barStyle="light-content" />
+    <View className="flex-1" style={{ backgroundColor: palette.screenBg }}>
+      <StatusBar barStyle={palette.statusBar} />
 
       <ScrollView
         className="flex-1"
@@ -127,27 +167,33 @@ export default observer(function HomeScreen() {
                 sentiment={sentiment}
                 volatility={volatility}
               />
-              <View className="mt-3 flex-row items-center justify-between rounded-2xl border border-[#27272A] bg-[#0F172A] px-4 py-3">
+              <View
+                className="mt-3 flex-row items-center justify-between rounded-2xl border px-4 py-3"
+                style={{ borderColor: palette.updateCardBorder, backgroundColor: palette.updateCardBg }}
+              >
                 <View className="flex-row items-center gap-2">
                   <RotateCw size={14} color="#60A5FA" strokeWidth={2.5} />
                   <Typography variant="caption" color="muted" weight="semibold">
                     Actualizado a las {activeSummary.welcome.time}
                   </Typography>
                 </View>
-                <Typography variant="caption" weight="bold" style={{ color: '#8DEBFF' }}>
+                <Typography variant="caption" weight="bold" style={{ color: palette.cityAccent }}>
                   Madrid
                 </Typography>
               </View>
             </View>
 
             {isAgendaComplete && (
-              <View className="mb-8 rounded-3xl border border-[#0F766E]/40 bg-[#042F2E]/30 p-6">
+              <View
+                className="mb-8 rounded-3xl border p-6"
+                style={{ borderColor: palette.agendaCardBorder, backgroundColor: palette.agendaCardBg }}
+              >
                 <View className="flex-row items-center gap-3 mb-3">
-                  <View className="w-11 h-11 rounded-2xl items-center justify-center" style={{ backgroundColor: '#0F766E33' }}>
-                    <CheckCircle2 size={24} color="#5EEAD4" strokeWidth={2.5} />
+                  <View className="w-11 h-11 rounded-2xl items-center justify-center" style={{ backgroundColor: palette.agendaIconBg }}>
+                    <CheckCircle2 size={24} color={palette.agendaIcon} strokeWidth={2.5} />
                   </View>
                   <View className="flex-1">
-                    <Typography variant="h2" weight="bold" style={{ color: '#CCFBF1' }}>
+                    <Typography variant="h2" weight="bold" style={{ color: palette.agendaTitle }}>
                       Agenda completada
                     </Typography>
                     <Typography variant="caption" color="muted" weight="semibold">
@@ -162,9 +208,9 @@ export default observer(function HomeScreen() {
             )}
 
             <View className="mb-8">
-              <Typography variant="h2" weight="bold" className="mb-4 text-text-primary">
-                Próximo Evento
-              </Typography>
+                <Typography variant="h2" weight="bold" className="mb-4" style={{ color: palette.textPrimary }}>
+                  Próximo Evento
+                </Typography>
               {activeSummary.nextEvent ? (
                 <NextEventCard
                   event={activeSummary.nextEvent}
@@ -174,7 +220,10 @@ export default observer(function HomeScreen() {
                   }}
                 />
               ) : (
-                <View className="bg-[#18181B] rounded-3xl p-6 border border-[#27272A] items-center justify-center py-10">
+                <View
+                  className="rounded-3xl p-6 border items-center justify-center py-10"
+                  style={{ backgroundColor: palette.emptyCardBg, borderColor: palette.emptyCardBorder }}
+                >
                   <Calendar size={32} color="#52525B" strokeWidth={2} />
                   <Typography variant="body" weight="semibold" color="secondary" className="mt-4">
                     No hay más eventos hoy
@@ -188,16 +237,16 @@ export default observer(function HomeScreen() {
 
             {briefing && (
               <View className="mb-8">
-                <Typography variant="h2" weight="bold" className="mb-4">
+                <Typography variant="h2" weight="bold" className="mb-4" style={{ color: palette.textPrimary }}>
                   Briefing del Día
                 </Typography>
 
-                <View className="bg-[#18181B] rounded-3xl p-6 border border-[#27272A] mb-4">
+                <View className="rounded-3xl p-6 border mb-4" style={{ backgroundColor: palette.cardBg, borderColor: palette.cardBorder }}>
                   <FormattedAIText text={briefing.generalOutlook} />
                 </View>
 
                 {briefing.cautionaryHours && briefing.cautionaryHours.length > 0 && (
-                  <View className="bg-[#18181B] border border-[#FBBF24]/30 rounded-3xl p-6 mb-4">
+                  <View className="border rounded-3xl p-6 mb-4" style={{ backgroundColor: palette.cardBg, borderColor: '#FBBF24' + (isDarkMode ? '4D' : '80') }}>
                     <View className="flex-row items-center gap-2 mb-4">
                       <AlarmClock size={20} color="#FBBF24" strokeWidth={2.5} />
                       <Typography variant="h3" weight="bold" className="text-[#FBBF24]">
@@ -205,9 +254,13 @@ export default observer(function HomeScreen() {
                       </Typography>
                     </View>
                     {briefing.cautionaryHours.map((hour, idx) => (
-                      <View key={idx} className={`flex-row items-center gap-3 py-3 ${idx > 0 ? 'border-t border-[#27272A]' : ''}`}>
+                      <View
+                        key={idx}
+                        className="flex-row items-center gap-3 py-3"
+                        style={idx > 0 ? { borderTopWidth: 1, borderTopColor: palette.mutedLine } : undefined}
+                      >
                         <Clock size={16} color="#A1A1AA" strokeWidth={2} />
-                        <Typography variant="body" weight="medium" className="flex-1">
+                        <Typography variant="body" weight="medium" className="flex-1" style={{ color: palette.textPrimary }}>
                           {hour}
                         </Typography>
                       </View>
@@ -216,7 +269,7 @@ export default observer(function HomeScreen() {
                 )}
 
                 {briefing.impactedAssets && briefing.impactedAssets.length > 0 && (
-                  <View className="bg-[#18181B] border border-[#27272A] rounded-3xl p-6">
+                  <View className="border rounded-3xl p-6" style={{ backgroundColor: palette.cardBg, borderColor: palette.cardBorder }}>
                     <View className="flex-row items-center gap-2 mb-4">
                       <TrendingUp size={20} color="#3B82F6" strokeWidth={2.5} />
                       <Typography variant="h3" weight="bold" className="text-[#3B82F6]">
@@ -225,8 +278,8 @@ export default observer(function HomeScreen() {
                     </View>
                     <View className="flex-row flex-wrap gap-2">
                       {briefing.impactedAssets.slice(0, 6).map((asset, index) => (
-                        <View key={index} className="bg-[#27272A] px-4 py-2 rounded-xl">
-                          <Typography variant="body" weight="semibold">
+                        <View key={index} className="px-4 py-2 rounded-xl" style={{ backgroundColor: isDarkMode ? '#27272A' : '#EEF2FF' }}>
+                          <Typography variant="body" weight="semibold" style={{ color: palette.textPrimary }}>
                             {asset}
                           </Typography>
                         </View>
@@ -239,10 +292,10 @@ export default observer(function HomeScreen() {
 
             {hasHighlights && (
               <View className="mb-8">
-                <Typography variant="h2" weight="bold" className="mb-4">
+                <Typography variant="h2" weight="bold" className="mb-4" style={{ color: palette.textPrimary }}>
                   Destacados
                 </Typography>
-                <View className="bg-[#18181B] border border-[#27272A] rounded-3xl p-6">
+                <View className="border rounded-3xl p-6" style={{ backgroundColor: palette.cardBg, borderColor: palette.cardBorder }}>
                   {activeSummary.highlights.slice(0, 5).map((highlightEvent, index) => (
                     <TouchableOpacity
                       key={index}
@@ -253,7 +306,8 @@ export default observer(function HomeScreen() {
                         setEventModalVisible(true);
                       }}
                       activeOpacity={0.7}
-                      className={`flex-row items-center gap-4 py-4 ${index < Math.min(activeSummary.highlights!.length - 1, 4) ? 'border-b border-[#27272A]' : ''}`}
+                      className="flex-row items-center gap-4 py-4"
+                      style={index < Math.min(activeSummary.highlights!.length - 1, 4) ? { borderBottomWidth: 1, borderBottomColor: palette.mutedLine } : undefined}
                     >
                       <View className="w-8 h-8 rounded-full bg-[#3B82F6]/20 items-center justify-center">
                         <Typography variant="body" weight="bold" className="text-[#60A5FA]">
@@ -270,7 +324,7 @@ export default observer(function HomeScreen() {
                             {highlightEvent.country}
                           </Typography>
                         </View>
-                        <Typography variant="body" weight="semibold" className="text-[#F4F4F5]" numberOfLines={2}>
+                        <Typography variant="body" weight="semibold" style={{ color: palette.textPrimary }} numberOfLines={2}>
                           {highlightEvent.title}
                         </Typography>
                       </View>

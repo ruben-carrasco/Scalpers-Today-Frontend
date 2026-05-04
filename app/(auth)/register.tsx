@@ -15,6 +15,7 @@ import { observer } from 'mobx-react-lite';
 import { useAuthViewModel } from '../../src/presentation/hooks';
 import { passwordValidator, emailValidator } from '../../src/core/validation';
 import { Typography } from '../../src/presentation/components/common/Typography';
+import { useThemeMode } from '../../src/presentation/theme/ThemeModeContext';
 
 interface FormErrors {
   name?: string;
@@ -41,6 +42,7 @@ const getPasswordStrength = (pwd: string): { level: number; label: string; color
 export default observer(function RegisterScreen() {
   const router = useRouter();
   const authViewModel = useAuthViewModel();
+  const { isDarkMode } = useThemeMode();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -125,10 +127,29 @@ export default observer(function RegisterScreen() {
   };
 
   const isLoading = authViewModel.isLoading || isSubmitting;
+  const palette = isDarkMode
+    ? {
+        bg: '#000000',
+        statusBar: 'light-content' as const,
+        card: '#18181B',
+        border: '#27272A',
+        inputText: '#FFFFFF',
+        muted: '#94A3B8',
+        icon: '#A1A1AA',
+      }
+    : {
+        bg: '#F4F4F5',
+        statusBar: 'dark-content' as const,
+        card: '#FFFFFF',
+        border: '#E4E4E7',
+        inputText: '#0F172A',
+        muted: '#94A3B8',
+        icon: '#64748B',
+      };
 
   return (
-    <View className="flex-1 bg-bg-primary">
-      <StatusBar barStyle="light-content" />
+    <View className="flex-1" style={{ backgroundColor: palette.bg }}>
+      <StatusBar barStyle={palette.statusBar} />
 
       <KeyboardAvoidingView
         className="flex-1"
@@ -146,12 +167,14 @@ export default observer(function RegisterScreen() {
             disabled={isLoading}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           >
-            <ArrowLeft size={24} color="#FFFFFF" strokeWidth={2.5} />
+            <ArrowLeft size={24} color={palette.inputText} strokeWidth={2.5} />
           </TouchableOpacity>
 
           {/* Header Section */}
           <View className="mb-10">
-            <Typography variant="metric" weight="bold" className="mb-2">Crear Cuenta</Typography>
+            <Typography variant="metric" weight="bold" className="mb-2" style={{ color: palette.inputText }}>
+              Crear Cuenta
+            </Typography>
             <Typography variant="h3" color="secondary">Completa tus datos para comenzar</Typography>
           </View>
 
@@ -159,12 +182,19 @@ export default observer(function RegisterScreen() {
           <View className="mb-8">
             {/* Name Input */}
             <View className="mb-5">
-              <View className={`flex-row items-center bg-bg-card border-2 rounded-2xl px-5 h-16 gap-3 ${errors.name ? 'border-semantic-danger bg-semantic-danger/10' : 'border-border-DEFAULT focus:border-brand-primary'}`}>
-                <User size={22} color={errors.name ? '#FF453A' : '#A1A1AA'} strokeWidth={2} />
+              <View
+                className="flex-row items-center border-2 rounded-2xl px-5 h-16 gap-3"
+                style={{
+                  backgroundColor: errors.name ? 'rgba(255,69,58,0.10)' : palette.card,
+                  borderColor: errors.name ? '#FF453A' : palette.border,
+                }}
+              >
+                <User size={22} color={errors.name ? '#FF453A' : palette.icon} strokeWidth={2} />
                 <TextInput
-                  className="flex-1 text-[17px] text-text-primary font-medium"
+                  className="flex-1 text-[17px] font-medium"
+                  style={{ color: palette.inputText }}
                   placeholder="Tu nombre completo"
-                  placeholderTextColor="#71717A"
+                  placeholderTextColor={palette.muted}
                   value={name}
                   onChangeText={(text) => { setName(text); clearFieldError('name'); }}
                   autoCapitalize="words"
@@ -179,12 +209,19 @@ export default observer(function RegisterScreen() {
 
             {/* Email Input */}
             <View className="mb-5">
-              <View className={`flex-row items-center bg-bg-card border-2 rounded-2xl px-5 h-16 gap-3 ${errors.email ? 'border-semantic-danger bg-semantic-danger/10' : 'border-border-DEFAULT focus:border-brand-primary'}`}>
-                <Mail size={22} color={errors.email ? '#FF453A' : '#A1A1AA'} strokeWidth={2} />
+              <View
+                className="flex-row items-center border-2 rounded-2xl px-5 h-16 gap-3"
+                style={{
+                  backgroundColor: errors.email ? 'rgba(255,69,58,0.10)' : palette.card,
+                  borderColor: errors.email ? '#FF453A' : palette.border,
+                }}
+              >
+                <Mail size={22} color={errors.email ? '#FF453A' : palette.icon} strokeWidth={2} />
                 <TextInput
-                  className="flex-1 text-[17px] text-text-primary font-medium"
+                  className="flex-1 text-[17px] font-medium"
+                  style={{ color: palette.inputText }}
                   placeholder="Correo electrónico"
-                  placeholderTextColor="#71717A"
+                  placeholderTextColor={palette.muted}
                   value={email}
                   onChangeText={(text) => { setEmail(text); clearFieldError('email'); }}
                   keyboardType="email-address"
@@ -201,12 +238,19 @@ export default observer(function RegisterScreen() {
 
             {/* Password Input */}
             <View className="mb-5">
-              <View className={`flex-row items-center bg-bg-card border-2 rounded-2xl px-5 h-16 gap-3 ${errors.password ? 'border-semantic-danger bg-semantic-danger/10' : 'border-border-DEFAULT focus:border-brand-primary'}`}>
-                <Lock size={22} color={errors.password ? '#FF453A' : '#A1A1AA'} strokeWidth={2} />
+              <View
+                className="flex-row items-center border-2 rounded-2xl px-5 h-16 gap-3"
+                style={{
+                  backgroundColor: errors.password ? 'rgba(255,69,58,0.10)' : palette.card,
+                  borderColor: errors.password ? '#FF453A' : palette.border,
+                }}
+              >
+                <Lock size={22} color={errors.password ? '#FF453A' : palette.icon} strokeWidth={2} />
                 <TextInput
-                  className="flex-1 text-[17px] text-text-primary font-medium"
+                  className="flex-1 text-[17px] font-medium"
+                  style={{ color: palette.inputText }}
                   placeholder="Contraseña"
-                  placeholderTextColor="#71717A"
+                  placeholderTextColor={palette.muted}
                   value={password}
                   onChangeText={(text) => { setPassword(text); clearFieldError('password'); }}
                   secureTextEntry={!showPassword}
@@ -219,9 +263,9 @@ export default observer(function RegisterScreen() {
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
                   {showPassword ? (
-                    <EyeOff size={22} color="#A1A1AA" strokeWidth={2} />
+                    <EyeOff size={22} color={palette.icon} strokeWidth={2} />
                   ) : (
-                    <Eye size={22} color="#A1A1AA" strokeWidth={2} />
+                    <Eye size={22} color={palette.icon} strokeWidth={2} />
                   )}
                 </TouchableOpacity>
               </View>
@@ -251,9 +295,9 @@ export default observer(function RegisterScreen() {
                         {req.met ? (
                           <CheckCircle size={16} color="#34D399" strokeWidth={2.5} />
                         ) : (
-                          <Circle size={16} color="#52525B" strokeWidth={2.5} />
+                          <Circle size={16} color={isDarkMode ? '#52525B' : '#94A3B8'} strokeWidth={2.5} />
                         )}
-                        <Typography variant="caption" weight={req.met ? "semibold" : "medium"} style={{ color: req.met ? '#34D399' : '#A1A1AA' }}>
+                        <Typography variant="caption" weight={req.met ? "semibold" : "medium"} style={{ color: req.met ? '#34D399' : isDarkMode ? '#A1A1AA' : '#64748B' }}>
                           {req.label}
                         </Typography>
                       </View>
@@ -265,12 +309,19 @@ export default observer(function RegisterScreen() {
 
             {/* Confirm Password Input */}
             <View className="mb-8">
-              <View className={`flex-row items-center bg-bg-card border-2 rounded-2xl px-5 h-16 gap-3 ${errors.confirmPassword ? 'border-semantic-danger bg-semantic-danger/10' : 'border-border-DEFAULT focus:border-brand-primary'}`}>
-                <Lock size={22} color={errors.confirmPassword ? '#FF453A' : '#A1A1AA'} strokeWidth={2} />
+              <View
+                className="flex-row items-center border-2 rounded-2xl px-5 h-16 gap-3"
+                style={{
+                  backgroundColor: errors.confirmPassword ? 'rgba(255,69,58,0.10)' : palette.card,
+                  borderColor: errors.confirmPassword ? '#FF453A' : palette.border,
+                }}
+              >
+                <Lock size={22} color={errors.confirmPassword ? '#FF453A' : palette.icon} strokeWidth={2} />
                 <TextInput
-                  className="flex-1 text-[17px] text-text-primary font-medium"
+                  className="flex-1 text-[17px] font-medium"
+                  style={{ color: palette.inputText }}
                   placeholder="Confirmar contraseña"
-                  placeholderTextColor="#71717A"
+                  placeholderTextColor={palette.muted}
                   value={confirmPassword}
                   onChangeText={(text) => { setConfirmPassword(text); clearFieldError('confirmPassword'); }}
                   secureTextEntry={!showConfirmPassword}
@@ -283,9 +334,9 @@ export default observer(function RegisterScreen() {
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
                   {showConfirmPassword ? (
-                    <EyeOff size={22} color="#A1A1AA" strokeWidth={2} />
+                    <EyeOff size={22} color={palette.icon} strokeWidth={2} />
                   ) : (
-                    <Eye size={22} color="#A1A1AA" strokeWidth={2} />
+                    <Eye size={22} color={palette.icon} strokeWidth={2} />
                   )}
                 </TouchableOpacity>
               </View>
@@ -320,7 +371,9 @@ export default observer(function RegisterScreen() {
               {isLoading ? (
                 <ActivityIndicator color="#fff" size="small" />
               ) : (
-                <Typography variant="body" weight="bold" className="text-text-primary">Crear Cuenta</Typography>
+                <Typography variant="body" weight="bold" style={{ color: '#FFFFFF' }}>
+                  Crear Cuenta
+                </Typography>
               )}
             </TouchableOpacity>
           </View>

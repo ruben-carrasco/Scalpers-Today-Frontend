@@ -5,6 +5,7 @@ import { AlertModel } from '../../models/AlertModel';
 import { Typography } from '../common/Typography';
 import { colors } from '../../theme/tokens';
 import type { LucideIcon } from 'lucide-react-native';
+import { useThemeMode } from '../../theme/ThemeModeContext';
 
 const ALERT_TYPES: { type: string; label: string; Icon: LucideIcon }[] = [
   { type: 'high_impact_event', label: 'Alto Impacto', Icon: AlertCircle },
@@ -39,12 +40,18 @@ const getStatusLabel = (status: string) => {
 export const AlertCard = React.memo(function AlertCard({ alert, onToggle, onDelete }: AlertCardProps) {
   const statusColor = getStatusColor(alert.status);
   const pushColor = alert.pushEnabled ? colors.brand.primaryLight : colors.text.muted;
+  const { isDarkMode } = useThemeMode();
+  const cardBg = isDarkMode ? colors.bg.modal : '#FFFFFF';
+  const cardBorder = isDarkMode ? colors.bg.modalCard : '#E4E4E7';
+  const chipBg = isDarkMode ? colors.bg.modalCard : '#F4F4F5';
+  const textColor = isDarkMode ? colors.text.bright : '#18181B';
+  const chipText = isDarkMode ? colors.text.light : '#334155';
 
   return (
-    <View className="rounded-3xl p-5 border mb-3" style={{ backgroundColor: colors.bg.modal, borderColor: colors.bg.modalCard }} accessibilityLabel={`Alerta ${alert.name}, estado ${getStatusLabel(alert.status)}`}>
+    <View className="rounded-3xl p-5 border mb-3" style={{ backgroundColor: cardBg, borderColor: cardBorder }} accessibilityLabel={`Alerta ${alert.name}, estado ${getStatusLabel(alert.status)}`}>
       <View className="flex-row justify-between items-start mb-4">
         <View className="flex-1 mr-4">
-          <Typography variant="h3" weight="bold" className="mb-2" style={{ color: colors.text.bright }} numberOfLines={1}>
+          <Typography variant="h3" weight="bold" className="mb-2" style={{ color: textColor }} numberOfLines={1}>
             {alert.name}
           </Typography>
           <View className="flex-row items-center gap-2">
@@ -53,7 +60,7 @@ export const AlertCard = React.memo(function AlertCard({ alert, onToggle, onDele
                 {getStatusLabel(alert.status)}
               </Typography>
             </View>
-            <View className="px-2 py-1 rounded-md flex-row items-center gap-1.5" style={{ backgroundColor: colors.bg.modalCard }}>
+            <View className="px-2 py-1 rounded-md flex-row items-center gap-1.5" style={{ backgroundColor: chipBg }}>
               {alert.pushEnabled ? (
                 <Bell size={12} color={pushColor} strokeWidth={2.5} />
               ) : (
@@ -85,7 +92,7 @@ export const AlertCard = React.memo(function AlertCard({ alert, onToggle, onDele
               <Bell size={20} color={colors.black} strokeWidth={2.5} />
             </View>
           ) : (
-            <View className="w-12 h-12 rounded-full items-center justify-center" style={{ backgroundColor: colors.bg.modalCard }}>
+            <View className="w-12 h-12 rounded-full items-center justify-center" style={{ backgroundColor: chipBg }}>
               <BellOff size={20} color={colors.text.muted} strokeWidth={2.5} />
             </View>
           )}
@@ -103,9 +110,9 @@ export const AlertCard = React.memo(function AlertCard({ alert, onToggle, onDele
           const alertType = ALERT_TYPES.find((t) => t.type === condition.alertType);
           const CondIcon = alertType?.Icon || Tag;
           return (
-            <View key={index} className="flex-row items-center px-3 py-1.5 rounded-lg gap-2" style={{ backgroundColor: colors.bg.modalCard }}>
-              <CondIcon size={14} color={colors.text.light} strokeWidth={2} />
-              <Typography variant="caption" weight="semibold" style={{ color: colors.text.light }}>
+            <View key={index} className="flex-row items-center px-3 py-1.5 rounded-lg gap-2" style={{ backgroundColor: chipBg }}>
+              <CondIcon size={14} color={chipText} strokeWidth={2} />
+              <Typography variant="caption" weight="semibold" style={{ color: chipText }}>
                 {alertType?.label || condition.alertType}
                 {condition.value && `: ${condition.value}`}
               </Typography>

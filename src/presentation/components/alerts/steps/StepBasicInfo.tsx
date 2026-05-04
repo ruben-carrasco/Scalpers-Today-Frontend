@@ -9,31 +9,41 @@ interface StepBasicInfoProps {
   description: string;
   onNameChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
+  isDarkMode: boolean;
 }
 
-export function StepBasicInfo({ name, description, onNameChange, onDescriptionChange }: StepBasicInfoProps) {
+export function StepBasicInfo({ name, description, onNameChange, onDescriptionChange, isDarkMode }: StepBasicInfoProps) {
+  const fieldBg = isDarkMode ? colors.bg.modalCard : '#FFFFFF';
+  const fieldBorder = isDarkMode ? colors.border.medium : '#CBD5E1';
+  const textColor = isDarkMode ? colors.text.primary : '#0F172A';
+  const iconColor = isDarkMode ? colors.text.icon : '#64748B';
+  const placeholderColor = isDarkMode ? colors.text.muted : '#94A3B8';
+  const labelColor = isDarkMode ? colors.text.secondary : '#334155';
+
   return (
     <View className="pb-10">
-      <Typography variant="label" color="secondary" className="mb-2 mt-4">Nombre de la alerta</Typography>
-      <View className="flex-row items-center rounded-2xl px-4 h-14 border" style={{ backgroundColor: colors.bg.modalCard, borderColor: colors.border.medium }}>
-        <Type size={18} color={colors.text.icon} strokeWidth={2} />
+      <Typography variant="label" className="mb-2 mt-4" style={{ color: labelColor }}>Nombre de la alerta</Typography>
+      <View className="flex-row items-center rounded-2xl px-4 h-14 border" style={{ backgroundColor: fieldBg, borderColor: fieldBorder }}>
+        <Type size={18} color={iconColor} strokeWidth={2} />
         <TextInput
-          className="flex-1 ml-3 text-[17px] text-text-primary"
+          className="flex-1 ml-3 text-[17px]"
+          style={{ color: textColor }}
           placeholder="Ej: Alertas NFP USA"
-          placeholderTextColor={colors.text.muted}
+          placeholderTextColor={placeholderColor}
           value={name}
           onChangeText={onNameChange}
           accessibilityLabel="Nombre de la alerta"
         />
       </View>
 
-      <Typography variant="label" color="secondary" className="mb-2 mt-6">Descripción (Opcional)</Typography>
-      <View className="flex-row items-start rounded-2xl p-4 border min-h-[100px]" style={{ backgroundColor: colors.bg.modalCard, borderColor: colors.border.medium }}>
-        <PenLine size={18} color={colors.text.icon} strokeWidth={2} className="mt-1" />
+      <Typography variant="label" className="mb-2 mt-6" style={{ color: labelColor }}>Descripción (Opcional)</Typography>
+      <View className="flex-row items-start rounded-2xl p-4 border min-h-[100px]" style={{ backgroundColor: fieldBg, borderColor: fieldBorder }}>
+        <PenLine size={18} color={iconColor} strokeWidth={2} className="mt-1" />
         <TextInput
-          className="flex-1 ml-3 text-[17px] text-text-primary"
+          className="flex-1 ml-3 text-[17px]"
+          style={{ color: textColor }}
           placeholder="Notas adicionales..."
-          placeholderTextColor={colors.text.muted}
+          placeholderTextColor={placeholderColor}
           value={description}
           onChangeText={onDescriptionChange}
           multiline

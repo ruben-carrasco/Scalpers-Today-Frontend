@@ -22,9 +22,17 @@ interface StepConditionsProps {
   availableCountries: string[];
   onToggleType: (type: AlertType) => void;
   onSetConditionValue: (type: AlertType, value: string) => void;
+  isDarkMode: boolean;
 }
 
-export function StepConditions({ selectedTypes, conditionValues, availableCountries, onToggleType, onSetConditionValue }: StepConditionsProps) {
+export function StepConditions({ selectedTypes, conditionValues, availableCountries, onToggleType, onSetConditionValue, isDarkMode }: StepConditionsProps) {
+  const baseBg = isDarkMode ? colors.bg.modalCard : '#FFFFFF';
+  const baseSurface = isDarkMode ? colors.bg.modal : '#F4F4F5';
+  const baseBorder = isDarkMode ? colors.border.medium : '#CBD5E1';
+  const baseText = isDarkMode ? colors.text.icon : '#334155';
+  const indicator = isDarkMode ? colors.border.indicator : '#64748B';
+  const descriptionText = isDarkMode ? colors.text.muted : '#475569';
+
   return (
     <View className="pb-10">
       {ALERT_TYPES.map((alertType) => {
@@ -35,23 +43,23 @@ export function StepConditions({ selectedTypes, conditionValues, availableCountr
             onPress={() => onToggleType(alertType.type)}
             activeOpacity={0.7}
             className="flex-row items-center p-4 rounded-2xl mb-3 border"
-            style={{ backgroundColor: isSelected ? colors.brand.primary + '1A' : colors.bg.modalCard, borderColor: isSelected ? colors.brand.primary : colors.border.medium }}
+            style={{ backgroundColor: isSelected ? colors.brand.primary + '1A' : baseBg, borderColor: isSelected ? colors.brand.primary : baseBorder }}
           >
-            <View className="w-12 h-12 rounded-xl items-center justify-center mr-4" style={{ backgroundColor: isSelected ? colors.brand.primary : colors.bg.modal }}>
-              <alertType.Icon size={20} color={isSelected ? colors.white : colors.text.icon} strokeWidth={2} />
+            <View className="w-12 h-12 rounded-xl items-center justify-center mr-4" style={{ backgroundColor: isSelected ? colors.brand.primary : baseSurface }}>
+              <alertType.Icon size={20} color={isSelected ? colors.white : baseText} strokeWidth={2} />
             </View>
             <View className="flex-1">
-              <Typography variant="body" weight="bold" style={{ color: isSelected ? colors.text.primary : colors.text.icon }}>
+              <Typography variant="body" weight="bold" style={{ color: isSelected ? colors.text.primary : baseText }}>
                 {alertType.label}
               </Typography>
-              <Typography variant="caption" color="muted" className="mt-1">
+              <Typography variant="caption" className="mt-1" style={{ color: descriptionText }}>
                 {alertType.description}
               </Typography>
             </View>
             {isSelected ? (
               <CheckCircle size={24} color={colors.brand.primary} strokeWidth={2.5} />
             ) : (
-              <Circle size={24} color={colors.border.indicator} strokeWidth={2.5} />
+              <Circle size={24} color={indicator} strokeWidth={2.5} />
             )}
           </TouchableOpacity>
         );
@@ -63,6 +71,7 @@ export function StepConditions({ selectedTypes, conditionValues, availableCountr
           items={availableCountries}
           selectedValue={conditionValues['specific_country']}
           onSelect={(v) => onSetConditionValue('specific_country', v)}
+          isDarkMode={isDarkMode}
         />
       )}
 
@@ -72,16 +81,35 @@ export function StepConditions({ selectedTypes, conditionValues, availableCountr
           items={AVAILABLE_CURRENCIES}
           selectedValue={conditionValues['specific_currency']}
           onSelect={(v) => onSetConditionValue('specific_currency', v)}
+          isDarkMode={isDarkMode}
         />
       )}
     </View>
   );
 }
 
-function ValueSelector({ label, items, selectedValue, onSelect }: { label: string; items: string[]; selectedValue?: string; onSelect: (v: string) => void }) {
+function ValueSelector({
+  label,
+  items,
+  selectedValue,
+  onSelect,
+  isDarkMode,
+}: {
+  label: string;
+  items: string[];
+  selectedValue?: string;
+  onSelect: (v: string) => void;
+  isDarkMode: boolean;
+}) {
+  const boxBg = isDarkMode ? colors.bg.modalCard : '#EEF2FF';
+  const chipBg = isDarkMode ? colors.bg.modal : '#FFFFFF';
+  const border = isDarkMode ? colors.border.medium : '#CBD5E1';
+  const chipText = isDarkMode ? colors.text.icon : '#334155';
+  const labelText = isDarkMode ? colors.text.secondary : '#334155';
+
   return (
-    <View className="mt-4 p-4 rounded-2xl" style={{ backgroundColor: colors.bg.modalCard }}>
-      <Typography variant="label" color="secondary" className="mb-3">{label}</Typography>
+    <View className="mt-4 p-4 rounded-2xl" style={{ backgroundColor: boxBg }}>
+      <Typography variant="label" className="mb-3" style={{ color: labelText }}>{label}</Typography>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         {items.map((item) => {
           const isSelected = selectedValue === item;
@@ -90,9 +118,9 @@ function ValueSelector({ label, items, selectedValue, onSelect }: { label: strin
               key={item}
               onPress={() => onSelect(item)}
               className="px-4 py-2 rounded-xl mr-2 border"
-              style={{ backgroundColor: isSelected ? colors.brand.primary : colors.bg.modal, borderColor: isSelected ? colors.brand.primary : colors.border.medium, borderWidth: isSelected ? 0 : 1 }}
+              style={{ backgroundColor: isSelected ? colors.brand.primary : chipBg, borderColor: isSelected ? colors.brand.primary : border, borderWidth: isSelected ? 0 : 1 }}
             >
-              <Typography variant="body" weight="semibold" style={{ color: isSelected ? colors.text.primary : colors.text.icon }}>
+              <Typography variant="body" weight="semibold" style={{ color: isSelected ? colors.text.primary : chipText }}>
                 {item}
               </Typography>
             </TouchableOpacity>

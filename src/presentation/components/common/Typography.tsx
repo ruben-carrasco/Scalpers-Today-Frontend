@@ -1,5 +1,6 @@
 import React from 'react';
 import { Text, TextProps } from 'react-native';
+import { useColorScheme } from 'nativewind';
 
 interface TypographyProps extends TextProps {
   variant?: 'h1' | 'h2' | 'h3' | 'body' | 'caption' | 'label' | 'metric';
@@ -18,6 +19,8 @@ export function Typography({
   children,
   ...props
 }: TypographyProps) {
+  const { colorScheme } = useColorScheme();
+  const isDarkMode = colorScheme !== 'light';
   const baseClasses = 'font-sans tracking-tight';
   
   const variants = {
@@ -31,9 +34,9 @@ export function Typography({
   };
 
   const colors = {
-    primary: 'text-text-primary', // Pure white
-    secondary: 'text-[#A1A1AA]', // Light Gray
-    muted: 'text-[#52525B]', // Darker Gray
+    primary: isDarkMode ? 'text-text-primary' : 'text-[#18181B]',
+    secondary: isDarkMode ? 'text-[#A1A1AA]' : 'text-[#475569]',
+    muted: isDarkMode ? 'text-[#52525B]' : 'text-[#64748B]',
     brand: 'text-[#3B82F6]', // iOS Blue
     danger: 'text-[#FF453A]', // Bright Neon Red
     success: 'text-[#34D399]', // Bright Neon Green

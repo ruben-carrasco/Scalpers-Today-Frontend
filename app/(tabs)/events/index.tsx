@@ -30,6 +30,7 @@ import { EventCard, EventDetailModal } from '../../../src/presentation/component
 import { EventCardSkeleton } from '../../../src/presentation/components/events/EventCardSkeleton';
 import { EventModel } from '../../../src/presentation/models/EventModel';
 import { Typography } from '../../../src/presentation/components/common/Typography';
+import { useThemeMode } from '../../../src/presentation/theme/ThemeModeContext';
 
 type DayTone = {
   label: string;
@@ -99,6 +100,36 @@ export default observer(function EventsScreen() {
 
   const eventsViewModel = useEventsViewModel();
   const haptics = useHaptics();
+  const { isDarkMode } = useThemeMode();
+  const palette = isDarkMode
+    ? {
+        screenBg: '#000000',
+        statusBar: 'light-content' as const,
+        surfaceBg: '#18181B',
+        surfaceBorder: '#27272A',
+        surfaceStrong: '#27272A',
+        surfaceStrongBorder: '#3F3F46',
+        textPrimary: '#FFFFFF',
+        textSecondary: '#A1A1AA',
+        textMuted: '#71717A',
+        textSoft: '#D4D4D8',
+        modalOverlay: 'rgba(0,0,0,0.6)',
+        modalSheetBg: '#111113',
+      }
+    : {
+        screenBg: '#F4F4F5',
+        statusBar: 'dark-content' as const,
+        surfaceBg: '#FFFFFF',
+        surfaceBorder: '#E4E4E7',
+        surfaceStrong: '#EEF2FF',
+        surfaceStrongBorder: '#CBD5E1',
+        textPrimary: '#18181B',
+        textSecondary: '#52525B',
+        textMuted: '#71717A',
+        textSoft: '#334155',
+        modalOverlay: 'rgba(15,23,42,0.2)',
+        modalSheetBg: '#FFFFFF',
+      };
   const openedEventIdRef = useRef<string | null>(null);
   const flatEventsListRef = useRef<FlatList<EventModel>>(null);
   const flashEventsListRef = useRef<FlashListRef<EventModel>>(null);
@@ -249,9 +280,9 @@ export default observer(function EventsScreen() {
           activeOpacity={0.8}
           onPress={handleClearVisibleFilters}
           className="px-5 py-3 rounded-2xl border"
-          style={{ backgroundColor: '#27272A', borderColor: '#3F3F46' }}
+          style={{ backgroundColor: palette.surfaceStrong, borderColor: palette.surfaceStrongBorder }}
         >
-          <Typography variant="body" weight="bold" style={{ color: '#FFFFFF' }}>
+          <Typography variant="body" weight="bold" style={{ color: palette.textPrimary }}>
             Limpiar filtros
           </Typography>
         </TouchableOpacity>
@@ -274,13 +305,13 @@ export default observer(function EventsScreen() {
   );
 
   return (
-    <View className="flex-1 bg-bg-primary">
-      <StatusBar barStyle="light-content" />
+    <View className="flex-1" style={{ backgroundColor: palette.screenBg }}>
+      <StatusBar barStyle={palette.statusBar} />
 
-      <View style={{ paddingTop: insets.top + 20 }} className="px-6 pb-4 bg-bg-primary gap-4">
+      <View style={{ paddingTop: insets.top + 20, backgroundColor: palette.screenBg }} className="px-6 pb-4 gap-4">
         <View className="flex-row justify-between items-end">
           <View>
-            <Typography variant="h1" weight="bold" className="text-text-primary">Calendario</Typography>
+            <Typography variant="h1" weight="bold" style={{ color: palette.textPrimary }}>Calendario</Typography>
             <Typography variant="body" color="muted" weight="medium" className="mt-1">
               {total} eventos · {selectedDayLabel}
             </Typography>
@@ -290,12 +321,13 @@ export default observer(function EventsScreen() {
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={() => setIsControlsOpen(value => !value)}
-          className="bg-[#18181B] border border-[#27272A] rounded-2xl px-4 py-3 gap-2"
+          className="border rounded-2xl px-4 py-3 gap-2"
+          style={{ backgroundColor: palette.surfaceBg, borderColor: palette.surfaceBorder }}
         >
           <View className="flex-row items-center justify-between">
             <View className="gap-1">
               <Typography variant="caption" color="muted" weight="semibold">Día</Typography>
-              <Typography variant="body" weight="semibold" color="primary">
+              <Typography variant="body" weight="semibold" style={{ color: palette.textPrimary }}>
                 {selectedDay?.fullLabel ?? selectedDayLabel}
               </Typography>
             </View>
@@ -312,9 +344,9 @@ export default observer(function EventsScreen() {
                 </Typography>
               </View>
               {isControlsOpen ? (
-                <ChevronUp size={18} color="#A1A1AA" strokeWidth={2.5} />
+                <ChevronUp size={18} color={palette.textSecondary} strokeWidth={2.5} />
               ) : (
-                <ChevronDown size={18} color="#A1A1AA" strokeWidth={2.5} />
+                <ChevronDown size={18} color={palette.textSecondary} strokeWidth={2.5} />
               )}
             </View>
           </View>
@@ -323,26 +355,27 @@ export default observer(function EventsScreen() {
           </Typography>
         </TouchableOpacity>
 
-        <View className="flex-row items-center bg-[#18181B] rounded-2xl px-4 h-12 gap-3 border border-[#27272A]">
-          <Search size={20} color="#71717A" strokeWidth={2.5} />
+        <View className="flex-row items-center rounded-2xl px-4 h-12 gap-3 border" style={{ backgroundColor: palette.surfaceBg, borderColor: palette.surfaceBorder }}>
+          <Search size={20} color={palette.textMuted} strokeWidth={2.5} />
           <TextInput
-            className="flex-1 text-[17px] text-text-primary font-medium"
+            className="flex-1 text-[17px] font-medium"
+            style={{ color: palette.textPrimary }}
             placeholder="Buscar evento..."
-            placeholderTextColor="#71717A"
+            placeholderTextColor={palette.textMuted}
             value={searchText}
             onChangeText={handleSearch}
           />
           {searchText.length > 0 && (
             <TouchableOpacity onPress={() => handleSearch('')} className="p-1">
-              <X size={20} color="#A1A1AA" strokeWidth={2.5} />
+              <X size={20} color={palette.textSecondary} strokeWidth={2.5} />
             </TouchableOpacity>
           )}
         </View>
       </View>
 
       {isControlsOpen && (
-        <View className="mx-6 mb-2 bg-[#18181B] border border-[#27272A] rounded-2xl overflow-hidden">
-          <View className="px-4 py-3 border-b border-[#27272A]">
+        <View className="mx-6 mb-2 border rounded-2xl overflow-hidden" style={{ backgroundColor: palette.surfaceBg, borderColor: palette.surfaceBorder }}>
+          <View className="px-4 py-3 border-b" style={{ borderBottomColor: palette.surfaceBorder }}>
             <Typography variant="caption" color="muted" weight="semibold">Seleccionar día</Typography>
           </View>
 
@@ -354,13 +387,17 @@ export default observer(function EventsScreen() {
             {weekDays.map(day => {
               const isActive = day.date === selectedDate;
               const tone = getDayTone(day.count);
-              const titleColor = isActive ? '#FFFFFF' : day.count === 0 ? '#71717A' : '#D4D4D8';
+              const titleColor = isActive ? palette.textPrimary : day.count === 0 ? palette.textMuted : palette.textSoft;
               return (
                 <TouchableOpacity
                   key={day.date}
                   activeOpacity={0.8}
                   onPress={() => handleSelectDay(day.date)}
-                  className={`px-4 py-3 flex-row items-center justify-between border-b border-[#27272A] ${isActive ? 'bg-[#27272A]' : ''}`}
+                  className="px-4 py-3 flex-row items-center justify-between border-b"
+                  style={{
+                    borderBottomColor: palette.surfaceBorder,
+                    backgroundColor: isActive ? palette.surfaceStrong : 'transparent',
+                  }}
                 >
                   <View>
                     <Typography variant="body" weight="semibold" style={{ color: titleColor }}>
@@ -388,7 +425,7 @@ export default observer(function EventsScreen() {
                         {tone.label}
                       </Typography>
                     </View>
-                    <Typography variant="caption" weight="semibold" style={{ color: isActive ? '#FFFFFF' : '#A1A1AA' }}>
+                    <Typography variant="caption" weight="semibold" style={{ color: isActive ? palette.textPrimary : palette.textSecondary }}>
                       {day.count} eventos
                     </Typography>
                   </View>
@@ -399,14 +436,15 @@ export default observer(function EventsScreen() {
         </View>
       )}
 
-      <View className="py-2 bg-bg-primary border-b border-[#27272A]">
+      <View className="py-2 border-b" style={{ backgroundColor: palette.screenBg, borderBottomColor: palette.surfaceBorder }}>
         <View className="px-6 flex-row items-center gap-2">
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => setIsFiltersModalOpen(true)}
-            className="px-3 py-1.5 rounded-lg border border-[#27272A] bg-[#18181B] flex-row items-center gap-2"
+            className="px-3 py-1.5 rounded-lg border flex-row items-center gap-2"
+            style={{ borderColor: palette.surfaceBorder, backgroundColor: palette.surfaceBg }}
           >
-            <Typography variant="caption" weight="semibold" style={{ color: '#FFFFFF' }}>
+            <Typography variant="caption" weight="semibold" style={{ color: palette.textPrimary }}>
               Filtros
             </Typography>
             {hasActiveFilters && (
@@ -422,10 +460,11 @@ export default observer(function EventsScreen() {
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={handleClearVisibleFilters}
-              className="px-3 py-1.5 rounded-lg border border-[#3F3F46] bg-[#27272A] flex-row items-center gap-1.5"
+              className="px-3 py-1.5 rounded-lg border flex-row items-center gap-1.5"
+              style={{ borderColor: palette.surfaceStrongBorder, backgroundColor: palette.surfaceStrong }}
             >
-              <X size={12} color="#FFFFFF" strokeWidth={2.5} />
-              <Typography variant="caption" weight="semibold" style={{ color: '#FFFFFF' }}>
+              <X size={12} color={palette.textPrimary} strokeWidth={2.5} />
+              <Typography variant="caption" weight="semibold" style={{ color: palette.textPrimary }}>
                 Limpiar
               </Typography>
             </TouchableOpacity>
@@ -479,12 +518,12 @@ export default observer(function EventsScreen() {
         animationType="fade"
         onRequestClose={() => setIsFiltersModalOpen(false)}
       >
-        <View className="flex-1 bg-black/60 justify-end">
-          <View className="bg-[#111113] rounded-t-3xl border-t border-[#27272A] pb-8 pt-4 gap-3">
+        <View className="flex-1 justify-end" style={{ backgroundColor: palette.modalOverlay }}>
+          <View className="rounded-t-3xl border-t pb-8 pt-4 gap-3" style={{ backgroundColor: palette.modalSheetBg, borderTopColor: palette.surfaceBorder }}>
             <View className="px-6 flex-row items-center justify-between">
               <Typography variant="h2" weight="bold" color="secondary">Filtros</Typography>
               <TouchableOpacity onPress={() => setIsFiltersModalOpen(false)} className="p-2">
-                <X size={20} color="#A1A1AA" strokeWidth={2.5} />
+                <X size={20} color={palette.textSecondary} strokeWidth={2.5} />
               </TouchableOpacity>
             </View>
 
@@ -498,10 +537,10 @@ export default observer(function EventsScreen() {
                   activeOpacity={0.8}
                   onPress={handleClearVisibleFilters}
                   className="flex-row items-center px-4 py-2.5 rounded-xl border gap-2"
-                  style={{ backgroundColor: '#27272A', borderColor: '#3F3F46' }}
+                  style={{ backgroundColor: palette.surfaceStrong, borderColor: palette.surfaceStrongBorder }}
                 >
-                  <X size={14} color="#FFFFFF" strokeWidth={2.5} />
-                  <Typography variant="body" weight="semibold" style={{ color: '#FFFFFF' }}>
+                  <X size={14} color={palette.textPrimary} strokeWidth={2.5} />
+                  <Typography variant="body" weight="semibold" style={{ color: palette.textPrimary }}>
                     Limpiar
                   </Typography>
                 </TouchableOpacity>
@@ -519,10 +558,14 @@ export default observer(function EventsScreen() {
                     key={item.label}
                     onPress={() => handleImportanceFilter(item.value)}
                     activeOpacity={0.7}
-                    className={`flex-row items-center px-4 py-2.5 rounded-xl border gap-2 ${isActive ? 'bg-[#27272A] border-[#3F3F46]' : 'bg-[#18181B] border-[#27272A]'}`}
+                    className="flex-row items-center px-4 py-2.5 rounded-xl border gap-2"
+                    style={{
+                      backgroundColor: isActive ? palette.surfaceStrong : palette.surfaceBg,
+                      borderColor: isActive ? palette.surfaceStrongBorder : palette.surfaceBorder,
+                    }}
                   >
-                    {item.Icon && <item.Icon size={14} color={isActive ? item.color : '#71717A'} strokeWidth={2.5} />}
-                    <Typography variant="body" weight="semibold" style={isActive ? { color: item.color } : { color: '#A1A1AA' }}>
+                    {item.Icon && <item.Icon size={14} color={isActive ? item.color : palette.textMuted} strokeWidth={2.5} />}
+                    <Typography variant="body" weight="semibold" style={isActive ? { color: item.color } : { color: palette.textSecondary }}>
                       {item.label}
                     </Typography>
                   </TouchableOpacity>
@@ -538,10 +581,14 @@ export default observer(function EventsScreen() {
               <TouchableOpacity
                 onPress={() => handleCountryFilter(undefined)}
                 activeOpacity={0.7}
-                className={`flex-row items-center px-4 py-2.5 rounded-xl border gap-2 ${!filters.country ? 'bg-[#27272A] border-[#3F3F46]' : 'bg-[#18181B] border-[#27272A]'}`}
+                className="flex-row items-center px-4 py-2.5 rounded-xl border gap-2"
+                style={{
+                  backgroundColor: !filters.country ? palette.surfaceStrong : palette.surfaceBg,
+                  borderColor: !filters.country ? palette.surfaceStrongBorder : palette.surfaceBorder,
+                }}
               >
-                <Globe size={14} color={!filters.country ? '#FFFFFF' : '#71717A'} strokeWidth={2.5} />
-                <Typography variant="body" weight="semibold" style={!filters.country ? { color: '#FFFFFF' } : { color: '#A1A1AA' }}>
+                <Globe size={14} color={!filters.country ? palette.textPrimary : palette.textMuted} strokeWidth={2.5} />
+                <Typography variant="body" weight="semibold" style={!filters.country ? { color: palette.textPrimary } : { color: palette.textSecondary }}>
                   Todos
                 </Typography>
               </TouchableOpacity>
@@ -553,9 +600,13 @@ export default observer(function EventsScreen() {
                     key={country}
                     onPress={() => handleCountryFilter(country)}
                     activeOpacity={0.7}
-                    className={`flex-row items-center px-4 py-2.5 rounded-xl border gap-2 ${isCountryActive ? 'bg-[#27272A] border-[#3F3F46]' : 'bg-[#18181B] border-[#27272A]'}`}
+                    className="flex-row items-center px-4 py-2.5 rounded-xl border gap-2"
+                    style={{
+                      backgroundColor: isCountryActive ? palette.surfaceStrong : palette.surfaceBg,
+                      borderColor: isCountryActive ? palette.surfaceStrongBorder : palette.surfaceBorder,
+                    }}
                   >
-                    <Typography variant="body" weight="semibold" style={isCountryActive ? { color: '#FFFFFF' } : { color: '#A1A1AA' }}>
+                    <Typography variant="body" weight="semibold" style={isCountryActive ? { color: palette.textPrimary } : { color: palette.textSecondary }}>
                       {country}
                     </Typography>
                   </TouchableOpacity>

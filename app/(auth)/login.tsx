@@ -19,6 +19,7 @@ import { observer } from 'mobx-react-lite';
 import { useAuthViewModel } from '../../src/presentation/hooks';
 import { emailValidator } from '../../src/core/validation';
 import { Typography } from '../../src/presentation/components/common/Typography';
+import { useThemeMode } from '../../src/presentation/theme/ThemeModeContext';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -43,6 +44,7 @@ const safeGoogleAuthConfig = {
 export default observer(function LoginScreen() {
   const router = useRouter();
   const authViewModel = useAuthViewModel();
+  const { isDarkMode } = useThemeMode();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -154,10 +156,27 @@ export default observer(function LoginScreen() {
 
   const isLoading = authViewModel.isLoading || isSubmitting || isGoogleSubmitting;
   const isGoogleDisabled = isLoading || !googleRequest || !hasGoogleClientId;
+  const palette = isDarkMode
+    ? {
+        bg: '#000000',
+        statusBar: 'light-content' as const,
+        card: '#18181B',
+        border: '#27272A',
+        inputText: '#FFFFFF',
+        muted: '#71717A',
+      }
+    : {
+        bg: '#F4F4F5',
+        statusBar: 'dark-content' as const,
+        card: '#FFFFFF',
+        border: '#E4E4E7',
+        inputText: '#0F172A',
+        muted: '#94A3B8',
+      };
 
   return (
-    <View className="flex-1 bg-bg-primary">
-      <StatusBar barStyle="light-content" />
+    <View className="flex-1" style={{ backgroundColor: palette.bg }}>
+      <StatusBar barStyle={palette.statusBar} />
 
       <KeyboardAvoidingView
         className="flex-1"
@@ -171,14 +190,16 @@ export default observer(function LoginScreen() {
         >
           {/* Header Section */}
           <View className="mb-12 mt-10">
-            <View className="w-20 h-20 rounded-2xl bg-bg-card items-center justify-center mb-6 overflow-hidden border border-border-subtle">
+            <View className="w-20 h-20 rounded-2xl items-center justify-center mb-6 overflow-hidden border" style={{ backgroundColor: palette.card, borderColor: palette.border }}>
               <Image 
                 source={require('../../assets/icon.png')} 
                 style={{ width: '100%', height: '100%' }}
                 resizeMode="contain"
               />
             </View>
-            <Typography variant="metric" weight="bold" className="mb-2">Bienvenido</Typography>
+            <Typography variant="metric" weight="bold" className="mb-2" style={{ color: palette.inputText }}>
+              Bienvenido
+            </Typography>
             <Typography variant="h3" color="secondary">Inicia sesión en Scalper Today</Typography>
           </View>
 
@@ -186,12 +207,19 @@ export default observer(function LoginScreen() {
           <View className="mb-8">
             {/* Email Input */}
             <View className="mb-5">
-              <View className={`flex-row items-center bg-bg-card border-2 rounded-2xl px-5 h-16 gap-3 ${errors.email ? 'border-semantic-danger bg-semantic-danger/10' : 'border-border-DEFAULT focus:border-brand-primary'}`}>
+              <View
+                className="flex-row items-center border-2 rounded-2xl px-5 h-16 gap-3"
+                style={{
+                  backgroundColor: errors.email ? 'rgba(255,69,58,0.10)' : palette.card,
+                  borderColor: errors.email ? '#FF453A' : palette.border,
+                }}
+              >
                 <Mail size={22} color={errors.email ? '#FF453A' : '#A1A1AA'} strokeWidth={2} />
                 <TextInput
-                  className="flex-1 text-[17px] text-text-primary font-medium"
+                  className="flex-1 text-[17px] font-medium"
+                  style={{ color: palette.inputText }}
                   placeholder="Correo electrónico"
-                  placeholderTextColor="#71717A"
+                  placeholderTextColor={palette.muted}
                   value={email}
                   onChangeText={handleEmailChange}
                   keyboardType="email-address"
@@ -208,12 +236,19 @@ export default observer(function LoginScreen() {
 
             {/* Password Input */}
             <View className="mb-6">
-              <View className={`flex-row items-center bg-bg-card border-2 rounded-2xl px-5 h-16 gap-3 ${errors.password ? 'border-semantic-danger bg-semantic-danger/10' : 'border-border-DEFAULT focus:border-brand-primary'}`}>
+              <View
+                className="flex-row items-center border-2 rounded-2xl px-5 h-16 gap-3"
+                style={{
+                  backgroundColor: errors.password ? 'rgba(255,69,58,0.10)' : palette.card,
+                  borderColor: errors.password ? '#FF453A' : palette.border,
+                }}
+              >
                 <Lock size={22} color={errors.password ? '#FF453A' : '#A1A1AA'} strokeWidth={2} />
                 <TextInput
-                  className="flex-1 text-[17px] text-text-primary font-medium"
+                  className="flex-1 text-[17px] font-medium"
+                  style={{ color: palette.inputText }}
                   placeholder="Contraseña"
-                  placeholderTextColor="#71717A"
+                  placeholderTextColor={palette.muted}
                   value={password}
                   onChangeText={handlePasswordChange}
                   secureTextEntry={!showPassword}
@@ -264,7 +299,9 @@ export default observer(function LoginScreen() {
               {isLoading ? (
                 <ActivityIndicator color="#fff" size="small" />
               ) : (
-                <Typography variant="body" weight="bold" className="text-text-primary">Iniciar Sesión</Typography>
+                <Typography variant="body" weight="bold" style={{ color: '#FFFFFF' }}>
+                  Iniciar Sesión
+                </Typography>
               )}
             </TouchableOpacity>
 
@@ -278,7 +315,8 @@ export default observer(function LoginScreen() {
               onPress={handleGoogleLogin}
               disabled={isGoogleDisabled}
               activeOpacity={0.85}
-              className={`h-16 rounded-full border border-border-subtle bg-bg-card flex-row items-center justify-center gap-3 ${isGoogleDisabled ? 'opacity-50' : 'opacity-100'}`}
+              className={`h-16 rounded-full border flex-row items-center justify-center gap-3 ${isGoogleDisabled ? 'opacity-50' : 'opacity-100'}`}
+              style={{ borderColor: palette.border, backgroundColor: palette.card }}
               accessibilityRole="button"
               accessibilityLabel="Continuar con Google"
             >
@@ -287,7 +325,7 @@ export default observer(function LoginScreen() {
               ) : (
                 <>
                   <FontAwesome name="google" size={20} color="#DB4437" />
-                  <Typography variant="body" weight="bold" className="text-text-primary">
+                  <Typography variant="body" weight="bold" style={{ color: palette.inputText }}>
                     Continuar con Google
                   </Typography>
                 </>
@@ -300,7 +338,7 @@ export default observer(function LoginScreen() {
             <Typography variant="body" color="secondary">¿No tienes cuenta?</Typography>
             <Link href="/(auth)/register" asChild>
               <TouchableOpacity disabled={isLoading} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-                <Typography variant="body" weight="bold" className="text-text-primary">
+                <Typography variant="body" weight="bold" style={{ color: palette.inputText }}>
                   Crear cuenta
                 </Typography>
               </TouchableOpacity>
