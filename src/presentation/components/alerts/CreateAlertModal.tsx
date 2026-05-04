@@ -12,6 +12,7 @@ import { AlertType } from '../../../domain/entities/AlertType';
 import { AlertCondition } from '../../../domain/entities/AlertCondition';
 import { Typography } from '../common/Typography';
 import { colors } from '../../theme/tokens';
+import { useThemeMode } from '../../theme/ThemeModeContext';
 import { StepBasicInfo } from './steps/StepBasicInfo';
 import { StepConditions } from './steps/StepConditions';
 import { StepConfirmation } from './steps/StepConfirmation';
@@ -39,6 +40,10 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
   const [pushEnabled, setPushEnabled] = useState(true);
   const [step, setStep] = useState(1);
   const [footerHeight, setFooterHeight] = useState(96);
+  const { isDarkMode } = useThemeMode();
+  const sheetBg = isDarkMode ? colors.bg.modal : '#FFFFFF';
+  const surfaceBg = isDarkMode ? colors.bg.modalCard : '#F4F4F5';
+  const borderColor = isDarkMode ? colors.bg.modalCard : '#E2E8F0';
 
   useEffect(() => {
     if (visible) {
@@ -125,7 +130,7 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
       <BottomSheetFooter {...props} bottomInset={0}>
         <View
           className="flex-row px-6 pt-4 pb-6 border-t"
-          style={{ borderTopColor: colors.bg.modalCard, backgroundColor: colors.bg.modal }}
+          style={{ borderTopColor: borderColor, backgroundColor: sheetBg }}
           onLayout={(event: LayoutChangeEvent) => {
             const nextHeight = Math.ceil(event.nativeEvent.layout.height);
             if (nextHeight !== footerHeight) {
@@ -137,7 +142,7 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
             <TouchableOpacity
               onPress={() => setStep(step - 1)}
               className="px-6 h-14 items-center justify-center rounded-xl mr-3"
-              style={{ backgroundColor: colors.bg.modalCard }}
+              style={{ backgroundColor: surfaceBg }}
             >
               <ArrowLeft size={20} color={colors.text.icon} />
             </TouchableOpacity>
@@ -153,17 +158,17 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
               void handleCreate();
             }}
             className="flex-1 h-14 rounded-xl flex-row items-center justify-center gap-2"
-            style={{ backgroundColor: isNextEnabled ? colors.brand.primary : colors.bg.modalCard }}
+            style={{ backgroundColor: isNextEnabled ? colors.brand.primary : surfaceBg }}
           >
-            <Typography variant="body" weight="bold" style={{ color: isNextEnabled ? colors.text.primary : colors.text.muted }}>
+            <Typography variant="body" weight="bold" style={{ color: isNextEnabled ? colors.text.primary : isDarkMode ? colors.text.muted : '#64748B' }}>
               {step < 3 ? 'Siguiente' : 'Confirmar y Crear'}
             </Typography>
-            {step < 3 && <ArrowRight size={20} color={isNextEnabled ? colors.white : colors.text.muted} />}
+            {step < 3 && <ArrowRight size={20} color={isNextEnabled ? colors.white : isDarkMode ? colors.text.muted : '#64748B'} />}
           </TouchableOpacity>
         </View>
       </BottomSheetFooter>
     ),
-    [footerHeight, handleCreate, isNextEnabled, step]
+    [borderColor, footerHeight, handleCreate, isDarkMode, isNextEnabled, sheetBg, step, surfaceBg]
   );
 
   return (
@@ -175,8 +180,8 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
       onChange={handleSheetChanges}
       backdropComponent={renderBackdrop}
       footerComponent={renderFooter}
-      backgroundStyle={{ backgroundColor: colors.bg.modal }}
-      handleIndicatorStyle={{ backgroundColor: colors.border.indicator }}
+      backgroundStyle={{ backgroundColor: sheetBg }}
+      handleIndicatorStyle={{ backgroundColor: isDarkMode ? colors.border.indicator : '#CBD5E1' }}
     >
       <BottomSheetScrollView
         key={`${step}-${selectedTypes.join(',')}`}
@@ -189,7 +194,7 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
           <Typography variant="caption" color="secondary" className="mt-1">{STEP_SUBTITLES[step - 1]}</Typography>
         </View>
 
-        <ProgressBar currentStep={step} />
+        <ProgressBar currentStep={step} isDarkMode={isDarkMode} />
 
         <View className="px-6">
           {step === 1 && (
@@ -198,6 +203,7 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
               description={description}
               onNameChange={setName}
               onDescriptionChange={setDescription}
+              isDarkMode={isDarkMode}
             />
           )}
 
@@ -208,6 +214,7 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
               availableCountries={availableCountries}
               onToggleType={toggleType}
               onSetConditionValue={handleSetConditionValue}
+              isDarkMode={isDarkMode}
             />
           )}
 
@@ -217,6 +224,7 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
               selectedCount={selectedTypes.length}
               pushEnabled={pushEnabled}
               onPushEnabledChange={setPushEnabled}
+              isDarkMode={isDarkMode}
             />
           )}
         </View>
@@ -225,19 +233,19 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
   );
 }
 
-function ProgressBar({ currentStep }: { currentStep: number }) {
+function ProgressBar({ currentStep, isDarkMode }: { currentStep: number; isDarkMode: boolean }) {
   return (
     <View className="flex-row items-center justify-center py-4 px-10">
       {[1, 2, 3].map((s) => (
         <View key={s} className="flex-row items-center">
-          <View className="w-8 h-8 rounded-full items-center justify-center" style={{ backgroundColor: s <= currentStep ? colors.brand.primary : colors.bg.modalCard }}>
+          <View className="w-8 h-8 rounded-full items-center justify-center" style={{ backgroundColor: s <= currentStep ? colors.brand.primary : isDarkMode ? colors.bg.modalCard : '#E2E8F0' }}>
             {s < currentStep ? (
               <CheckCircle size={16} color={colors.white} />
             ) : (
-              <Typography variant="caption" weight="bold" style={{ color: s <= currentStep ? colors.text.primary : colors.text.muted }}>{s}</Typography>
+              <Typography variant="caption" weight="bold" style={{ color: s <= currentStep ? colors.text.primary : isDarkMode ? colors.text.muted : '#64748B' }}>{s}</Typography>
             )}
           </View>
-          {s < 3 && <View className="w-12 h-1 mx-2 rounded-full" style={{ backgroundColor: s < currentStep ? colors.brand.primary : colors.bg.modalCard }} />}
+          {s < 3 && <View className="w-12 h-1 mx-2 rounded-full" style={{ backgroundColor: s < currentStep ? colors.brand.primary : isDarkMode ? colors.bg.modalCard : '#E2E8F0' }} />}
         </View>
       ))}
     </View>

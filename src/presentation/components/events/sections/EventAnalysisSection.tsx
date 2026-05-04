@@ -8,6 +8,7 @@ import { FormattedAIText } from '../../common/FormattedAIText';
 import { Typography } from '../../common/Typography';
 import { getImpactColor, getSentimentColor, getSentimentIcon } from '../../../theme';
 import { colors } from '../../../theme/tokens';
+import { useThemeMode } from '../../../theme/ThemeModeContext';
 
 const IMPACT_LABELS: Record<string, string> = {
   HIGH: 'Alto', MEDIUM: 'Medio', LOW: 'Bajo',
@@ -31,10 +32,15 @@ interface EventAnalysisSectionProps {
 }
 
 export function EventAnalysisUnavailableSection() {
+  const { isDarkMode } = useThemeMode();
+  const cardBg = isDarkMode ? colors.bg.modalCard : '#F8FAFC';
+  const cardBorder = isDarkMode ? colors.border.medium : '#E2E8F0';
+  const titleColor = isDarkMode ? colors.text.primary : '#0F172A';
+
   return (
     <View
       className="rounded-3xl p-5 mb-8 border"
-      style={{ backgroundColor: colors.bg.modalCard, borderColor: colors.border.medium }}
+      style={{ backgroundColor: cardBg, borderColor: cardBorder }}
     >
       <View className="flex-row items-center gap-3 mb-3">
         <View
@@ -44,7 +50,7 @@ export function EventAnalysisUnavailableSection() {
           <Clock3 size={18} color={colors.semantic.warningLight} strokeWidth={2.5} />
         </View>
         <View className="flex-1">
-          <Typography variant="body" weight="bold" style={{ color: colors.text.primary }}>
+          <Typography variant="body" weight="bold" style={{ color: titleColor }}>
             Sin comentario de mercado
           </Typography>
           <Typography variant="caption" color="muted" className="mt-1">
@@ -63,6 +69,10 @@ export function EventAnalysisUnavailableSection() {
 
 export function EventAnalysisSection({ ai }: EventAnalysisSectionProps) {
   const [detailsVisible, setDetailsVisible] = useState(false);
+  const { isDarkMode } = useThemeMode();
+  const surface = isDarkMode ? colors.bg.modalCard : '#F8FAFC';
+  const base = isDarkMode ? colors.bg.modal : '#FFFFFF';
+  const border = isDarkMode ? colors.border.medium : '#E2E8F0';
 
   const SentimentIcon = getSentimentIcon(ai.sentiment) || Minus;
 
@@ -78,7 +88,7 @@ export function EventAnalysisSection({ ai }: EventAnalysisSectionProps) {
   };
 
   return (
-    <View className="rounded-3xl p-5 mb-8 border" style={{ backgroundColor: colors.bg.modalCard, borderColor: colors.border.medium }}>
+    <View className="rounded-3xl p-5 mb-8 border" style={{ backgroundColor: surface, borderColor: border }}>
       <View className="flex-row items-center justify-between mb-5">
         <View className="flex-row items-center gap-2">
           <Sparkles size={18} color={colors.brand.primaryLight} strokeWidth={2.5} />
@@ -97,7 +107,7 @@ export function EventAnalysisSection({ ai }: EventAnalysisSectionProps) {
       {ai.impactedAssets && ai.impactedAssets.length > 0 && (
         <View className="flex-row flex-wrap gap-2 mb-4">
           {ai.impactedAssets.map((a, i) => (
-            <View key={i} className="px-3 py-1.5 rounded-lg border" style={{ backgroundColor: colors.bg.modal, borderColor: colors.border.medium }}>
+            <View key={i} className="px-3 py-1.5 rounded-lg border" style={{ backgroundColor: base, borderColor: border }}>
               <Typography variant="caption" weight="semibold" style={{ color: colors.brand.primaryLight }}>{a}</Typography>
             </View>
           ))}
@@ -108,7 +118,7 @@ export function EventAnalysisSection({ ai }: EventAnalysisSectionProps) {
         <>
           <TouchableOpacity
             className="flex-row items-center justify-between pt-4 border-t"
-            style={{ borderTopColor: colors.border.medium }}
+            style={{ borderTopColor: border }}
             onPress={openDetails}
             activeOpacity={0.7}
           >
@@ -126,10 +136,10 @@ export function EventAnalysisSection({ ai }: EventAnalysisSectionProps) {
         presentationStyle="pageSheet"
         onRequestClose={() => setDetailsVisible(false)}
       >
-        <View className="flex-1" style={{ backgroundColor: colors.bg.modal }}>
+        <View className="flex-1" style={{ backgroundColor: base }}>
           <View
             className="flex-row items-center justify-between px-6 py-4 border-b"
-            style={{ borderBottomColor: colors.border.medium }}
+            style={{ borderBottomColor: border }}
           >
             <Typography variant="h2" weight="bold">
               Análisis detallado
@@ -137,7 +147,7 @@ export function EventAnalysisSection({ ai }: EventAnalysisSectionProps) {
             <TouchableOpacity
               onPress={() => setDetailsVisible(false)}
               className="w-10 h-10 rounded-full items-center justify-center"
-              style={{ backgroundColor: colors.bg.modalCard }}
+              style={{ backgroundColor: surface }}
             >
               <X size={18} color={colors.text.icon} strokeWidth={2.5} />
             </TouchableOpacity>
@@ -153,7 +163,7 @@ export function EventAnalysisSection({ ai }: EventAnalysisSectionProps) {
               <View
                 key={i}
                 className="rounded-2xl p-5 border"
-                style={{ backgroundColor: colors.bg.modalCard, borderColor: colors.border.medium }}
+                style={{ backgroundColor: surface, borderColor: border }}
               >
                 <View className="flex-row items-center gap-2 mb-3">
                   <s.icon size={16} color={colors.brand.primaryLight} strokeWidth={2} />

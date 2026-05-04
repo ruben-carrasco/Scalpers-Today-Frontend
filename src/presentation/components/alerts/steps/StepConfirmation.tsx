@@ -9,12 +9,16 @@ interface StepConfirmationProps {
   selectedCount: number;
   pushEnabled: boolean;
   onPushEnabledChange: (value: boolean) => void;
+  isDarkMode: boolean;
 }
 
-export function StepConfirmation({ name, selectedCount, pushEnabled, onPushEnabledChange }: StepConfirmationProps) {
+export function StepConfirmation({ name, selectedCount, pushEnabled, onPushEnabledChange, isDarkMode }: StepConfirmationProps) {
+  const surface = isDarkMode ? colors.bg.modalCard : '#FFFFFF';
+  const border = isDarkMode ? colors.border.medium : '#CBD5E1';
+
   return (
     <View className="pb-10">
-      <View className="flex-row items-center justify-between p-5 rounded-2xl mb-6 border" style={{ backgroundColor: colors.bg.modalCard, borderColor: colors.border.medium }}>
+      <View className="flex-row items-center justify-between p-5 rounded-2xl mb-6 border" style={{ backgroundColor: surface, borderColor: border }}>
         <View className="flex-row items-center gap-4 flex-1">
           <View className="w-12 h-12 rounded-xl items-center justify-center" style={{ backgroundColor: colors.brand.primary }}>
             <Bell size={20} color={colors.white} strokeWidth={2} />
@@ -32,13 +36,13 @@ export function StepConfirmation({ name, selectedCount, pushEnabled, onPushEnabl
         />
       </View>
 
-      <View className="rounded-2xl p-6 border" style={{ backgroundColor: colors.bg.modalCard, borderColor: colors.border.medium }}>
+      <View className="rounded-2xl p-6 border" style={{ backgroundColor: surface, borderColor: border }}>
         <Typography variant="h3" weight="bold" className="mb-6">Resumen de Alerta</Typography>
-        <View className="flex-row justify-between py-3 border-b" style={{ borderBottomColor: colors.border.medium }}>
+        <View className="flex-row justify-between py-3 border-b" style={{ borderBottomColor: border }}>
           <Typography variant="body" color="secondary">Nombre</Typography>
           <Typography variant="body" weight="bold">{name}</Typography>
         </View>
-        <View className="flex-row justify-between py-3 border-b" style={{ borderBottomColor: colors.border.medium }}>
+        <View className="flex-row justify-between py-3 border-b" style={{ borderBottomColor: border }}>
           <Typography variant="body" color="secondary">Condiciones</Typography>
           <Typography variant="body" weight="bold">{selectedCount} seleccionadas</Typography>
         </View>

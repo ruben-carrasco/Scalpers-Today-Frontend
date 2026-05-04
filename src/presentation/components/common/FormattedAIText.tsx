@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '../../theme';
+import { useThemeMode } from '../../theme/ThemeModeContext';
 
 interface FormattedAITextProps {
   text: string;
@@ -18,6 +19,15 @@ function preprocess(raw: string): string {
 }
 
 export function FormattedAIText({ text }: FormattedAITextProps) {
+  const { isDarkMode } = useThemeMode();
+  const palette = {
+    body: isDarkMode ? colors.text.secondary : '#334155',
+    accent: isDarkMode ? colors.brand.accentLight : '#2563EB',
+    key: isDarkMode ? colors.text.muted : '#64748B',
+    cardBg: isDarkMode ? colors.bg.primary + '80' : '#EEF2FF',
+    cardBorder: isDarkMode ? colors.border.subtle : '#CBD5E1',
+    dim: isDarkMode ? colors.text.dim : '#475569',
+  };
   const processed = preprocess(text);
   const lines = processed.split('\n').filter(l => l.trim().length > 0);
 
@@ -25,19 +35,25 @@ export function FormattedAIText({ text }: FormattedAITextProps) {
     <View style={styles.container}>
       {lines.map((line, i) => {
         const trimmed = line.trim();
-        return <LineBlock key={i} text={trimmed} />;
+        return <LineBlock key={i} text={trimmed} palette={palette} />;
       })}
     </View>
   );
 }
 
-function LineBlock({ text }: { text: string }) {
+function LineBlock({
+  text,
+  palette,
+}: {
+  text: string;
+  palette: { body: string; accent: string; key: string; cardBg: string; cardBorder: string; dim: string };
+}) {
   const scenarioMatch = text.match(/^(ESCENARIO\s*\d+[^:]*):?\s*(.*)/i);
   if (scenarioMatch) {
     return (
       <View style={styles.scenarioBlock}>
         <Text style={styles.scenarioLabel}>{scenarioMatch[1]}</Text>
-        {scenarioMatch[2] ? <Text style={styles.body}>{scenarioMatch[2]}</Text> : null}
+        {scenarioMatch[2] ? <Text style={[styles.body, { color: palette.body }]}>{scenarioMatch[2]}</Text> : null}
       </View>
     );
   }
@@ -47,7 +63,7 @@ function LineBlock({ text }: { text: string }) {
     return (
       <View style={styles.kvBlock}>
         <Text style={styles.kvKey}>{gestionMatch[1]}</Text>
-        <Text style={styles.body}>{gestionMatch[2]}</Text>
+        <Text style={[styles.body, { color: palette.body }]}>{gestionMatch[2]}</Text>
       </View>
     );
   }
@@ -55,18 +71,18 @@ function LineBlock({ text }: { text: string }) {
   if (text.includes('|')) {
     const parts = text.split('|').map(p => p.trim()).filter(Boolean);
     return (
-      <View style={styles.levelsCard}>
+      <View style={[styles.levelsCard, { backgroundColor: palette.cardBg }]}>
         {parts.map((part, j) => {
           const kv = part.match(/^([^:]+):\s*(.*)/);
           if (kv) {
             return (
               <View key={j} style={styles.levelRow}>
-                <Text style={styles.levelKey}>{kv[1].trim()}</Text>
-                <Text style={styles.levelVal}>{kv[2].trim()}</Text>
+                <Text style={[styles.levelKey, { color: palette.dim }]}>{kv[1].trim()}</Text>
+                <Text style={[styles.levelVal, { color: palette.body }]}>{kv[2].trim()}</Text>
               </View>
             );
           }
-          return <Text key={j} style={styles.levelAsset}>{part}</Text>;
+          return <Text key={j} style={[styles.levelAsset, { color: palette.accent, borderBottomColor: palette.cardBorder }]}>{part}</Text>;
         })}
       </View>
     );
@@ -76,8 +92,8 @@ function LineBlock({ text }: { text: string }) {
   if (bulletMatch) {
     return (
       <View style={styles.bulletRow}>
-        <Text style={styles.bulletDot}>{'\u2022'}</Text>
-        <Text style={styles.body}>{bulletMatch[1]}</Text>
+        <Text style={[styles.bulletDot, { color: palette.accent }]}>{'\u2022'}</Text>
+        <Text style={[styles.body, { color: palette.body }]}>{bulletMatch[1]}</Text>
       </View>
     );
   }
@@ -89,12 +105,12 @@ function LineBlock({ text }: { text: string }) {
         <View style={styles.numBadge}>
           <Text style={styles.numText}>{numMatch[1]}</Text>
         </View>
-        <Text style={styles.body}>{numMatch[2]}</Text>
+        <Text style={[styles.body, { color: palette.body }]}>{numMatch[2]}</Text>
       </View>
     );
   }
 
-  return <Text style={styles.body}>{text}</Text>;
+  return <Text style={[styles.body, { color: palette.body }]}>{text}</Text>;
 }
 
 const styles = StyleSheet.create({
