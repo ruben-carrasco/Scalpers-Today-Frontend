@@ -172,7 +172,9 @@ export default observer(function RegisterScreen() {
 
           {/* Header Section */}
           <View className="mb-10">
-            <Typography variant="metric" weight="bold" className="mb-2">Crear Cuenta</Typography>
+            <Typography variant="metric" weight="bold" className="mb-2" style={{ color: palette.inputText }}>
+              Crear Cuenta
+            </Typography>
             <Typography variant="h3" color="secondary">Completa tus datos para comenzar</Typography>
           </View>
 
@@ -369,7 +371,9 @@ export default observer(function RegisterScreen() {
               {isLoading ? (
                 <ActivityIndicator color="#fff" size="small" />
               ) : (
-                <Typography variant="body" weight="bold" className="text-text-primary">Crear Cuenta</Typography>
+                <Typography variant="body" weight="bold" style={{ color: '#FFFFFF' }}>
+                  Crear Cuenta
+                </Typography>
               )}
             </TouchableOpacity>
           </View>

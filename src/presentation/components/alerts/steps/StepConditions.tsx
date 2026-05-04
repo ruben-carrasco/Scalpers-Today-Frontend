@@ -30,7 +30,8 @@ export function StepConditions({ selectedTypes, conditionValues, availableCountr
   const baseSurface = isDarkMode ? colors.bg.modal : '#F4F4F5';
   const baseBorder = isDarkMode ? colors.border.medium : '#CBD5E1';
   const baseText = isDarkMode ? colors.text.icon : '#334155';
-  const indicator = isDarkMode ? colors.border.indicator : '#94A3B8';
+  const indicator = isDarkMode ? colors.border.indicator : '#64748B';
+  const descriptionText = isDarkMode ? colors.text.muted : '#475569';
 
   return (
     <View className="pb-10">
@@ -51,7 +52,7 @@ export function StepConditions({ selectedTypes, conditionValues, availableCountr
               <Typography variant="body" weight="bold" style={{ color: isSelected ? colors.text.primary : baseText }}>
                 {alertType.label}
               </Typography>
-              <Typography variant="caption" color="muted" className="mt-1">
+              <Typography variant="caption" className="mt-1" style={{ color: descriptionText }}>
                 {alertType.description}
               </Typography>
             </View>
@@ -104,10 +105,11 @@ function ValueSelector({
   const chipBg = isDarkMode ? colors.bg.modal : '#FFFFFF';
   const border = isDarkMode ? colors.border.medium : '#CBD5E1';
   const chipText = isDarkMode ? colors.text.icon : '#334155';
+  const labelText = isDarkMode ? colors.text.secondary : '#334155';
 
   return (
     <View className="mt-4 p-4 rounded-2xl" style={{ backgroundColor: boxBg }}>
-      <Typography variant="label" color="secondary" className="mb-3">{label}</Typography>
+      <Typography variant="label" className="mb-3" style={{ color: labelText }}>{label}</Typography>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         {items.map((item) => {
           const isSelected = selectedValue === item;

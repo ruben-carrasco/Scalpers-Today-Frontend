@@ -197,7 +197,9 @@ export default observer(function LoginScreen() {
                 resizeMode="contain"
               />
             </View>
-            <Typography variant="metric" weight="bold" className="mb-2">Bienvenido</Typography>
+            <Typography variant="metric" weight="bold" className="mb-2" style={{ color: palette.inputText }}>
+              Bienvenido
+            </Typography>
             <Typography variant="h3" color="secondary">Inicia sesión en Scalper Today</Typography>
           </View>
 
@@ -297,7 +299,9 @@ export default observer(function LoginScreen() {
               {isLoading ? (
                 <ActivityIndicator color="#fff" size="small" />
               ) : (
-                <Typography variant="body" weight="bold" className="text-text-primary">Iniciar Sesión</Typography>
+                <Typography variant="body" weight="bold" style={{ color: '#FFFFFF' }}>
+                  Iniciar Sesión
+                </Typography>
               )}
             </TouchableOpacity>
 

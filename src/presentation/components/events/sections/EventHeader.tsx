@@ -18,6 +18,7 @@ export function EventHeader({ event, impColor, bottomSheetModalRef, onClose }: E
   const { isDarkMode } = useThemeMode();
   const chipBg = isDarkMode ? colors.bg.modalCard : '#F4F4F5';
   const chipText = isDarkMode ? colors.text.light : '#334155';
+  const titleColor = isDarkMode ? colors.text.primary : '#0F172A';
 
   return (
     <>
@@ -44,7 +45,7 @@ export function EventHeader({ event, impColor, bottomSheetModalRef, onClose }: E
         </TouchableOpacity>
       </View>
 
-      <Typography variant="h1" weight="bold" className="mb-4 leading-tight px-6">
+      <Typography variant="h1" weight="bold" className="mb-4 leading-tight px-6" style={{ color: titleColor }}>
         {event.title}
       </Typography>
 

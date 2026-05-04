@@ -73,6 +73,7 @@ export function EventAnalysisSection({ ai }: EventAnalysisSectionProps) {
   const surface = isDarkMode ? colors.bg.modalCard : '#F8FAFC';
   const base = isDarkMode ? colors.bg.modal : '#FFFFFF';
   const border = isDarkMode ? colors.border.medium : '#E2E8F0';
+  const titleColor = isDarkMode ? colors.text.primary : '#0F172A';
 
   const SentimentIcon = getSentimentIcon(ai.sentiment) || Minus;
 
@@ -141,7 +142,7 @@ export function EventAnalysisSection({ ai }: EventAnalysisSectionProps) {
             className="flex-row items-center justify-between px-6 py-4 border-b"
             style={{ borderBottomColor: border }}
           >
-            <Typography variant="h2" weight="bold">
+            <Typography variant="h2" weight="bold" style={{ color: titleColor }}>
               Análisis detallado
             </Typography>
             <TouchableOpacity

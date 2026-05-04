@@ -44,6 +44,10 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
   const sheetBg = isDarkMode ? colors.bg.modal : '#FFFFFF';
   const surfaceBg = isDarkMode ? colors.bg.modalCard : '#F4F4F5';
   const borderColor = isDarkMode ? colors.bg.modalCard : '#E2E8F0';
+  const titleColor = isDarkMode ? colors.text.primary : '#0F172A';
+  const subtleText = isDarkMode ? colors.text.secondary : '#334155';
+  const disabledText = isDarkMode ? colors.text.muted : '#475569';
+  const iconText = isDarkMode ? colors.text.icon : '#334155';
 
   useEffect(() => {
     if (visible) {
@@ -144,7 +148,7 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
               className="px-6 h-14 items-center justify-center rounded-xl mr-3"
               style={{ backgroundColor: surfaceBg }}
             >
-              <ArrowLeft size={20} color={colors.text.icon} />
+              <ArrowLeft size={20} color={iconText} />
             </TouchableOpacity>
           )}
 
@@ -160,15 +164,15 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
             className="flex-1 h-14 rounded-xl flex-row items-center justify-center gap-2"
             style={{ backgroundColor: isNextEnabled ? colors.brand.primary : surfaceBg }}
           >
-            <Typography variant="body" weight="bold" style={{ color: isNextEnabled ? colors.text.primary : isDarkMode ? colors.text.muted : '#64748B' }}>
+            <Typography variant="body" weight="bold" style={{ color: isNextEnabled ? colors.text.primary : disabledText }}>
               {step < 3 ? 'Siguiente' : 'Confirmar y Crear'}
             </Typography>
-            {step < 3 && <ArrowRight size={20} color={isNextEnabled ? colors.white : isDarkMode ? colors.text.muted : '#64748B'} />}
+            {step < 3 && <ArrowRight size={20} color={isNextEnabled ? colors.white : disabledText} />}
           </TouchableOpacity>
         </View>
       </BottomSheetFooter>
     ),
-    [borderColor, footerHeight, handleCreate, isDarkMode, isNextEnabled, sheetBg, step, surfaceBg]
+    [borderColor, disabledText, footerHeight, handleCreate, iconText, isNextEnabled, sheetBg, step, surfaceBg]
   );
 
   return (
@@ -190,8 +194,8 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
         keyboardShouldPersistTaps="handled"
       >
         <View className="px-6 py-4">
-          <Typography variant="h2" weight="bold">{STEP_TITLES[step - 1]}</Typography>
-          <Typography variant="caption" color="secondary" className="mt-1">{STEP_SUBTITLES[step - 1]}</Typography>
+          <Typography variant="h2" weight="bold" style={{ color: titleColor }}>{STEP_TITLES[step - 1]}</Typography>
+          <Typography variant="caption" className="mt-1" style={{ color: subtleText }}>{STEP_SUBTITLES[step - 1]}</Typography>
         </View>
 
         <ProgressBar currentStep={step} isDarkMode={isDarkMode} />
@@ -234,6 +238,7 @@ export function CreateAlertModal({ visible, onClose, onCreate, availableCountrie
 }
 
 function ProgressBar({ currentStep, isDarkMode }: { currentStep: number; isDarkMode: boolean }) {
+  const muted = isDarkMode ? colors.text.muted : '#475569';
   return (
     <View className="flex-row items-center justify-center py-4 px-10">
       {[1, 2, 3].map((s) => (
@@ -242,7 +247,7 @@ function ProgressBar({ currentStep, isDarkMode }: { currentStep: number; isDarkM
             {s < currentStep ? (
               <CheckCircle size={16} color={colors.white} />
             ) : (
-              <Typography variant="caption" weight="bold" style={{ color: s <= currentStep ? colors.text.primary : isDarkMode ? colors.text.muted : '#64748B' }}>{s}</Typography>
+              <Typography variant="caption" weight="bold" style={{ color: s <= currentStep ? colors.text.primary : muted }}>{s}</Typography>
             )}
           </View>
           {s < 3 && <View className="w-12 h-1 mx-2 rounded-full" style={{ backgroundColor: s < currentStep ? colors.brand.primary : isDarkMode ? colors.bg.modalCard : '#E2E8F0' }} />}
