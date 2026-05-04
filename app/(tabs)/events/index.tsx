@@ -88,12 +88,14 @@ function getImportanceLabel(importance: number | undefined): string | null {
 
 export default observer(function EventsScreen() {
   const insets = useSafeAreaInsets();
+  const isWeb = Platform.OS === 'web';
   const params = useLocalSearchParams();
   const requestedEventId = typeof params.eventId === 'string' ? params.eventId : undefined;
   const [searchText, setSearchText] = useState('');
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [isDaySelectorOpen, setIsDaySelectorOpen] = useState(false);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(!isWeb);
 
   const eventsViewModel = useEventsViewModel();
   const haptics = useHaptics();
@@ -388,79 +390,107 @@ export default observer(function EventsScreen() {
       </View>
 
       <View className="py-2 bg-bg-primary border-b border-[#27272A]">
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerClassName="px-6 gap-2"
-        >
-          {hasActiveFilters && (
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={handleClearVisibleFilters}
-              className="flex-row items-center px-4 py-2.5 rounded-xl border gap-2"
-              style={{ backgroundColor: '#27272A', borderColor: '#3F3F46' }}
-            >
-              <X size={14} color="#FFFFFF" strokeWidth={2.5} />
+        {isWeb && (
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => setIsFiltersOpen(value => !value)}
+            className="mx-6 px-4 py-3 rounded-2xl border border-[#27272A] bg-[#18181B] flex-row items-center justify-between"
+          >
+            <View className="flex-row items-center gap-2">
               <Typography variant="body" weight="semibold" style={{ color: '#FFFFFF' }}>
-                Limpiar filtros
+                Filtros
               </Typography>
-              <Typography variant="caption" weight="semibold" color="muted" numberOfLines={1}>
-                {activeFilterLabels.join(' · ')}
+              {hasActiveFilters && (
+                <View className="px-2 py-0.5 rounded-full bg-[#2563EB33] border border-[#1D4ED8]">
+                  <Typography variant="caption" weight="bold" style={{ color: '#60A5FA' }}>
+                    {activeFilterLabels.length}
+                  </Typography>
+                </View>
+              )}
+            </View>
+            {isFiltersOpen ? (
+              <ChevronUp size={16} color="#A1A1AA" strokeWidth={2.5} />
+            ) : (
+              <ChevronDown size={16} color="#A1A1AA" strokeWidth={2.5} />
+            )}
+          </TouchableOpacity>
+        )}
+
+        {(!isWeb || isFiltersOpen) && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerClassName={`px-6 gap-2 ${isWeb ? 'pt-2' : ''}`}
+          >
+            {hasActiveFilters && (
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={handleClearVisibleFilters}
+                className="flex-row items-center px-4 py-2.5 rounded-xl border gap-2"
+                style={{ backgroundColor: '#27272A', borderColor: '#3F3F46' }}
+              >
+                <X size={14} color="#FFFFFF" strokeWidth={2.5} />
+                <Typography variant="body" weight="semibold" style={{ color: '#FFFFFF' }}>
+                  Limpiar filtros
+                </Typography>
+                <Typography variant="caption" weight="semibold" color="muted" numberOfLines={1}>
+                  {activeFilterLabels.join(' · ')}
+                </Typography>
+              </TouchableOpacity>
+            )}
+
+            {[
+              { label: 'Todos', value: undefined, Icon: null, color: '#FFFFFF' },
+              { label: 'Alto', value: 3, Icon: Flame, color: '#FF453A' },
+              { label: 'Medio', value: 2, Icon: TrendingUp, color: '#FBBF24' },
+              { label: 'Bajo', value: 1, Icon: MinusCircle, color: '#A1A1AA' },
+            ].map((item) => {
+              const isActive = filters.importance === item.value;
+              return (
+                <TouchableOpacity
+                  key={item.label}
+                  onPress={() => handleImportanceFilter(item.value)}
+                  activeOpacity={0.7}
+                  className={`flex-row items-center px-4 py-2.5 rounded-xl border gap-2 ${isActive ? 'bg-[#27272A] border-[#3F3F46]' : 'bg-[#18181B] border-[#27272A]'}`}
+                >
+                  {item.Icon && <item.Icon size={14} color={isActive ? item.color : '#71717A'} strokeWidth={2.5} />}
+                  <Typography variant="body" weight="semibold" style={isActive ? { color: item.color } : { color: '#A1A1AA' }}>
+                    {item.label}
+                  </Typography>
+                </TouchableOpacity>
+              );
+            })}
+
+            <View className="w-px h-6 bg-[#27272A] self-center mx-2" />
+
+            <TouchableOpacity
+              onPress={() => handleCountryFilter(undefined)}
+              activeOpacity={0.7}
+              className={`flex-row items-center px-4 py-2.5 rounded-xl border gap-2 ${!filters.country ? 'bg-[#27272A] border-[#3F3F46]' : 'bg-[#18181B] border-[#27272A]'}`}
+            >
+              <Globe size={14} color={!filters.country ? '#FFFFFF' : '#71717A'} strokeWidth={2.5} />
+              <Typography variant="body" weight="semibold" style={!filters.country ? { color: '#FFFFFF' } : { color: '#A1A1AA' }}>
+                Todos
               </Typography>
             </TouchableOpacity>
-          )}
 
-          {[
-            { label: 'Todos', value: undefined, Icon: null, color: '#FFFFFF' },
-            { label: 'Alto', value: 3, Icon: Flame, color: '#FF453A' },
-            { label: 'Medio', value: 2, Icon: TrendingUp, color: '#FBBF24' },
-            { label: 'Bajo', value: 1, Icon: MinusCircle, color: '#A1A1AA' },
-          ].map((item) => {
-            const isActive = filters.importance === item.value;
-            return (
-              <TouchableOpacity
-                key={item.label}
-                onPress={() => handleImportanceFilter(item.value)}
-                activeOpacity={0.7}
-                className={`flex-row items-center px-4 py-2.5 rounded-xl border gap-2 ${isActive ? 'bg-[#27272A] border-[#3F3F46]' : 'bg-[#18181B] border-[#27272A]'}`}
-              >
-                {item.Icon && <item.Icon size={14} color={isActive ? item.color : '#71717A'} strokeWidth={2.5} />}
-                <Typography variant="body" weight="semibold" style={isActive ? { color: item.color } : { color: '#A1A1AA' }}>
-                  {item.label}
-                </Typography>
-              </TouchableOpacity>
-            );
-          })}
-
-          <View className="w-px h-6 bg-[#27272A] self-center mx-2" />
-
-          <TouchableOpacity
-            onPress={() => handleCountryFilter(undefined)}
-            activeOpacity={0.7}
-            className={`flex-row items-center px-4 py-2.5 rounded-xl border gap-2 ${!filters.country ? 'bg-[#27272A] border-[#3F3F46]' : 'bg-[#18181B] border-[#27272A]'}`}
-          >
-            <Globe size={14} color={!filters.country ? '#FFFFFF' : '#71717A'} strokeWidth={2.5} />
-            <Typography variant="body" weight="semibold" style={!filters.country ? { color: '#FFFFFF' } : { color: '#A1A1AA' }}>
-              Todos
-            </Typography>
-          </TouchableOpacity>
-
-          {availableCountries.map((country) => {
-            const isCountryActive = filters.country === country;
-            return (
-              <TouchableOpacity
-                key={country}
-                onPress={() => handleCountryFilter(country)}
-                activeOpacity={0.7}
-                className={`flex-row items-center px-4 py-2.5 rounded-xl border gap-2 ${isCountryActive ? 'bg-[#27272A] border-[#3F3F46]' : 'bg-[#18181B] border-[#27272A]'}`}
-              >
-                <Typography variant="body" weight="semibold" style={isCountryActive ? { color: '#FFFFFF' } : { color: '#A1A1AA' }}>
-                  {country}
-                </Typography>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
+            {availableCountries.map((country) => {
+              const isCountryActive = filters.country === country;
+              return (
+                <TouchableOpacity
+                  key={country}
+                  onPress={() => handleCountryFilter(country)}
+                  activeOpacity={0.7}
+                  className={`flex-row items-center px-4 py-2.5 rounded-xl border gap-2 ${isCountryActive ? 'bg-[#27272A] border-[#3F3F46]' : 'bg-[#18181B] border-[#27272A]'}`}
+                >
+                  <Typography variant="body" weight="semibold" style={isCountryActive ? { color: '#FFFFFF' } : { color: '#A1A1AA' }}>
+                    {country}
+                  </Typography>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        )}
       </View>
 
       {isIOS ? (
