@@ -344,50 +344,56 @@ export default observer(function EventsScreen() {
             <Typography variant="caption" color="muted" weight="semibold">Seleccionar día</Typography>
           </View>
 
-          {weekDays.map(day => {
-            const isActive = day.date === selectedDate;
-            const tone = getDayTone(day.count);
-            const titleColor = isActive ? '#FFFFFF' : day.count === 0 ? '#71717A' : '#D4D4D8';
-            return (
-              <TouchableOpacity
-                key={day.date}
-                activeOpacity={0.8}
-                onPress={() => handleSelectDay(day.date)}
-                className={`px-4 py-3 flex-row items-center justify-between border-b border-[#27272A] ${isActive ? 'bg-[#27272A]' : ''}`}
-              >
-                <View>
-                  <Typography variant="body" weight="semibold" style={{ color: titleColor }}>
-                    {day.fullLabel}
-                  </Typography>
-                  <View className="flex-row items-center gap-2 mt-1">
-                    <Typography variant="caption" color="muted">
-                      {day.shortLabel}
+          <ScrollView
+            style={{ maxHeight: 320 }}
+            nestedScrollEnabled
+            showsVerticalScrollIndicator
+          >
+            {weekDays.map(day => {
+              const isActive = day.date === selectedDate;
+              const tone = getDayTone(day.count);
+              const titleColor = isActive ? '#FFFFFF' : day.count === 0 ? '#71717A' : '#D4D4D8';
+              return (
+                <TouchableOpacity
+                  key={day.date}
+                  activeOpacity={0.8}
+                  onPress={() => handleSelectDay(day.date)}
+                  className={`px-4 py-3 flex-row items-center justify-between border-b border-[#27272A] ${isActive ? 'bg-[#27272A]' : ''}`}
+                >
+                  <View>
+                    <Typography variant="body" weight="semibold" style={{ color: titleColor }}>
+                      {day.fullLabel}
                     </Typography>
-                    {day.isToday && (
-                      <View className="px-2 py-0.5 rounded-full" style={{ backgroundColor: '#2563EB33' }}>
-                        <Typography variant="caption" weight="bold" style={{ color: '#60A5FA' }}>
-                          Hoy
-                        </Typography>
-                      </View>
-                    )}
+                    <View className="flex-row items-center gap-2 mt-1">
+                      <Typography variant="caption" color="muted">
+                        {day.shortLabel}
+                      </Typography>
+                      {day.isToday && (
+                        <View className="px-2 py-0.5 rounded-full" style={{ backgroundColor: '#2563EB33' }}>
+                          <Typography variant="caption" weight="bold" style={{ color: '#60A5FA' }}>
+                            Hoy
+                          </Typography>
+                        </View>
+                      )}
+                    </View>
                   </View>
-                </View>
-                <View className="items-end gap-1">
-                  <View
-                    className="px-2.5 py-1 rounded-full border"
-                    style={{ backgroundColor: tone.backgroundColor, borderColor: tone.borderColor }}
-                  >
-                    <Typography variant="caption" weight="bold" style={{ color: tone.color }}>
-                      {tone.label}
+                  <View className="items-end gap-1">
+                    <View
+                      className="px-2.5 py-1 rounded-full border"
+                      style={{ backgroundColor: tone.backgroundColor, borderColor: tone.borderColor }}
+                    >
+                      <Typography variant="caption" weight="bold" style={{ color: tone.color }}>
+                        {tone.label}
+                      </Typography>
+                    </View>
+                    <Typography variant="caption" weight="semibold" style={{ color: isActive ? '#FFFFFF' : '#A1A1AA' }}>
+                      {day.count} eventos
                     </Typography>
                   </View>
-                  <Typography variant="caption" weight="semibold" style={{ color: isActive ? '#FFFFFF' : '#A1A1AA' }}>
-                    {day.count} eventos
-                  </Typography>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
 
           <View className="px-4 pt-3 pb-2 border-b border-[#27272A]">
             <Typography variant="caption" color="muted" weight="semibold">Filtros</Typography>
