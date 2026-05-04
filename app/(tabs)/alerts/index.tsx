@@ -10,6 +10,7 @@ import { AlertCardSkeleton } from '../../../src/presentation/components/alerts/A
 import { AnimatedCard } from '../../../src/presentation/components/common/AnimatedCard';
 import { AlertCondition } from '../../../src/domain/entities/AlertCondition';
 import { Typography } from '../../../src/presentation/components/common/Typography';
+import { useThemeMode } from '../../../src/presentation/theme/ThemeModeContext';
 
 export default observer(function AlertsScreen() {
   const insets = useSafeAreaInsets();
@@ -18,6 +19,19 @@ export default observer(function AlertsScreen() {
   const alertsViewModel = useAlertsViewModel();
   const eventsViewModel = useEventsViewModel();
   const haptics = useHaptics();
+  const { isDarkMode } = useThemeMode();
+
+  const palette = isDarkMode
+    ? {
+        screenBg: '#000000',
+        statusBar: 'light-content' as const,
+        emptyIconBg: '#18181B',
+      }
+    : {
+        screenBg: '#F4F4F5',
+        statusBar: 'dark-content' as const,
+        emptyIconBg: '#E4E4E7',
+      };
 
   useEffect(() => {
     alertsViewModel.loadAlerts();
@@ -73,15 +87,15 @@ export default observer(function AlertsScreen() {
   const pausedAlerts = alerts.filter(a => a.status === 'paused').length;
 
   return (
-    <View className="flex-1 bg-bg-primary">
-      <StatusBar barStyle="light-content" />
+    <View className="flex-1" style={{ backgroundColor: palette.screenBg }}>
+      <StatusBar barStyle={palette.statusBar} />
 
       {/* Header */}
-      <View style={{ paddingTop: insets.top + 20 }} className="px-6 pb-4 bg-bg-primary">
+      <View style={{ paddingTop: insets.top + 20, backgroundColor: palette.screenBg }} className="px-6 pb-4">
         <View className="flex-row justify-between items-end">
           <View>
-            <Typography variant="h1" weight="bold" className="text-text-primary">Alertas</Typography>
-            <Typography variant="body" color="muted" weight="medium" className="mt-1">
+            <Typography variant="h1" weight="bold" style={{ color: isDarkMode ? '#FFFFFF' : '#18181B' }}>Alertas</Typography>
+            <Typography variant="body" weight="medium" className="mt-1" style={{ color: isDarkMode ? '#A1A1AA' : '#52525B' }}>
               {activeAlerts} activas · {pausedAlerts} pausadas
             </Typography>
           </View>
@@ -124,11 +138,11 @@ export default observer(function AlertsScreen() {
             </View>
           ) : (
             <View className="items-center pt-24 px-8 gap-4">
-              <View className="w-20 h-20 rounded-full bg-[#18181B] items-center justify-center mb-2">
+              <View className="w-20 h-20 rounded-full items-center justify-center mb-2" style={{ backgroundColor: palette.emptyIconBg }}>
                 <BellOff size={40} color="#52525B" strokeWidth={2} />
               </View>
-              <Typography variant="h2" weight="bold" color="primary">No tienes alertas</Typography>
-              <Typography variant="body" color="muted" className="text-center leading-relaxed">
+              <Typography variant="h2" weight="bold" style={{ color: isDarkMode ? '#FFFFFF' : '#18181B' }}>No tienes alertas</Typography>
+              <Typography variant="body" className="text-center leading-relaxed" style={{ color: isDarkMode ? '#71717A' : '#52525B' }}>
                 Crea tu primera alerta para recibir notificaciones cuando se publiquen eventos económicos clave.
               </Typography>
               <TouchableOpacity

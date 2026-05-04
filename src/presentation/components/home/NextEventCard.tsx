@@ -4,6 +4,7 @@ import { Sparkles } from 'lucide-react-native';
 import { EconomicEvent } from '../../../domain/entities/EconomicEvent';
 import { Typography } from '../common/Typography';
 import { getImportanceColor } from '../../theme';
+import { useThemeMode } from '../../theme/ThemeModeContext';
 
 interface NextEventCardProps {
   event: EconomicEvent;
@@ -13,14 +14,20 @@ interface NextEventCardProps {
 export function NextEventCard({ event, onPress }: NextEventCardProps) {
   const impColor = getImportanceColor(event.importance);
   const hasData = event.actual || event.forecast || event.previous;
+  const { isDarkMode } = useThemeMode();
+  const primaryText = isDarkMode ? '#FFFFFF' : '#111827';
+  const secondaryText = isDarkMode ? '#A1A1AA' : '#475569';
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.7} className="w-full">
-      <View className="bg-[#18181B] rounded-3xl p-6 border border-[#27272A]">
+      <View
+        className="rounded-3xl p-6 border"
+        style={{ backgroundColor: isDarkMode ? '#18181B' : '#FFFFFF', borderColor: isDarkMode ? '#27272A' : '#E4E4E7' }}
+      >
         <View className="flex-row justify-between items-center mb-4">
           <View className="flex-row items-center gap-2">
             <View className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: impColor }} />
-            <Typography variant="h3" weight="bold" className="font-mono">{event.time}</Typography>
+            <Typography variant="h3" weight="bold" className="font-mono" style={{ color: primaryText }}>{event.time}</Typography>
           </View>
           {event.aiAnalysis && (
             <View className="flex-row items-center gap-1.5 bg-[#3B82F6]/20 px-3 py-1.5 rounded-full">
@@ -30,34 +37,37 @@ export function NextEventCard({ event, onPress }: NextEventCardProps) {
           )}
         </View>
 
-        <Typography variant="h2" weight="semibold" className="mb-4" numberOfLines={2}>
+        <Typography variant="h2" weight="semibold" className="mb-4" style={{ color: primaryText }} numberOfLines={2}>
           {event.title}
         </Typography>
 
         <View className="flex-row items-center gap-3 mb-6">
-          <View className="bg-[#27272A] px-3 py-1.5 rounded-lg">
+          <View className="px-3 py-1.5 rounded-lg" style={{ backgroundColor: isDarkMode ? '#27272A' : '#EEF2FF' }}>
             <Typography variant="caption" color="primary" weight="semibold">{event.country}</Typography>
           </View>
           {event.currency && (
-            <View className="bg-[#27272A] px-3 py-1.5 rounded-lg">
+            <View className="px-3 py-1.5 rounded-lg" style={{ backgroundColor: isDarkMode ? '#27272A' : '#EEF2FF' }}>
               <Typography variant="caption" color="primary" weight="semibold">{event.currency}</Typography>
             </View>
           )}
         </View>
 
         {hasData && (
-          <View className="flex-row justify-between pt-5 border-t border-[#27272A]">
+          <View
+            className="flex-row justify-between pt-5 border-t"
+            style={{ borderTopColor: isDarkMode ? '#27272A' : '#E4E4E7' }}
+          >
             <View className="items-center flex-1">
               <Typography variant="caption" color="secondary" weight="medium" className="uppercase mb-1">Actual</Typography>
-              <Typography variant="h3" weight="bold" className="text-text-primary">{event.actual || '--'}</Typography>
+              <Typography variant="h3" weight="bold" style={{ color: primaryText }}>{event.actual || '--'}</Typography>
             </View>
-            <View className="items-center flex-1 border-l border-r border-[#27272A]">
+            <View className="items-center flex-1 border-l border-r" style={{ borderColor: isDarkMode ? '#27272A' : '#E4E4E7' }}>
               <Typography variant="caption" color="secondary" weight="medium" className="uppercase mb-1">Previsto</Typography>
-              <Typography variant="h3" weight="bold" color="secondary">{event.forecast || '--'}</Typography>
+              <Typography variant="h3" weight="bold" style={{ color: secondaryText }}>{event.forecast || '--'}</Typography>
             </View>
             <View className="items-center flex-1">
               <Typography variant="caption" color="secondary" weight="medium" className="uppercase mb-1">Anterior</Typography>
-              <Typography variant="h3" weight="bold" color="secondary">{event.previous || '--'}</Typography>
+              <Typography variant="h3" weight="bold" style={{ color: secondaryText }}>{event.previous || '--'}</Typography>
             </View>
           </View>
         )}

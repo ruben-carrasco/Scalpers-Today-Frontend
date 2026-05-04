@@ -6,6 +6,7 @@ import { Typography } from '../common/Typography';
 import { getImportanceColor } from '../../theme';
 import { colors } from '../../theme/tokens';
 import { formatEventValue, hasEventValue } from '../../utils/eventValues';
+import { useThemeMode } from '../../theme/ThemeModeContext';
 
 interface EventCardProps {
   event: EventModel;
@@ -25,6 +26,12 @@ export const EventCard = React.memo(function EventCard({ event, onPress }: Event
   const impColor = getImportanceColor(event.importance);
   const surpriseInfo = getSurpriseInfo(event.surprise);
   const hasAnyDataValue = [event.actual, event.forecast, event.previous].some(hasEventValue);
+  const { isDarkMode } = useThemeMode();
+  const cardBg = isDarkMode ? colors.bg.modal : '#FFFFFF';
+  const cardBorder = isDarkMode ? colors.bg.modalCard : '#E4E4E7';
+  const chipBg = isDarkMode ? colors.bg.modalCard : '#F4F4F5';
+  const titleColor = isDarkMode ? colors.text.bright : '#18181B';
+  const timeColor = isDarkMode ? colors.text.light : '#334155';
   const aiStatus = event.aiAnalysis
     ? {
         Icon: Sparkles,
@@ -41,33 +48,33 @@ export const EventCard = React.memo(function EventCard({ event, onPress }: Event
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.7} className="w-full mb-3" accessibilityRole="button" accessibilityLabel={`Evento ${event.title}, ${event.country}, importancia ${event.importance}, a las ${event.time}`}>
-      <View style={{ backgroundColor: colors.bg.modal, borderColor: colors.bg.modalCard }} className="rounded-3xl p-5 border">
+      <View style={{ backgroundColor: cardBg, borderColor: cardBorder }} className="rounded-3xl p-5 border">
         <View className="flex-row justify-between items-start mb-3">
           <View className="flex-row items-center gap-2">
             <View className="w-2 h-2 rounded-full" style={{ backgroundColor: impColor }} />
-            <Typography variant="body" weight="bold" className="font-mono" style={{ color: colors.text.light }}>
+            <Typography variant="body" weight="bold" className="font-mono" style={{ color: timeColor }}>
               {event.time}
             </Typography>
           </View>
           <View className="flex-row gap-2">
-            <View style={{ backgroundColor: colors.bg.modalCard }} className="px-2.5 py-1 rounded-md">
+            <View style={{ backgroundColor: chipBg }} className="px-2.5 py-1 rounded-md">
               <Typography variant="label" weight="bold" color="secondary">{event.country}</Typography>
             </View>
-            <View style={{ backgroundColor: colors.bg.modalCard }} className="px-2.5 py-1 rounded-md">
+            <View style={{ backgroundColor: chipBg }} className="px-2.5 py-1 rounded-md">
               <Typography variant="label" weight="bold" color="secondary">{event.currency}</Typography>
             </View>
           </View>
         </View>
 
-        <Typography variant="h3" weight="semibold" className="mb-4 leading-snug" style={{ color: colors.text.bright }} numberOfLines={2}>
+        <Typography variant="h3" weight="semibold" className="mb-4 leading-snug" style={{ color: titleColor }} numberOfLines={2}>
           {event.title}
         </Typography>
 
         {hasAnyDataValue && (
-          <View style={{ borderTopColor: colors.bg.modalCard }} className="flex-row justify-between pt-4 border-t">
+          <View style={{ borderTopColor: cardBorder }} className="flex-row justify-between pt-4 border-t">
             <View className="items-start flex-1">
               <Typography variant="caption" color="muted" weight="semibold" className="uppercase mb-1">Act</Typography>
-              <Typography variant="body" weight="bold" className="text-text-primary">{formatEventValue(event.actual)}</Typography>
+              <Typography variant="body" weight="bold" style={{ color: titleColor }}>{formatEventValue(event.actual)}</Typography>
             </View>
             <View className="items-start flex-1">
               <Typography variant="caption" color="muted" weight="semibold" className="uppercase mb-1">Prev</Typography>
@@ -91,7 +98,7 @@ export const EventCard = React.memo(function EventCard({ event, onPress }: Event
           </View>
         )}
 
-        <View style={{ borderTopColor: colors.bg.modalCard }} className="flex-row items-center justify-between gap-2 mt-4 pt-3 border-t">
+        <View style={{ borderTopColor: cardBorder }} className="flex-row items-center justify-between gap-2 mt-4 pt-3 border-t">
           <View
             className="flex-row items-center gap-1.5 px-2.5 py-1.5 rounded-lg"
             style={{ backgroundColor: aiStatus.backgroundColor }}
