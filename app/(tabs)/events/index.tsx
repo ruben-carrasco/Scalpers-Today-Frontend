@@ -94,6 +94,7 @@ export default observer(function EventsScreen() {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [isControlsOpen, setIsControlsOpen] = useState(false);
+  const [isFiltersPanelOpen, setIsFiltersPanelOpen] = useState(false);
 
   const eventsViewModel = useEventsViewModel();
   const haptics = useHaptics();
@@ -394,16 +395,40 @@ export default observer(function EventsScreen() {
               );
             })}
           </ScrollView>
+        </View>
+      )}
 
-          <View className="px-4 pt-3 pb-2 border-b border-[#27272A]">
-            <Typography variant="caption" color="muted" weight="semibold">Filtros</Typography>
-          </View>
+      <View className="py-2 bg-bg-primary border-b border-[#27272A]">
+        <View className="px-6">
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => setIsFiltersPanelOpen(value => !value)}
+            className="self-start px-4 py-2 rounded-xl border border-[#27272A] bg-[#18181B] flex-row items-center gap-2"
+          >
+            <Typography variant="body" weight="semibold" style={{ color: '#FFFFFF' }}>
+              Filtros
+            </Typography>
+            {hasActiveFilters && (
+              <View className="px-2 py-0.5 rounded-full bg-[#2563EB33] border border-[#1D4ED8]">
+                <Typography variant="caption" weight="bold" style={{ color: '#60A5FA' }}>
+                  {activeFilterLabels.length}
+                </Typography>
+              </View>
+            )}
+            {isFiltersPanelOpen ? (
+              <ChevronUp size={14} color="#A1A1AA" strokeWidth={2.5} />
+            ) : (
+              <ChevronDown size={14} color="#A1A1AA" strokeWidth={2.5} />
+            )}
+          </TouchableOpacity>
+        </View>
 
-          <View className="py-3 gap-2">
+        {isFiltersPanelOpen && (
+          <View className="pt-2 gap-2">
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerClassName="px-4 gap-2"
+              contentContainerClassName="px-6 gap-2"
             >
               {hasActiveFilters && (
                 <TouchableOpacity
@@ -414,7 +439,7 @@ export default observer(function EventsScreen() {
                 >
                   <X size={14} color="#FFFFFF" strokeWidth={2.5} />
                   <Typography variant="body" weight="semibold" style={{ color: '#FFFFFF' }}>
-                    Limpiar filtros
+                    Limpiar
                   </Typography>
                 </TouchableOpacity>
               )}
@@ -445,7 +470,7 @@ export default observer(function EventsScreen() {
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerClassName="px-4 gap-2"
+              contentContainerClassName="px-6 gap-2"
             >
               <TouchableOpacity
                 onPress={() => handleCountryFilter(undefined)}
@@ -475,8 +500,8 @@ export default observer(function EventsScreen() {
               })}
             </ScrollView>
           </View>
-        </View>
-      )}
+        )}
+      </View>
 
       {isIOS ? (
         <FlatList
