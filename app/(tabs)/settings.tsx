@@ -230,11 +230,20 @@ export default observer(function SettingsScreen() {
               onPress={handleLogout}
               activeOpacity={0.7}
             >
-              <View className="w-10 h-10 rounded-full bg-[#FF453A]/10 justify-center items-center mr-4">
-                <LogOut size={18} color="#FF453A" strokeWidth={2.5} />
+              <View
+                className="w-10 h-10 rounded-full justify-center items-center mr-4"
+                style={{ backgroundColor: isDarkMode ? 'rgba(255,69,58,0.10)' : '#FEE2E2' }}
+              >
+                <LogOut size={18} color={isDarkMode ? '#FF453A' : '#B91C1C'} strokeWidth={2.5} />
               </View>
               <View className="flex-1">
-                <Typography variant="body" weight="bold" className="text-[#FF453A]">Cerrar Sesión</Typography>
+                <Typography
+                  variant="body"
+                  weight="bold"
+                  style={{ color: isDarkMode ? '#FF453A' : '#B91C1C' }}
+                >
+                  Cerrar Sesión
+                </Typography>
               </View>
             </TouchableOpacity>
           </View>
