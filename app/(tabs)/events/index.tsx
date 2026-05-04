@@ -547,7 +547,7 @@ export default observer(function EventsScreen() {
               )}
 
               {[
-                { label: 'Todos', value: undefined, Icon: null, color: '#FFFFFF' },
+                { label: 'Todos', value: undefined, Icon: null, color: isDarkMode ? '#FFFFFF' : '#0F172A' },
                 { label: 'Alto', value: 3, Icon: Flame, color: '#FF453A' },
                 { label: 'Medio', value: 2, Icon: TrendingUp, color: '#FBBF24' },
                 { label: 'Bajo', value: 1, Icon: MinusCircle, color: '#A1A1AA' },
