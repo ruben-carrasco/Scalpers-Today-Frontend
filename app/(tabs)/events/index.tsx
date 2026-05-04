@@ -294,7 +294,7 @@ export default observer(function EventsScreen() {
         >
           <View className="flex-row items-center justify-between">
             <View className="gap-1">
-              <Typography variant="caption" color="muted" weight="semibold">Día y filtros</Typography>
+              <Typography variant="caption" color="muted" weight="semibold">Día</Typography>
               <Typography variant="body" weight="semibold" color="primary">
                 {selectedDay?.fullLabel ?? selectedDayLabel}
               </Typography>
@@ -400,11 +400,11 @@ export default observer(function EventsScreen() {
       )}
 
       <View className="py-2 bg-bg-primary border-b border-[#27272A]">
-        <View className="px-6">
+        <View className="px-6 flex-row items-center gap-2">
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => setIsFiltersModalOpen(true)}
-            className="self-start px-3 py-1.5 rounded-lg border border-[#27272A] bg-[#18181B] flex-row items-center gap-2"
+            className="px-3 py-1.5 rounded-lg border border-[#27272A] bg-[#18181B] flex-row items-center gap-2"
           >
             <Typography variant="caption" weight="semibold" style={{ color: '#FFFFFF' }}>
               Filtros
@@ -417,6 +417,19 @@ export default observer(function EventsScreen() {
               </View>
             )}
           </TouchableOpacity>
+
+          {hasActiveFilters && (
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={handleClearVisibleFilters}
+              className="px-3 py-1.5 rounded-lg border border-[#3F3F46] bg-[#27272A] flex-row items-center gap-1.5"
+            >
+              <X size={12} color="#FFFFFF" strokeWidth={2.5} />
+              <Typography variant="caption" weight="semibold" style={{ color: '#FFFFFF' }}>
+                Limpiar
+              </Typography>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
