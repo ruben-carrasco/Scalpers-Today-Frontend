@@ -14,6 +14,7 @@ import { AuthViewModel } from '../src/presentation/viewmodels/AuthViewModel';
 import { ApiClient } from '../src/data/api/ApiClient';
 import { notificationService } from '../src/services/NotificationService';
 import { ErrorBoundary } from '../src/presentation/components/common/ErrorBoundary';
+import { ThemeModeProvider, useThemeMode } from '../src/presentation/theme/ThemeModeContext';
 
 const authViewModel = container.get<AuthViewModel>(TYPES.AuthViewModel);
 
@@ -92,13 +93,15 @@ const RootLayoutNav = observer(function RootLayoutNav() {
   return <Slot />;
 });
 
-export default observer(function RootLayout() {
+const RootLayout = observer(function RootLayout() {
+  const { themeMode } = useThemeMode();
+
   return (
     <ErrorBoundary>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
           <BottomSheetModalProvider>
-            <StatusBar style="light" />
+            <StatusBar style={themeMode === 'dark' ? 'light' : 'dark'} />
             <RootLayoutNav />
           </BottomSheetModalProvider>
         </SafeAreaProvider>
@@ -106,3 +109,11 @@ export default observer(function RootLayout() {
     </ErrorBoundary>
   );
 });
+
+export default function RootLayoutWithTheme() {
+  return (
+    <ThemeModeProvider>
+      <RootLayout />
+    </ThemeModeProvider>
+  );
+}
