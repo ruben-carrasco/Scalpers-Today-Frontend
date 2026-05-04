@@ -6,16 +6,19 @@ import Constants from 'expo-constants';
 import { NotificationData } from './types';
 
 export { NotificationData };
+const IS_WEB = Platform.OS === 'web';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+if (!IS_WEB) {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
+}
 
 class NotificationService {
   private notificationListener: Notifications.EventSubscription | null = null;
@@ -32,6 +35,10 @@ class NotificationService {
 
   async registerForPushNotifications(): Promise<string | null> {
     try {
+      if (IS_WEB) {
+        return null;
+      }
+
       if (!Device.isDevice) {
         this.debugLog('Push notifications work best on physical devices');
       }
@@ -102,6 +109,10 @@ class NotificationService {
     onNotificationReceived?: (notification: Notifications.Notification) => void,
     onNotificationResponse?: (response: Notifications.NotificationResponse) => void
   ): void {
+    if (IS_WEB) {
+      return;
+    }
+
     this.removeNotificationListeners();
 
     this.notificationListener = Notifications.addNotificationReceivedListener(
@@ -131,6 +142,10 @@ class NotificationService {
   }
 
   async getLastNotificationResponse(): Promise<Notifications.NotificationResponse | null> {
+    if (IS_WEB) {
+      return null;
+    }
+
     return await Notifications.getLastNotificationResponseAsync();
   }
 
@@ -138,6 +153,10 @@ class NotificationService {
     notification: NotificationData,
     trigger?: Notifications.NotificationTriggerInput
   ): Promise<string> {
+    if (IS_WEB) {
+      return '';
+    }
+
     return await Notifications.scheduleNotificationAsync({
       content: {
         title: notification.title,
@@ -150,18 +169,30 @@ class NotificationService {
   }
 
   async cancelAllScheduledNotifications(): Promise<void> {
+    if (IS_WEB) {
+      return;
+    }
     await Notifications.cancelAllScheduledNotificationsAsync();
   }
 
   async getBadgeCount(): Promise<number> {
+    if (IS_WEB) {
+      return 0;
+    }
     return await Notifications.getBadgeCountAsync();
   }
 
   async setBadgeCount(count: number): Promise<void> {
+    if (IS_WEB) {
+      return;
+    }
     await Notifications.setBadgeCountAsync(count);
   }
 
   async hasPermission(): Promise<boolean> {
+    if (IS_WEB) {
+      return false;
+    }
     const { status } = await Notifications.getPermissionsAsync();
     return status === 'granted';
   }
