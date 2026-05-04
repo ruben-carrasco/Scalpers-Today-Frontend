@@ -88,14 +88,12 @@ function getImportanceLabel(importance: number | undefined): string | null {
 
 export default observer(function EventsScreen() {
   const insets = useSafeAreaInsets();
-  const isWeb = Platform.OS === 'web';
   const params = useLocalSearchParams();
   const requestedEventId = typeof params.eventId === 'string' ? params.eventId : undefined;
   const [searchText, setSearchText] = useState('');
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [isDaySelectorOpen, setIsDaySelectorOpen] = useState(false);
-  const [isFiltersOpen, setIsFiltersOpen] = useState(!isWeb);
+  const [isControlsOpen, setIsControlsOpen] = useState(false);
 
   const eventsViewModel = useEventsViewModel();
   const haptics = useHaptics();
@@ -175,7 +173,7 @@ export default observer(function EventsScreen() {
     haptics.selection();
     eventsViewModel.setSelectedDate(date);
     scrollEventsToTop(false);
-    setIsDaySelectorOpen(false);
+    setIsControlsOpen(false);
   };
 
   const {
@@ -289,12 +287,12 @@ export default observer(function EventsScreen() {
 
         <TouchableOpacity
           activeOpacity={0.8}
-          onPress={() => setIsDaySelectorOpen(value => !value)}
-          className="bg-[#18181B] border border-[#27272A] rounded-2xl px-4 py-3 gap-2"
+          onPress={() => setIsControlsOpen(value => !value)}
+          className="bg-[#18181B] border border-[#27272A] rounded-2xl px-4 py-3"
         >
           <View className="flex-row items-center justify-between">
             <View className="gap-1">
-              <Typography variant="caption" color="muted" weight="semibold">Semana actual</Typography>
+              <Typography variant="caption" color="muted" weight="semibold">Día y filtros</Typography>
               <Typography variant="body" weight="semibold" color="primary">
                 {selectedDay?.fullLabel ?? selectedDayLabel}
               </Typography>
@@ -311,66 +309,14 @@ export default observer(function EventsScreen() {
                   {selectedDayTone.label}
                 </Typography>
               </View>
-              {isDaySelectorOpen ? (
+              {isControlsOpen ? (
                 <ChevronUp size={18} color="#A1A1AA" strokeWidth={2.5} />
               ) : (
                 <ChevronDown size={18} color="#A1A1AA" strokeWidth={2.5} />
               )}
             </View>
           </View>
-          <Typography variant="caption" color="muted">
-            {selectedDay?.count ?? 0} eventos programados ese día
-          </Typography>
         </TouchableOpacity>
-
-        {isDaySelectorOpen && (
-          <View className="bg-[#18181B] border border-[#27272A] rounded-2xl overflow-hidden">
-            {weekDays.map(day => {
-              const isActive = day.date === selectedDate;
-              const tone = getDayTone(day.count);
-              const titleColor = isActive ? '#FFFFFF' : day.count === 0 ? '#71717A' : '#D4D4D8';
-              return (
-                <TouchableOpacity
-                  key={day.date}
-                  activeOpacity={0.8}
-                  onPress={() => handleSelectDay(day.date)}
-                  className={`px-4 py-3 flex-row items-center justify-between border-b border-[#27272A] ${isActive ? 'bg-[#27272A]' : ''}`}
-                >
-                  <View>
-                    <Typography variant="body" weight="semibold" style={{ color: titleColor }}>
-                      {day.fullLabel}
-                    </Typography>
-                    <View className="flex-row items-center gap-2 mt-1">
-                      <Typography variant="caption" color="muted">
-                        {day.shortLabel}
-                      </Typography>
-                      {day.isToday && (
-                        <View className="px-2 py-0.5 rounded-full" style={{ backgroundColor: '#2563EB33' }}>
-                          <Typography variant="caption" weight="bold" style={{ color: '#60A5FA' }}>
-                            Hoy
-                          </Typography>
-                        </View>
-                      )}
-                    </View>
-                  </View>
-                  <View className="items-end gap-1">
-                    <View
-                      className="px-2.5 py-1 rounded-full border"
-                      style={{ backgroundColor: tone.backgroundColor, borderColor: tone.borderColor }}
-                    >
-                      <Typography variant="caption" weight="bold" style={{ color: tone.color }}>
-                        {tone.label}
-                      </Typography>
-                    </View>
-                    <Typography variant="caption" weight="semibold" style={{ color: isActive ? '#FFFFFF' : '#A1A1AA' }}>
-                      {day.count} eventos
-                    </Typography>
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        )}
 
         <View className="flex-row items-center bg-[#18181B] rounded-2xl px-4 h-12 gap-3 border border-[#27272A]">
           <Search size={20} color="#71717A" strokeWidth={2.5} />
@@ -389,38 +335,37 @@ export default observer(function EventsScreen() {
         </View>
       </View>
 
-      <View className="py-2 bg-bg-primary border-b border-[#27272A]">
-        {isWeb && (
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => setIsFiltersOpen(value => !value)}
-            className="mx-6 px-4 py-3 rounded-2xl border border-[#27272A] bg-[#18181B] flex-row items-center justify-between"
-          >
-            <View className="flex-row items-center gap-2">
-              <Typography variant="body" weight="semibold" style={{ color: '#FFFFFF' }}>
-                Filtros
-              </Typography>
-              {hasActiveFilters && (
-                <View className="px-2 py-0.5 rounded-full bg-[#2563EB33] border border-[#1D4ED8]">
-                  <Typography variant="caption" weight="bold" style={{ color: '#60A5FA' }}>
-                    {activeFilterLabels.length}
-                  </Typography>
-                </View>
-              )}
-            </View>
-            {isFiltersOpen ? (
-              <ChevronUp size={16} color="#A1A1AA" strokeWidth={2.5} />
-            ) : (
-              <ChevronDown size={16} color="#A1A1AA" strokeWidth={2.5} />
-            )}
-          </TouchableOpacity>
-        )}
-
-        {(!isWeb || isFiltersOpen) && (
+      {isControlsOpen && (
+        <View className="py-2 bg-bg-primary border-b border-[#27272A] gap-2">
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerClassName={`px-6 gap-2 ${isWeb ? 'pt-2' : ''}`}
+            contentContainerClassName="px-6 gap-2"
+          >
+            {weekDays.map(day => {
+              const isActive = day.date === selectedDate;
+              return (
+                <TouchableOpacity
+                  key={day.date}
+                  onPress={() => handleSelectDay(day.date)}
+                  activeOpacity={0.7}
+                  className={`px-4 py-2.5 rounded-xl border ${isActive ? 'bg-[#27272A] border-[#3F3F46]' : 'bg-[#18181B] border-[#27272A]'}`}
+                >
+                  <Typography variant="body" weight="semibold" style={{ color: isActive ? '#FFFFFF' : '#A1A1AA' }}>
+                    {day.shortLabel}
+                  </Typography>
+                  <Typography variant="caption" style={{ color: isActive ? '#D4D4D8' : '#71717A' }}>
+                    {day.count} eventos
+                  </Typography>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerClassName="px-6 gap-2"
           >
             {hasActiveFilters && (
               <TouchableOpacity
@@ -490,8 +435,8 @@ export default observer(function EventsScreen() {
               );
             })}
           </ScrollView>
-        )}
-      </View>
+        </View>
+      )}
 
       {isIOS ? (
         <FlatList
