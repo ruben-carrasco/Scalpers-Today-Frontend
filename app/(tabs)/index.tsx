@@ -66,6 +66,12 @@ export default observer(function HomeScreen() {
         cardBg: '#18181B',
         cardBorder: '#27272A',
         mutedLine: '#27272A',
+        cityAccent: '#8DEBFF',
+        agendaCardBg: 'rgba(4,47,46,0.30)',
+        agendaCardBorder: 'rgba(15,118,110,0.40)',
+        agendaIconBg: '#0F766E33',
+        agendaTitle: '#CCFBF1',
+        agendaIcon: '#5EEAD4',
       }
     : {
         screenBg: '#F4F4F5',
@@ -78,6 +84,12 @@ export default observer(function HomeScreen() {
         cardBg: '#FFFFFF',
         cardBorder: '#E4E4E7',
         mutedLine: '#E4E4E7',
+        cityAccent: '#1D4ED8',
+        agendaCardBg: '#ECFDF5',
+        agendaCardBorder: '#A7F3D0',
+        agendaIconBg: '#D1FAE5',
+        agendaTitle: '#065F46',
+        agendaIcon: '#0F766E',
       };
 
   const [currentTime, setCurrentTime] = useState(() =>
@@ -165,20 +177,23 @@ export default observer(function HomeScreen() {
                     Actualizado a las {activeSummary.welcome.time}
                   </Typography>
                 </View>
-                <Typography variant="caption" weight="bold" style={{ color: '#8DEBFF' }}>
+                <Typography variant="caption" weight="bold" style={{ color: palette.cityAccent }}>
                   Madrid
                 </Typography>
               </View>
             </View>
 
             {isAgendaComplete && (
-              <View className="mb-8 rounded-3xl border border-[#0F766E]/40 bg-[#042F2E]/30 p-6">
+              <View
+                className="mb-8 rounded-3xl border p-6"
+                style={{ borderColor: palette.agendaCardBorder, backgroundColor: palette.agendaCardBg }}
+              >
                 <View className="flex-row items-center gap-3 mb-3">
-                  <View className="w-11 h-11 rounded-2xl items-center justify-center" style={{ backgroundColor: '#0F766E33' }}>
-                    <CheckCircle2 size={24} color="#5EEAD4" strokeWidth={2.5} />
+                  <View className="w-11 h-11 rounded-2xl items-center justify-center" style={{ backgroundColor: palette.agendaIconBg }}>
+                    <CheckCircle2 size={24} color={palette.agendaIcon} strokeWidth={2.5} />
                   </View>
                   <View className="flex-1">
-                    <Typography variant="h2" weight="bold" style={{ color: '#CCFBF1' }}>
+                    <Typography variant="h2" weight="bold" style={{ color: palette.agendaTitle }}>
                       Agenda completada
                     </Typography>
                     <Typography variant="caption" color="muted" weight="semibold">

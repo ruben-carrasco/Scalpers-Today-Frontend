@@ -1,11 +1,18 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Skeleton } from '../common/Skeleton';
-import { colors, borderRadius, spacing } from '@presentation/theme';
+import { borderRadius, spacing } from '@presentation/theme';
+import { useThemeMode } from '../../theme/ThemeModeContext';
 
 export function MarketOverviewSkeleton() {
+  const { isDarkMode } = useThemeMode();
+  const cardStyle = {
+    backgroundColor: isDarkMode ? '#111827' : '#FFFFFF',
+    borderColor: isDarkMode ? '#1F2937' : '#E4E4E7',
+  };
+
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, cardStyle]}>
       <Skeleton width={160} height={18} borderRadius={4} />
       <Skeleton width={100} height={14} borderRadius={4} style={{ marginTop: 8 }} />
 
@@ -32,8 +39,14 @@ export function ImpactGridSkeleton() {
 }
 
 export function NextEventSkeleton() {
+  const { isDarkMode } = useThemeMode();
+  const cardStyle = {
+    backgroundColor: isDarkMode ? '#111827' : '#FFFFFF',
+    borderColor: isDarkMode ? '#1F2937' : '#E4E4E7',
+  };
+
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, cardStyle]}>
       <Skeleton width={120} height={16} borderRadius={4} />
       <Skeleton width="80%" height={18} borderRadius={4} style={{ marginTop: 12 }} />
       <View style={styles.row}>
@@ -45,8 +58,14 @@ export function NextEventSkeleton() {
 }
 
 export function BriefingSkeleton() {
+  const { isDarkMode } = useThemeMode();
+  const cardStyle = {
+    backgroundColor: isDarkMode ? '#111827' : '#FFFFFF',
+    borderColor: isDarkMode ? '#1F2937' : '#E4E4E7',
+  };
+
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, cardStyle]}>
       <Skeleton width={140} height={18} borderRadius={4} />
       <Skeleton width="100%" height={14} borderRadius={4} style={{ marginTop: 12 }} />
       <Skeleton width="90%" height={14} borderRadius={4} style={{ marginTop: 6 }} />
@@ -78,10 +97,8 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
   },
   card: {
-    backgroundColor: colors.bg.card,
     borderRadius: borderRadius.xl,
     borderWidth: 1,
-    borderColor: colors.border.default,
     padding: spacing.xl,
   },
   statsRow: {

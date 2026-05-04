@@ -1,12 +1,20 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Skeleton } from '../common/Skeleton';
-import { colors, borderRadius, spacing } from '@presentation/theme';
+import { borderRadius, spacing } from '@presentation/theme';
+import { useThemeMode } from '../../theme/ThemeModeContext';
 
 export function AlertCardSkeleton() {
+  const { isDarkMode } = useThemeMode();
+  const cardStyle = {
+    backgroundColor: isDarkMode ? '#111827' : '#FFFFFF',
+    borderColor: isDarkMode ? '#1F2937' : '#E4E4E7',
+  };
+  const accentStyle = { backgroundColor: isDarkMode ? '#1F2937' : '#CBD5E1' };
+
   return (
-    <View style={styles.card}>
-      <View style={styles.accentBar} />
+    <View style={[styles.card, cardStyle]}>
+      <View style={[styles.accentBar, accentStyle]} />
 
       <View style={styles.content}>
         <View style={styles.topRow}>
@@ -33,15 +41,12 @@ export function AlertCardSkeleton() {
 const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
-    backgroundColor: colors.bg.card,
     borderRadius: borderRadius.xl,
     borderWidth: 1,
-    borderColor: colors.border.default,
     overflow: 'hidden',
   },
   accentBar: {
     width: 5,
-    backgroundColor: colors.border.default,
   },
   content: {
     flex: 1,
