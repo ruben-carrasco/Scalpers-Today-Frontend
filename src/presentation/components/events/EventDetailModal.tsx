@@ -114,7 +114,7 @@ export function EventDetailModal({ event, visible, onClose }: EventDetailModalPr
           <EventDataSection event={displayEvent} />
 
           {displayEvent.aiAnalysis ? (
-            <EventAnalysisSection ai={displayEvent.aiAnalysis} />
+            <EventAnalysisSection ai={displayEvent.aiAnalysis} isHighImpact={displayEvent.importance === 3} />
           ) : (
             <EventAnalysisUnavailableSection />
           )}

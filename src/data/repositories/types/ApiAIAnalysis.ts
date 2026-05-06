@@ -6,4 +6,5 @@ export interface ApiAIAnalysis {
   technical_levels?: string;
   trading_strategies?: string;
   impacted_assets?: string[] | string;
+  is_deep_analysis?: boolean;
 }

@@ -9,4 +9,5 @@ export interface AIAnalysis {
   technicalLevels?: string;
   tradingStrategies?: string;
   impactedAssets?: string[];
+  isDeepAnalysis?: boolean;
 }
