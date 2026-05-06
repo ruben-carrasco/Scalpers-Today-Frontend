@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, TouchableOpacity, LayoutAnimation, ScrollView, Modal } from 'react-native';
 import {
   Sparkles, BarChart3, Globe, Crosshair, Lightbulb,
-  ChevronRight, Minus, X, Clock3,
+  ChevronRight, Minus, X, Clock3, AlertCircle,
 } from 'lucide-react-native';
 import { FormattedAIText } from '../../common/FormattedAIText';
 import { Typography } from '../../common/Typography';
@@ -25,10 +25,12 @@ interface AIAnalysis {
   macroContext?: string;
   technicalLevels?: string;
   tradingStrategies?: string;
+  isDeepAnalysis?: boolean;
 }
 
 interface EventAnalysisSectionProps {
   ai: AIAnalysis;
+  isHighImpact?: boolean;
 }
 
 export function EventAnalysisUnavailableSection() {
@@ -67,7 +69,7 @@ export function EventAnalysisUnavailableSection() {
   );
 }
 
-export function EventAnalysisSection({ ai }: EventAnalysisSectionProps) {
+export function EventAnalysisSection({ ai, isHighImpact = false }: EventAnalysisSectionProps) {
   const [detailsVisible, setDetailsVisible] = useState(false);
   const { isDarkMode } = useThemeMode();
   const surface = isDarkMode ? colors.bg.modalCard : '#F8FAFC';
@@ -82,6 +84,8 @@ export function EventAnalysisSection({ ai }: EventAnalysisSectionProps) {
     ai.technicalLevels ? { icon: Crosshair, title: 'Niveles Técnicos', text: ai.technicalLevels } : null,
     ai.tradingStrategies ? { icon: Lightbulb, title: 'Estrategias', text: ai.tradingStrategies } : null,
   ].filter(Boolean) as { icon: any; title: string; text: string }[];
+  const hasDeepContent = deepSections.length > 0;
+  const shouldShowDetails = hasDeepContent || isHighImpact;
 
   const openDetails = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -115,7 +119,7 @@ export function EventAnalysisSection({ ai }: EventAnalysisSectionProps) {
         </View>
       )}
 
-      {deepSections.length > 0 && (
+      {shouldShowDetails && (
         <>
           <TouchableOpacity
             className="flex-row items-center justify-between pt-4 border-t"
@@ -123,9 +127,14 @@ export function EventAnalysisSection({ ai }: EventAnalysisSectionProps) {
             onPress={openDetails}
             activeOpacity={0.7}
           >
-            <Typography variant="body" weight="semibold" style={{ color: colors.brand.primaryLight }}>
-              Análisis detallado
-            </Typography>
+            <View className="flex-row items-center gap-2 flex-1">
+              {!hasDeepContent && (
+                <AlertCircle size={16} color={colors.semantic.warningLight} strokeWidth={2.5} />
+              )}
+              <Typography variant="body" weight="semibold" style={{ color: hasDeepContent ? colors.brand.primaryLight : colors.semantic.warningLight }}>
+                {hasDeepContent ? 'Análisis detallado' : 'Análisis detallado pendiente'}
+              </Typography>
+            </View>
             <ChevronRight size={18} color={colors.brand.primaryLight} strokeWidth={2.5} />
           </TouchableOpacity>
         </>
@@ -160,21 +169,40 @@ export function EventAnalysisSection({ ai }: EventAnalysisSectionProps) {
             showsVerticalScrollIndicator
             keyboardShouldPersistTaps="handled"
           >
-            {deepSections.map((s, i) => (
+            {hasDeepContent ? (
+              deepSections.map((s, i) => (
+                <View
+                  key={i}
+                  className="rounded-2xl p-5 border"
+                  style={{ backgroundColor: surface, borderColor: border }}
+                >
+                  <View className="flex-row items-center gap-2 mb-3">
+                    <s.icon size={16} color={colors.brand.primaryLight} strokeWidth={2} />
+                    <Typography variant="caption" weight="bold" style={{ color: colors.brand.primaryLight }} className="uppercase tracking-widest">
+                      {s.title}
+                    </Typography>
+                  </View>
+                  <FormattedAIText text={s.text} />
+                </View>
+              ))
+            ) : (
               <View
-                key={i}
                 className="rounded-2xl p-5 border"
                 style={{ backgroundColor: surface, borderColor: border }}
               >
                 <View className="flex-row items-center gap-2 mb-3">
-                  <s.icon size={16} color={colors.brand.primaryLight} strokeWidth={2} />
-                  <Typography variant="caption" weight="bold" style={{ color: colors.brand.primaryLight }} className="uppercase tracking-widest">
-                    {s.title}
+                  <AlertCircle size={16} color={colors.semantic.warningLight} strokeWidth={2} />
+                  <Typography variant="caption" weight="bold" style={{ color: colors.semantic.warningLight }} className="uppercase tracking-widest">
+                    Pendiente de análisis profundo
                   </Typography>
                 </View>
-                <FormattedAIText text={s.text} />
+                <Typography variant="body" color="secondary">
+                  Estamos preparando una lectura ampliada para este evento. Mientras tanto, puedes
+                  revisar el resumen, el dato actual, el previsto y el anterior para valorar su
+                  posible impacto en el mercado.
+                </Typography>
               </View>
-            ))}
+            )}
           </ScrollView>
         </View>
       </Modal>

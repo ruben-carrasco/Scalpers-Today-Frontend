@@ -67,6 +67,7 @@ export class EventRepositoryImpl implements IEventRepository {
       technicalLevels: api.technical_levels,
       tradingStrategies: api.trading_strategies,
       impactedAssets: assets,
+      isDeepAnalysis: api.is_deep_analysis ?? false,
     };
   }
 
