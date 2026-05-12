@@ -13,6 +13,14 @@ export class ApiEndpointProvider {
     return `${this.baseUrl}/auth/login`;
   }
 
+  get passwordResetRequest(): string {
+    return `${this.baseUrl}/auth/password-reset/request`;
+  }
+
+  get passwordResetConfirm(): string {
+    return `${this.baseUrl}/auth/password-reset/confirm`;
+  }
+
   get googleLogin(): string {
     return `${this.baseUrl}/auth/google`;
   }

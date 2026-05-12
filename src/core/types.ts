@@ -13,6 +13,8 @@ export const TYPES = {
   LoginUseCase: Symbol.for('LoginUseCase'),
   GoogleLoginUseCase: Symbol.for('GoogleLoginUseCase'),
   RegisterUseCase: Symbol.for('RegisterUseCase'),
+  RequestPasswordResetUseCase: Symbol.for('RequestPasswordResetUseCase'),
+  ConfirmPasswordResetUseCase: Symbol.for('ConfirmPasswordResetUseCase'),
   GetCurrentUserUseCase: Symbol.for('GetCurrentUserUseCase'),
   LogoutUseCase: Symbol.for('LogoutUseCase'),
 

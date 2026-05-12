@@ -272,6 +272,19 @@ export default observer(function LoginScreen() {
               )}
             </View>
 
+            <View className="items-end mb-6">
+              <Link href="/(auth)/forgot-password" asChild>
+                <TouchableOpacity
+                  disabled={isLoading}
+                  hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                >
+                  <Typography variant="body" weight="bold" style={{ color: palette.inputText }}>
+                    ¿Has olvidado tu contraseña?
+                  </Typography>
+                </TouchableOpacity>
+              </Link>
+            </View>
+
             {/* API Error */}
             {authViewModel.error && (
               <View className="flex-row items-center bg-semantic-danger/10 p-4 rounded-2xl gap-3 mb-6 border border-semantic-danger/20">
