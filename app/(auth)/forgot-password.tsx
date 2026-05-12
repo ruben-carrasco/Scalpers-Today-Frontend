@@ -46,6 +46,7 @@ export default observer(function ForgotPasswordScreen() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [hasRequestedReset, setHasRequestedReset] = useState(false);
+  const [showResetForm, setShowResetForm] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -57,6 +58,7 @@ export default observer(function ForgotPasswordScreen() {
     if (typeof params.token === 'string' && params.token.length > 0) {
       setToken(params.token);
       setHasRequestedReset(true);
+      setShowResetForm(true);
     }
   }, [params.token]);
 
@@ -131,6 +133,7 @@ export default observer(function ForgotPasswordScreen() {
     const resetToken = await authViewModel.requestPasswordReset(email.trim());
     if (!authViewModel.error) {
       setHasRequestedReset(true);
+      setShowResetForm(false);
       if (resetToken) {
         setToken(resetToken);
       }
@@ -193,6 +196,57 @@ export default observer(function ForgotPasswordScreen() {
     );
   }
 
+  if (hasRequestedReset && !showResetForm) {
+    return (
+      <View className="flex-1 px-8 justify-center" style={{ backgroundColor: palette.bg }}>
+        <StatusBar barStyle={palette.statusBar} />
+        <View
+          className="rounded-3xl p-6 border"
+          style={{ backgroundColor: palette.card, borderColor: palette.border }}
+        >
+          <View
+            className="w-16 h-16 rounded-full items-center justify-center mb-5"
+            style={{ backgroundColor: palette.successBg }}
+          >
+            <Mail size={32} color="#34D399" strokeWidth={2.4} />
+          </View>
+          <Typography
+            variant="h1"
+            weight="bold"
+            className="mb-3"
+            style={{ color: palette.inputText }}
+          >
+            Solicitud enviada
+          </Typography>
+          <Typography variant="body" color="secondary" className="mb-6">
+            Si existe una cuenta con ese email, recibirás un correo con un enlace y un código para
+            crear una nueva contraseña.
+          </Typography>
+          <TouchableOpacity
+            onPress={() => setShowResetForm(true)}
+            className="h-14 rounded-full bg-brand-primary items-center justify-center px-8 mb-4"
+            accessibilityRole="button"
+            accessibilityLabel="Introducir código"
+          >
+            <Typography variant="body" weight="bold" style={{ color: '#FFFFFF' }}>
+              Introducir código
+            </Typography>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => router.replace('/(auth)/login')}
+            className="h-12 rounded-full items-center justify-center"
+            accessibilityRole="button"
+            accessibilityLabel="Volver al inicio de sesión"
+          >
+            <Typography variant="body" weight="bold" style={{ color: palette.inputText }}>
+              Volver al inicio de sesión
+            </Typography>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View className="flex-1" style={{ backgroundColor: palette.bg }}>
       <StatusBar barStyle={palette.statusBar} />
@@ -235,72 +289,70 @@ export default observer(function ForgotPasswordScreen() {
           </View>
 
           <View className="mb-8">
-            <View className="mb-5">
-              <View
-                className="flex-row items-center border-2 rounded-2xl px-5 h-16 gap-3"
-                style={{
-                  backgroundColor: errors.email ? 'rgba(255,69,58,0.10)' : palette.card,
-                  borderColor: errors.email ? '#FF453A' : palette.border,
-                }}
-              >
-                <Mail size={22} color={errors.email ? '#FF453A' : palette.icon} strokeWidth={2} />
-                <TextInput
-                  className="flex-1 text-[17px] font-medium"
-                  style={{ color: palette.inputText }}
-                  placeholder="Correo electrónico"
-                  placeholderTextColor={palette.muted}
-                  value={email}
-                  onChangeText={(text) => {
-                    setEmail(text);
-                    clearFieldError('email');
-                  }}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  editable={!isLoading}
-                  accessibilityLabel="Correo electrónico"
-                />
-              </View>
-              {errors.email && (
-                <Typography variant="caption" color="danger" weight="semibold" className="mt-2 ml-2">
-                  {errors.email}
-                </Typography>
-              )}
-            </View>
+            {!hasRequestedReset && (
+              <>
+                <View className="mb-5">
+                  <View
+                    className="flex-row items-center border-2 rounded-2xl px-5 h-16 gap-3"
+                    style={{
+                      backgroundColor: errors.email ? 'rgba(255,69,58,0.10)' : palette.card,
+                      borderColor: errors.email ? '#FF453A' : palette.border,
+                    }}
+                  >
+                    <Mail
+                      size={22}
+                      color={errors.email ? '#FF453A' : palette.icon}
+                      strokeWidth={2}
+                    />
+                    <TextInput
+                      className="flex-1 text-[17px] font-medium"
+                      style={{ color: palette.inputText }}
+                      placeholder="Correo electrónico"
+                      placeholderTextColor={palette.muted}
+                      value={email}
+                      onChangeText={(text) => {
+                        setEmail(text);
+                        clearFieldError('email');
+                      }}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      editable={!isLoading}
+                      accessibilityLabel="Correo electrónico"
+                    />
+                  </View>
+                  {errors.email && (
+                    <Typography
+                      variant="caption"
+                      color="danger"
+                      weight="semibold"
+                      className="mt-2 ml-2"
+                    >
+                      {errors.email}
+                    </Typography>
+                  )}
+                </View>
 
-            <TouchableOpacity
-              onPress={handleRequestReset}
-              disabled={isLoading}
-              activeOpacity={0.85}
-              className={`h-14 rounded-full items-center justify-center mb-6 ${isLoading ? 'bg-brand-primary/50' : 'bg-brand-primary'}`}
-              accessibilityRole="button"
-              accessibilityLabel="Enviar instrucciones"
-            >
-              {isLoading && !hasRequestedReset ? (
-                <ActivityIndicator color="#fff" size="small" />
-              ) : (
-                <Typography variant="body" weight="bold" style={{ color: '#FFFFFF' }}>
-                  Enviar instrucciones
-                </Typography>
-              )}
-            </TouchableOpacity>
-
-            {hasRequestedReset && (
-              <View
-                className="rounded-2xl p-4 border mb-6"
-                style={{ backgroundColor: palette.card, borderColor: palette.border }}
-              >
-                <Typography variant="body" weight="bold" className="mb-1" style={{ color: palette.inputText }}>
-                  Solicitud enviada
-                </Typography>
-                <Typography variant="body" color="secondary">
-                  Si existe una cuenta con ese email, podrás continuar con el código de
-                  restablecimiento. En desarrollo se rellena automáticamente para poder probarlo.
-                </Typography>
-              </View>
+                <TouchableOpacity
+                  onPress={handleRequestReset}
+                  disabled={isLoading}
+                  activeOpacity={0.85}
+                  className={`h-14 rounded-full items-center justify-center mb-6 ${isLoading ? 'bg-brand-primary/50' : 'bg-brand-primary'}`}
+                  accessibilityRole="button"
+                  accessibilityLabel="Enviar instrucciones"
+                >
+                  {isLoading ? (
+                    <ActivityIndicator color="#fff" size="small" />
+                  ) : (
+                    <Typography variant="body" weight="bold" style={{ color: '#FFFFFF' }}>
+                      Enviar instrucciones
+                    </Typography>
+                  )}
+                </TouchableOpacity>
+              </>
             )}
 
-            {hasRequestedReset && (
+            {hasRequestedReset && showResetForm && (
               <>
                 <View className="mb-5">
                   <View
