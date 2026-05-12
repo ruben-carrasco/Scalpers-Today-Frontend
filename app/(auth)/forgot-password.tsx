@@ -19,7 +19,7 @@ import {
   Lock,
   Mail,
 } from 'lucide-react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { observer } from 'mobx-react-lite';
 import { emailValidator, passwordValidator } from '../../src/core/validation';
 import { Typography } from '../../src/presentation/components/common/Typography';
@@ -35,6 +35,7 @@ interface FormErrors {
 
 export default observer(function ForgotPasswordScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ token?: string }>();
   const authViewModel = useAuthViewModel();
   const { isDarkMode } = useThemeMode();
   const [email, setEmail] = useState('');
@@ -51,6 +52,13 @@ export default observer(function ForgotPasswordScreen() {
   useEffect(() => {
     authViewModel.clearError();
   }, [authViewModel]);
+
+  useEffect(() => {
+    if (typeof params.token === 'string' && params.token.length > 0) {
+      setToken(params.token);
+      setHasRequestedReset(true);
+    }
+  }, [params.token]);
 
   const palette = isDarkMode
     ? {
