@@ -6,6 +6,8 @@ import { TYPES } from '../../core/types';
 import { ILoginUseCase } from '../../domain/interfaces/usecases/ILoginUseCase';
 import { IGoogleLoginUseCase } from '../../domain/interfaces/usecases/IGoogleLoginUseCase';
 import { IRegisterUseCase } from '../../domain/interfaces/usecases/IRegisterUseCase';
+import { IRequestPasswordResetUseCase } from '../../domain/interfaces/usecases/IRequestPasswordResetUseCase';
+import { IConfirmPasswordResetUseCase } from '../../domain/interfaces/usecases/IConfirmPasswordResetUseCase';
 import { IGetCurrentUserUseCase } from '../../domain/interfaces/usecases/IGetCurrentUserUseCase';
 import { ILogoutUseCase } from '../../domain/interfaces/usecases/ILogoutUseCase';
 import { IRegisterDeviceTokenUseCase } from '../../domain/interfaces/usecases/IRegisterDeviceTokenUseCase';
@@ -39,6 +41,10 @@ export class AuthViewModel {
     private googleLoginUseCase: IGoogleLoginUseCase,
     @inject(TYPES.RegisterUseCase)
     private registerUseCase: IRegisterUseCase,
+    @inject(TYPES.RequestPasswordResetUseCase)
+    private requestPasswordResetUseCase: IRequestPasswordResetUseCase,
+    @inject(TYPES.ConfirmPasswordResetUseCase)
+    private confirmPasswordResetUseCase: IConfirmPasswordResetUseCase,
     @inject(TYPES.GetCurrentUserUseCase)
     private getCurrentUserUseCase: IGetCurrentUserUseCase,
     @inject(TYPES.LogoutUseCase)
@@ -223,6 +229,67 @@ export class AuthViewModel {
           this.error = translateApiError(err.message);
         } else {
           this.error = 'Ha ocurrido un error inesperado. Intenta de nuevo.';
+        }
+      });
+      return false;
+    } finally {
+      runInAction(() => {
+        this.isLoading = false;
+      });
+    }
+  }
+
+  async requestPasswordReset(email: string): Promise<string | null> {
+    this.isLoading = true;
+    this.error = null;
+
+    try {
+      const result = await this.requestPasswordResetUseCase.execute({ email });
+      return result.resetToken ?? null;
+    } catch (err) {
+      runInAction(() => {
+        if (err instanceof NetworkError) {
+          this.error = 'Sin conexión a internet. Verifica tu conexión.';
+        } else if (err instanceof ApiError) {
+          this.error = translateApiError(err.message);
+        } else if (err instanceof Error) {
+          this.error = translateApiError(err.message);
+        } else {
+          this.error = 'No se pudo solicitar el restablecimiento. Intenta de nuevo.';
+        }
+      });
+      return null;
+    } finally {
+      runInAction(() => {
+        this.isLoading = false;
+      });
+    }
+  }
+
+  async confirmPasswordReset(token: string, newPassword: string): Promise<boolean> {
+    this.isLoading = true;
+    this.error = null;
+
+    try {
+      await this.confirmPasswordResetUseCase.execute({
+        token,
+        new_password: newPassword,
+      });
+      return true;
+    } catch (err) {
+      runInAction(() => {
+        if (err instanceof NetworkError) {
+          this.error = 'Sin conexión a internet. Verifica tu conexión.';
+        } else if (err instanceof AuthError) {
+          this.error = 'El enlace de restablecimiento no es válido o ha caducado.';
+        } else if (err instanceof ValidationError) {
+          this.error = translateApiError(err.message);
+        } else if (err instanceof ApiError) {
+          this.error = translateApiError(err.message);
+        } else if (err instanceof Error) {
+          this.error = translateApiError(err.message);
+        } else {
+          this.error = 'No se pudo actualizar la contraseña. Intenta de nuevo.';
         }
       });
       return false;

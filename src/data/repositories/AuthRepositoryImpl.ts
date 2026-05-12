@@ -5,9 +5,12 @@ import { ApiClient } from '../api/ApiClient';
 import { ApiEndpointProvider } from '../api/ApiEndpointProvider';
 import { ITokenManager } from '../../core/storage/TokenManager';
 import { IAuthRepository } from '../../domain/interfaces/repositories/IAuthRepository';
+import { ConfirmPasswordResetParams } from '../../domain/interfaces/repositories/ConfirmPasswordResetParams';
 import { GoogleLoginParams } from '../../domain/interfaces/repositories/GoogleLoginParams';
 import { LoginParams } from '../../domain/interfaces/repositories/LoginParams';
+import { PasswordResetResult } from '../../domain/interfaces/repositories/PasswordResetResult';
 import { RegisterParams } from '../../domain/interfaces/repositories/RegisterParams';
+import { RequestPasswordResetParams } from '../../domain/interfaces/repositories/RequestPasswordResetParams';
 import { User } from '../../domain/entities/User';
 import { AuthResult } from '../../domain/entities/AuthResult';
 import { AuthToken } from '../../domain/entities/AuthToken';
@@ -34,6 +37,11 @@ interface ApiTokenResponse {
 interface ApiAuthResponse {
   user: ApiUserResponse;
   token: ApiTokenResponse;
+}
+
+interface ApiPasswordResetResponse {
+  message: string;
+  reset_token?: string | null;
 }
 
 @injectable()
@@ -99,6 +107,28 @@ export class AuthRepositoryImpl implements IAuthRepository {
       params
     );
     return this.mapAuthResult(response);
+  }
+
+  async requestPasswordReset(params: RequestPasswordResetParams): Promise<PasswordResetResult> {
+    const response = await this.apiClient.post<ApiPasswordResetResponse>(
+      this.endpoints.passwordResetRequest,
+      params
+    );
+    return {
+      message: response.message,
+      resetToken: response.reset_token,
+    };
+  }
+
+  async confirmPasswordReset(params: ConfirmPasswordResetParams): Promise<PasswordResetResult> {
+    const response = await this.apiClient.post<ApiPasswordResetResponse>(
+      this.endpoints.passwordResetConfirm,
+      params
+    );
+    return {
+      message: response.message,
+      resetToken: response.reset_token,
+    };
   }
 
   async getCurrentUser(): Promise<User> {

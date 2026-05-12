@@ -25,6 +25,14 @@ const mockRegisterUseCase = {
   execute: jest.fn(),
 };
 
+const mockRequestPasswordResetUseCase = {
+  execute: jest.fn(),
+};
+
+const mockConfirmPasswordResetUseCase = {
+  execute: jest.fn(),
+};
+
 const mockGetCurrentUserUseCase = {
   execute: jest.fn(),
 };
@@ -47,6 +55,8 @@ function createViewModel(): AuthViewModel {
   vm.loginUseCase = mockLoginUseCase;
   vm.googleLoginUseCase = mockGoogleLoginUseCase;
   vm.registerUseCase = mockRegisterUseCase;
+  vm.requestPasswordResetUseCase = mockRequestPasswordResetUseCase;
+  vm.confirmPasswordResetUseCase = mockConfirmPasswordResetUseCase;
   vm.getCurrentUserUseCase = mockGetCurrentUserUseCase;
   vm.logoutUseCase = mockLogoutUseCase;
   vm.registerDeviceTokenUseCase = mockRegisterDeviceTokenUseCase;

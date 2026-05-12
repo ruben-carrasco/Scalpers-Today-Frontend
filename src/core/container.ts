@@ -21,12 +21,16 @@ import { ConfigRepositoryImpl } from '../data/repositories/ConfigRepositoryImpl'
 import { ILoginUseCase } from '../domain/interfaces/usecases/ILoginUseCase';
 import { IGoogleLoginUseCase } from '../domain/interfaces/usecases/IGoogleLoginUseCase';
 import { IRegisterUseCase } from '../domain/interfaces/usecases/IRegisterUseCase';
+import { IRequestPasswordResetUseCase } from '../domain/interfaces/usecases/IRequestPasswordResetUseCase';
+import { IConfirmPasswordResetUseCase } from '../domain/interfaces/usecases/IConfirmPasswordResetUseCase';
 import { IGetCurrentUserUseCase } from '../domain/interfaces/usecases/IGetCurrentUserUseCase';
 import { ILogoutUseCase } from '../domain/interfaces/usecases/ILogoutUseCase';
 
 import { LoginUseCase } from '../domain/usecases/auth/LoginUseCase';
 import { GoogleLoginUseCase } from '../domain/usecases/auth/GoogleLoginUseCase';
 import { RegisterUseCase } from '../domain/usecases/auth/RegisterUseCase';
+import { RequestPasswordResetUseCase } from '../domain/usecases/auth/RequestPasswordResetUseCase';
+import { ConfirmPasswordResetUseCase } from '../domain/usecases/auth/ConfirmPasswordResetUseCase';
 import { GetCurrentUserUseCase } from '../domain/usecases/auth/GetCurrentUserUseCase';
 import { LogoutUseCase } from '../domain/usecases/auth/LogoutUseCase';
 
@@ -110,6 +114,14 @@ container.bind<IGoogleLoginUseCase>(TYPES.GoogleLoginUseCase)
 
 container.bind<IRegisterUseCase>(TYPES.RegisterUseCase)
   .to(RegisterUseCase)
+  .inTransientScope();
+
+container.bind<IRequestPasswordResetUseCase>(TYPES.RequestPasswordResetUseCase)
+  .to(RequestPasswordResetUseCase)
+  .inTransientScope();
+
+container.bind<IConfirmPasswordResetUseCase>(TYPES.ConfirmPasswordResetUseCase)
+  .to(ConfirmPasswordResetUseCase)
   .inTransientScope();
 
 container.bind<IGetCurrentUserUseCase>(TYPES.GetCurrentUserUseCase)
