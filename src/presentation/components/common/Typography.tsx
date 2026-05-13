@@ -40,7 +40,7 @@ export function Typography({
     brand: 'text-[#3B82F6]', // iOS Blue
     danger: 'text-[#FF453A]', // Bright Neon Red
     success: 'text-[#34D399]', // Bright Neon Green
-    warning: 'text-[#FBBF24]', // Bright Yellow
+    warning: isDarkMode ? 'text-[#FBBF24]' : 'text-[#92400E]',
   };
 
   const weights = {

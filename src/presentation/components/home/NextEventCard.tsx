@@ -17,6 +17,16 @@ export function NextEventCard({ event, onPress }: NextEventCardProps) {
   const { isDarkMode } = useThemeMode();
   const primaryText = isDarkMode ? '#FFFFFF' : '#111827';
   const secondaryText = isDarkMode ? '#A1A1AA' : '#475569';
+  const countryChip = {
+    backgroundColor: isDarkMode ? '#27272A' : '#DBEAFE',
+    borderColor: isDarkMode ? '#3F3F46' : '#93C5FD',
+    textColor: isDarkMode ? '#E4E4E7' : '#1E3A8A',
+  };
+  const currencyChip = {
+    backgroundColor: isDarkMode ? '#27272A' : '#DCFCE7',
+    borderColor: isDarkMode ? '#3F3F46' : '#86EFAC',
+    textColor: isDarkMode ? '#E4E4E7' : '#166534',
+  };
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.7} className="w-full">
@@ -42,12 +52,18 @@ export function NextEventCard({ event, onPress }: NextEventCardProps) {
         </Typography>
 
         <View className="flex-row items-center gap-3 mb-6">
-          <View className="px-3 py-1.5 rounded-lg" style={{ backgroundColor: isDarkMode ? '#27272A' : '#EEF2FF' }}>
-            <Typography variant="caption" color="primary" weight="semibold">{event.country}</Typography>
+          <View
+            className="px-3 py-1.5 rounded-lg border"
+            style={{ backgroundColor: countryChip.backgroundColor, borderColor: countryChip.borderColor }}
+          >
+            <Typography variant="caption" weight="bold" style={{ color: countryChip.textColor }}>{event.country}</Typography>
           </View>
           {event.currency && (
-            <View className="px-3 py-1.5 rounded-lg" style={{ backgroundColor: isDarkMode ? '#27272A' : '#EEF2FF' }}>
-              <Typography variant="caption" color="primary" weight="semibold">{event.currency}</Typography>
+            <View
+              className="px-3 py-1.5 rounded-lg border"
+              style={{ backgroundColor: currencyChip.backgroundColor, borderColor: currencyChip.borderColor }}
+            >
+              <Typography variant="caption" weight="bold" style={{ color: currencyChip.textColor }}>{event.currency}</Typography>
             </View>
           )}
         </View>

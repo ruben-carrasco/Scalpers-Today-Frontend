@@ -128,6 +128,9 @@ export default observer(function HomeScreen() {
   const sentiment = summary?.marketSentiment?.overall
     ? translateSentiment(summary.marketSentiment.overall)
     : { text: 'Neutral', type: 'neutral' as const };
+  const warningText = isDarkMode ? '#FBBF24' : '#92400E';
+  const warningBorder = isDarkMode ? '#FBBF244D' : '#F59E0B';
+  const warningBg = isDarkMode ? palette.cardBg : '#FFFBEB';
 
   const volatility = summary?.marketSentiment?.volatility
     ? translateVolatility(summary.marketSentiment.volatility)
@@ -246,10 +249,10 @@ export default observer(function HomeScreen() {
                 </View>
 
                 {briefing.cautionaryHours && briefing.cautionaryHours.length > 0 && (
-                  <View className="border rounded-3xl p-6 mb-4" style={{ backgroundColor: palette.cardBg, borderColor: '#FBBF24' + (isDarkMode ? '4D' : '80') }}>
+                  <View className="border rounded-3xl p-6 mb-4" style={{ backgroundColor: warningBg, borderColor: warningBorder }}>
                     <View className="flex-row items-center gap-2 mb-4">
-                      <AlarmClock size={20} color="#FBBF24" strokeWidth={2.5} />
-                      <Typography variant="h3" weight="bold" className="text-[#FBBF24]">
+                      <AlarmClock size={20} color={warningText} strokeWidth={2.5} />
+                      <Typography variant="h3" weight="bold" style={{ color: warningText }}>
                         Horas Clave
                       </Typography>
                     </View>
