@@ -29,7 +29,9 @@ export const EventCard = React.memo(function EventCard({ event, onPress }: Event
   const { isDarkMode } = useThemeMode();
   const cardBg = isDarkMode ? colors.bg.modal : '#FFFFFF';
   const cardBorder = isDarkMode ? colors.bg.modalCard : '#E4E4E7';
-  const chipBg = isDarkMode ? colors.bg.modalCard : '#F4F4F5';
+  const chipBg = isDarkMode ? colors.bg.modalCard : '#F8FAFC';
+  const chipBorder = isDarkMode ? colors.border.medium : '#CBD5E1';
+  const chipText = isDarkMode ? colors.text.light : '#334155';
   const titleColor = isDarkMode ? colors.text.bright : '#18181B';
   const timeColor = isDarkMode ? colors.text.light : '#334155';
   const aiStatus = event.aiAnalysis
@@ -57,11 +59,11 @@ export const EventCard = React.memo(function EventCard({ event, onPress }: Event
             </Typography>
           </View>
           <View className="flex-row gap-2">
-            <View style={{ backgroundColor: chipBg }} className="px-2.5 py-1 rounded-md">
-              <Typography variant="label" weight="bold" color="secondary">{event.country}</Typography>
+            <View style={{ backgroundColor: chipBg, borderColor: chipBorder }} className="px-2.5 py-1 rounded-md border">
+              <Typography variant="label" weight="bold" style={{ color: chipText }}>{event.country}</Typography>
             </View>
-            <View style={{ backgroundColor: chipBg }} className="px-2.5 py-1 rounded-md">
-              <Typography variant="label" weight="bold" color="secondary">{event.currency}</Typography>
+            <View style={{ backgroundColor: chipBg, borderColor: chipBorder }} className="px-2.5 py-1 rounded-md border">
+              <Typography variant="label" weight="bold" style={{ color: chipText }}>{event.currency}</Typography>
             </View>
           </View>
         </View>

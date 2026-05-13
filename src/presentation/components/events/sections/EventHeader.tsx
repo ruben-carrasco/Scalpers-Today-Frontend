@@ -17,7 +17,9 @@ interface EventHeaderProps {
 export function EventHeader({ event, impColor, bottomSheetModalRef, onClose }: EventHeaderProps) {
   const { isDarkMode } = useThemeMode();
   const chipBg = isDarkMode ? colors.bg.modalCard : '#F4F4F5';
-  const chipText = isDarkMode ? colors.text.light : '#334155';
+  const chipBorder = isDarkMode ? colors.border.medium : '#CBD5E1';
+  const countryChipText = isDarkMode ? colors.text.light : '#1E3A8A';
+  const currencyChipText = isDarkMode ? colors.text.light : '#166534';
   const titleColor = isDarkMode ? colors.text.primary : '#0F172A';
 
   return (
@@ -50,13 +52,13 @@ export function EventHeader({ event, impColor, bottomSheetModalRef, onClose }: E
       </Typography>
 
       <View className="flex-row items-center gap-3 mb-6 px-6">
-        <View className="flex-row items-center px-3 py-1.5 rounded-lg gap-2" style={{ backgroundColor: chipBg }}>
-          <Flag size={14} color={colors.brand.primaryLight} strokeWidth={2} />
-          <Typography variant="body" weight="semibold" style={{ color: chipText }}>{event.country}</Typography>
+        <View className="flex-row items-center px-3 py-1.5 rounded-lg gap-2 border" style={{ backgroundColor: chipBg, borderColor: chipBorder }}>
+          <Flag size={14} color={isDarkMode ? colors.brand.primaryLight : '#2563EB'} strokeWidth={2} />
+          <Typography variant="body" weight="bold" style={{ color: countryChipText }}>{event.country}</Typography>
         </View>
-        <View className="flex-row items-center px-3 py-1.5 rounded-lg gap-2" style={{ backgroundColor: chipBg }}>
-          <Banknote size={14} color={colors.semantic.successLight} strokeWidth={2} />
-          <Typography variant="body" weight="semibold" style={{ color: chipText }}>{event.currency}</Typography>
+        <View className="flex-row items-center px-3 py-1.5 rounded-lg gap-2 border" style={{ backgroundColor: chipBg, borderColor: chipBorder }}>
+          <Banknote size={14} color={isDarkMode ? colors.semantic.successLight : '#16A34A'} strokeWidth={2} />
+          <Typography variant="body" weight="bold" style={{ color: currencyChipText }}>{event.currency}</Typography>
         </View>
       </View>
     </>

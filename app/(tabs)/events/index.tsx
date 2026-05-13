@@ -40,39 +40,39 @@ type DayTone = {
   borderColor: string;
 };
 
-function getDayTone(count: number): DayTone {
+function getDayTone(count: number, isDarkMode: boolean): DayTone {
   if (count === 0) {
     return {
       label: 'Sin eventos',
-      color: '#71717A',
-      backgroundColor: '#18181B',
-      borderColor: '#27272A',
+      color: isDarkMode ? '#A1A1AA' : '#475569',
+      backgroundColor: isDarkMode ? '#18181B' : '#F8FAFC',
+      borderColor: isDarkMode ? '#27272A' : '#CBD5E1',
     };
   }
 
   if (count >= 40) {
     return {
       label: 'Alta actividad',
-      color: '#FF453A',
-      backgroundColor: '#7F1D1D33',
-      borderColor: '#991B1B',
+      color: isDarkMode ? '#FF453A' : '#B91C1C',
+      backgroundColor: isDarkMode ? '#7F1D1D33' : '#FEE2E2',
+      borderColor: isDarkMode ? '#991B1B' : '#FCA5A5',
     };
   }
 
   if (count >= 15) {
     return {
       label: 'Día activo',
-      color: '#FBBF24',
-      backgroundColor: '#78350F33',
-      borderColor: '#92400E',
+      color: isDarkMode ? '#FBBF24' : '#92400E',
+      backgroundColor: isDarkMode ? '#78350F33' : '#FEF3C7',
+      borderColor: isDarkMode ? '#92400E' : '#F59E0B',
     };
   }
 
   return {
     label: 'Agenda ligera',
-    color: '#60A5FA',
-    backgroundColor: '#1D4ED833',
-    borderColor: '#1D4ED8',
+    color: isDarkMode ? '#60A5FA' : '#1D4ED8',
+    backgroundColor: isDarkMode ? '#1D4ED833' : '#DBEAFE',
+    borderColor: isDarkMode ? '#1D4ED8' : '#93C5FD',
   };
 }
 
@@ -112,7 +112,7 @@ export default observer(function EventsScreen() {
         surfaceStrongBorder: '#3F3F46',
         textPrimary: '#FFFFFF',
         textSecondary: '#A1A1AA',
-        textMuted: '#71717A',
+        textMuted: '#64748B',
         textSoft: '#D4D4D8',
         modalOverlay: 'rgba(0,0,0,0.6)',
         modalSheetBg: '#111113',
@@ -122,11 +122,11 @@ export default observer(function EventsScreen() {
         statusBar: 'dark-content' as const,
         surfaceBg: '#FFFFFF',
         surfaceBorder: '#E4E4E7',
-        surfaceStrong: '#EEF2FF',
-        surfaceStrongBorder: '#CBD5E1',
+        surfaceStrong: '#DBEAFE',
+        surfaceStrongBorder: '#93C5FD',
         textPrimary: '#18181B',
-        textSecondary: '#52525B',
-        textMuted: '#71717A',
+        textSecondary: '#334155',
+        textMuted: '#475569',
         textSoft: '#334155',
         modalOverlay: 'rgba(15,23,42,0.2)',
         modalSheetBg: '#FFFFFF',
@@ -239,7 +239,7 @@ export default observer(function EventsScreen() {
 
   const selectedDay = weekDays.find(day => day.date === selectedDate);
   const selectedEvent = selectedEventId ? eventsViewModel.findEventById(selectedEventId) ?? null : null;
-  const selectedDayTone = getDayTone(selectedDay?.count ?? 0);
+  const selectedDayTone = getDayTone(selectedDay?.count ?? 0, isDarkMode);
   const hasActiveFilters = Boolean(searchText || filters.importance || filters.country);
   const activeFilterLabels = [
     searchText ? `“${searchText}”` : null,
@@ -403,8 +403,12 @@ export default observer(function EventsScreen() {
           >
             {weekDays.map(day => {
               const isActive = day.date === selectedDate;
-              const tone = getDayTone(day.count);
-              const titleColor = isActive ? palette.textPrimary : day.count === 0 ? palette.textMuted : palette.textSoft;
+              const tone = getDayTone(day.count, isDarkMode);
+              const titleColor = isActive
+                ? palette.textPrimary
+                : day.count === 0
+                  ? palette.textSecondary
+                  : palette.textSoft;
               return (
                 <TouchableOpacity
                   key={day.date}
@@ -426,7 +430,7 @@ export default observer(function EventsScreen() {
                       </Typography>
                       {day.isToday && (
                         <View className="px-2 py-0.5 rounded-full" style={{ backgroundColor: '#2563EB33' }}>
-                          <Typography variant="caption" weight="bold" style={{ color: '#60A5FA' }}>
+                          <Typography variant="caption" weight="bold" style={{ color: isDarkMode ? '#60A5FA' : '#1D4ED8' }}>
                             Hoy
                           </Typography>
                         </View>

@@ -38,6 +38,8 @@ export function EventAnalysisUnavailableSection() {
   const cardBg = isDarkMode ? colors.bg.modalCard : '#F8FAFC';
   const cardBorder = isDarkMode ? colors.border.medium : '#E2E8F0';
   const titleColor = isDarkMode ? colors.text.primary : '#0F172A';
+  const warningColor = isDarkMode ? colors.semantic.warningLight : '#92400E';
+  const warningBg = isDarkMode ? colors.semantic.warning + '20' : '#FEF3C7';
 
   return (
     <View
@@ -47,9 +49,9 @@ export function EventAnalysisUnavailableSection() {
       <View className="flex-row items-center gap-3 mb-3">
         <View
           className="w-10 h-10 rounded-2xl items-center justify-center"
-          style={{ backgroundColor: colors.semantic.warning + '20' }}
+          style={{ backgroundColor: warningBg }}
         >
-          <Clock3 size={18} color={colors.semantic.warningLight} strokeWidth={2.5} />
+          <Clock3 size={18} color={warningColor} strokeWidth={2.5} />
         </View>
         <View className="flex-1">
           <Typography variant="body" weight="bold" style={{ color: titleColor }}>
@@ -76,6 +78,7 @@ export function EventAnalysisSection({ ai, isHighImpact = false }: EventAnalysis
   const base = isDarkMode ? colors.bg.modal : '#FFFFFF';
   const border = isDarkMode ? colors.border.medium : '#E2E8F0';
   const titleColor = isDarkMode ? colors.text.primary : '#0F172A';
+  const warningColor = isDarkMode ? colors.semantic.warningLight : '#92400E';
 
   const SentimentIcon = getSentimentIcon(ai.sentiment) || Minus;
 
@@ -129,9 +132,9 @@ export function EventAnalysisSection({ ai, isHighImpact = false }: EventAnalysis
           >
             <View className="flex-row items-center gap-2 flex-1">
               {!hasDeepContent && (
-                <AlertCircle size={16} color={colors.semantic.warningLight} strokeWidth={2.5} />
+                <AlertCircle size={16} color={warningColor} strokeWidth={2.5} />
               )}
-              <Typography variant="body" weight="semibold" style={{ color: hasDeepContent ? colors.brand.primaryLight : colors.semantic.warningLight }}>
+              <Typography variant="body" weight="semibold" style={{ color: hasDeepContent ? colors.brand.primaryLight : warningColor }}>
                 {hasDeepContent ? 'Análisis detallado' : 'Análisis detallado pendiente'}
               </Typography>
             </View>
@@ -191,8 +194,8 @@ export function EventAnalysisSection({ ai, isHighImpact = false }: EventAnalysis
                 style={{ backgroundColor: surface, borderColor: border }}
               >
                 <View className="flex-row items-center gap-2 mb-3">
-                  <AlertCircle size={16} color={colors.semantic.warningLight} strokeWidth={2} />
-                  <Typography variant="caption" weight="bold" style={{ color: colors.semantic.warningLight }} className="uppercase tracking-widest">
+                  <AlertCircle size={16} color={warningColor} strokeWidth={2} />
+                  <Typography variant="caption" weight="bold" style={{ color: warningColor }} className="uppercase tracking-widest">
                     Pendiente de análisis profundo
                   </Typography>
                 </View>
