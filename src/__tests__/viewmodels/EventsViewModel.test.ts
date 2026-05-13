@@ -9,6 +9,10 @@ const mockGetFilteredEvents = {
   }),
 };
 
+const mockGetEvents = {
+  execute: jest.fn().mockResolvedValue([]),
+};
+
 const mockGetUpcomingEvents = {
   execute: jest.fn().mockResolvedValue({
     events: [],
@@ -22,11 +26,38 @@ const mockCacheService = {
 };
 
 const TEST_DATE = '2026-04-26';
+const MADRID_TIMEZONE = 'Europe/Madrid';
+
+function getMadridTodayIso(): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: MADRID_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date());
+
+  const values = Object.fromEntries(parts.map(part => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function currentWeekDates(): string[] {
+  const today = new Date(`${getMadridTodayIso()}T00:00:00Z`);
+  const mondayOffset = (today.getUTCDay() + 6) % 7;
+  const monday = new Date(today);
+  monday.setUTCDate(today.getUTCDate() - mondayOffset);
+
+  return Array.from({ length: 7 }, (_, index) => {
+    const value = new Date(monday);
+    value.setUTCDate(monday.getUTCDate() + index);
+    return value.toISOString().slice(0, 10);
+  });
+}
 
 function createViewModel(): EventsViewModel {
   const vm = Object.create(EventsViewModel.prototype);
   // Manually set the private dependencies (bypassing inversify)
   vm.getFilteredEventsUseCase = mockGetFilteredEvents;
+  vm.getEventsUseCase = mockGetEvents;
   vm.getUpcomingEventsUseCase = mockGetUpcomingEvents;
   vm.cacheService = mockCacheService;
   // Initialize observable properties
@@ -77,6 +108,9 @@ function makeEvent(overrides: Partial<EventModel> = {}): EventModel {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockGetEvents.execute.mockResolvedValue([]);
+  mockCacheService.get.mockResolvedValue(null);
+  mockCacheService.set.mockResolvedValue(undefined);
   jest.useFakeTimers();
 });
 
@@ -85,6 +119,51 @@ afterEach(() => {
 });
 
 describe('EventsViewModel', () => {
+  describe('loadEvents', () => {
+    it('does not reuse in-memory cache when current week only has one day loaded', async () => {
+      const vm = createViewModel();
+      const [today, tomorrow] = currentWeekDates();
+      const todayEvent = makeEvent({ id: 'today', eventDate: today });
+      const tomorrowEvent = makeEvent({ id: 'tomorrow', eventDate: tomorrow });
+      vm.allWeekEvents = [todayEvent];
+      (vm as any).lastFetchTime = Date.now();
+      mockGetEvents.execute.mockResolvedValue([todayEvent, tomorrowEvent]);
+
+      await vm.loadEvents();
+
+      expect(mockGetEvents.execute).toHaveBeenCalledTimes(1);
+      expect(vm.allWeekEvents.map(event => event.id)).toEqual(['today', 'tomorrow']);
+    });
+
+    it('reuses in-memory cache when current week has multiple days loaded', async () => {
+      const vm = createViewModel();
+      const [today, tomorrow] = currentWeekDates();
+      vm.allWeekEvents = [
+        makeEvent({ id: 'today', eventDate: today }),
+        makeEvent({ id: 'tomorrow', eventDate: tomorrow }),
+      ];
+      (vm as any).lastFetchTime = Date.now();
+
+      await vm.loadEvents();
+
+      expect(mockGetEvents.execute).not.toHaveBeenCalled();
+    });
+
+    it('ignores persisted cache when it only contains one current-week day', async () => {
+      const vm = createViewModel();
+      const [today, tomorrow] = currentWeekDates();
+      const todayEvent = makeEvent({ id: 'today', eventDate: today });
+      const tomorrowEvent = makeEvent({ id: 'tomorrow', eventDate: tomorrow });
+      mockCacheService.get.mockResolvedValue({ events: [todayEvent] });
+      mockGetEvents.execute.mockResolvedValue([todayEvent, tomorrowEvent]);
+
+      await vm.loadEvents();
+
+      expect(mockGetEvents.execute).toHaveBeenCalledTimes(1);
+      expect(vm.allWeekEvents.map(event => event.id)).toEqual(['today', 'tomorrow']);
+    });
+  });
+
   describe('setSearchFilter', () => {
     it('applies debounce of 300ms', () => {
       const vm = createViewModel();
