@@ -62,16 +62,16 @@ function buildCurrentWeekDates(): string[] {
 }
 
 function hasUsableWeekCache(events: EventModel[]): boolean {
-  const currentWeekDates = new Set(buildCurrentWeekDates());
+  const businessWeekDates = buildCurrentWeekDates().filter(date => parseIsoDate(date).getUTCDay() < 5);
   const coveredDates = new Set(
     events
       .map(event => event.eventDate)
       .filter((eventDate): eventDate is string => {
-        return typeof eventDate === 'string' && currentWeekDates.has(eventDate);
+        return typeof eventDate === 'string' && businessWeekDates.includes(eventDate);
       })
   );
 
-  return coveredDates.size > 1;
+  return businessWeekDates.every(date => coveredDates.has(date));
 }
 
 function buildWeekDayOptions(events: EventModel[]): WeekDayOption[] {
