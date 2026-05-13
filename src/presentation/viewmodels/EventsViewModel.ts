@@ -61,6 +61,19 @@ function buildCurrentWeekDates(): string[] {
   });
 }
 
+function hasUsableWeekCache(events: EventModel[]): boolean {
+  const currentWeekDates = new Set(buildCurrentWeekDates());
+  const coveredDates = new Set(
+    events
+      .map(event => event.eventDate)
+      .filter((eventDate): eventDate is string => {
+        return typeof eventDate === 'string' && currentWeekDates.has(eventDate);
+      })
+  );
+
+  return coveredDates.size > 1;
+}
+
 function buildWeekDayOptions(events: EventModel[]): WeekDayOption[] {
   const todayIso = getMadridTodayIso();
   const eventCountByDate = events.reduce<Record<string, number>>((acc, event) => {
@@ -233,7 +246,12 @@ export class EventsViewModel {
 
   async loadEvents(force: boolean = false): Promise<void> {
     const now = Date.now();
-    if (!force && this.allWeekEvents.length > 0 && now - this.lastFetchTime < CACHE_TTL_MS) {
+    if (
+      !force &&
+      this.allWeekEvents.length > 0 &&
+      hasUsableWeekCache(this.allWeekEvents) &&
+      now - this.lastFetchTime < CACHE_TTL_MS
+    ) {
       return;
     }
 
@@ -243,9 +261,10 @@ export class EventsViewModel {
 
     if (this.allWeekEvents.length === 0) {
       const cached = await this.cacheService.get<{ events: EventModel[] }>(EVENTS_CACHE_KEY, CACHE_TTL_MS);
-      if (cached && requestId === this._loadRequestId) {
+      const cachedEvents = cached?.events ?? [];
+      if (cachedEvents.length > 0 && hasUsableWeekCache(cachedEvents) && requestId === this._loadRequestId) {
         runInAction(() => {
-          this.hydrateWeekEvents(cached.events);
+          this.hydrateWeekEvents(cachedEvents);
         });
       }
     }

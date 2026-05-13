@@ -9,10 +9,11 @@ import {
   FlatList,
   Platform,
   Modal,
+  AppState,
 } from 'react-native';
 import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useLocalSearchParams } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   Search,
   X,
@@ -157,6 +158,22 @@ export default observer(function EventsScreen() {
 
     void eventsViewModel.loadEvents(true);
   }, [eventsViewModel, requestedEventId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      void eventsViewModel.loadEvents();
+
+      const subscription = AppState.addEventListener('change', (nextState) => {
+        if (nextState === 'active') {
+          void eventsViewModel.loadEvents();
+        }
+      });
+
+      return () => {
+        subscription.remove();
+      };
+    }, [eventsViewModel])
+  );
 
   useEffect(() => {
     if (!requestedEventId || openedEventIdRef.current === requestedEventId) {
