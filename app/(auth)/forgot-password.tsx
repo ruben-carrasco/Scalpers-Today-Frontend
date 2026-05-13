@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -13,6 +13,7 @@ import {
   AlertCircle,
   ArrowLeft,
   CheckCircle,
+  Circle,
   Eye,
   EyeOff,
   KeyRound,
@@ -33,6 +34,21 @@ interface FormErrors {
   confirmPassword?: string;
 }
 
+const getPasswordStrength = (pwd: string): { level: number; label: string; color: string; bgClass: string } => {
+  if (!pwd) return { level: 0, label: '', color: '#A1A1AA', bgClass: 'bg-bg-elevated' };
+  let score = 0;
+  if (pwd.length >= 6) score++;
+  if (pwd.length >= 10) score++;
+  if (/[A-Z]/.test(pwd)) score++;
+  if (/[a-z]/.test(pwd)) score++;
+  if (/[0-9]/.test(pwd)) score++;
+  if (/[^A-Za-z0-9]/.test(pwd)) score++;
+
+  if (score <= 2) return { level: 1, label: 'Débil', color: '#FF453A', bgClass: 'bg-semantic-danger' };
+  if (score <= 4) return { level: 2, label: 'Media', color: '#FBBF24', bgClass: 'bg-semantic-warning' };
+  return { level: 3, label: 'Fuerte', color: '#34D399', bgClass: 'bg-semantic-success' };
+};
+
 export default observer(function ForgotPasswordScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ token?: string }>();
@@ -49,6 +65,8 @@ export default observer(function ForgotPasswordScreen() {
   const [showResetForm, setShowResetForm] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const passwordStrength = useMemo(() => getPasswordStrength(password), [password]);
+  const passwordValidation = useMemo(() => passwordValidator.validate(password), [password]);
 
   useEffect(() => {
     authViewModel.clearError();
@@ -103,8 +121,8 @@ export default observer(function ForgotPasswordScreen() {
   const validatePasswordForm = useCallback((): boolean => {
     const newErrors: FormErrors = {};
 
-    if (!token.trim()) {
-      newErrors.token = 'Introduce el código o enlace de restablecimiento';
+    if (!/^\d{6}$/.test(token.trim())) {
+      newErrors.token = 'Introduce el código de 6 dígitos';
     }
 
     const validation = passwordValidator.validate(password);
@@ -219,8 +237,7 @@ export default observer(function ForgotPasswordScreen() {
             Solicitud enviada
           </Typography>
           <Typography variant="body" color="secondary" className="mb-6">
-            Si existe una cuenta con ese email, recibirás un correo con un enlace y un código para
-            crear una nueva contraseña.
+            Código enviado si el email existe.
           </Typography>
           <TouchableOpacity
             onPress={() => setShowResetForm(true)}
@@ -281,10 +298,12 @@ export default observer(function ForgotPasswordScreen() {
               className="mb-2"
               style={{ color: palette.inputText }}
             >
-              Restablecer contraseña
+              {hasRequestedReset && showResetForm ? 'Introduce el código' : 'Restablecer contraseña'}
             </Typography>
             <Typography variant="h3" color="secondary">
-              Introduce tu email y crea una nueva contraseña de acceso.
+              {hasRequestedReset && showResetForm
+                ? 'Introduce el código recibido y define una nueva contraseña.'
+                : 'Introduce tu email para recibir un código de verificación.'}
             </Typography>
           </View>
 
@@ -370,17 +389,17 @@ export default observer(function ForgotPasswordScreen() {
                     <TextInput
                       className="flex-1 text-[15px] font-medium"
                       style={{ color: palette.inputText }}
-                      placeholder="Código o token de restablecimiento"
+                      placeholder="Código de 6 dígitos"
                       placeholderTextColor={palette.muted}
                       value={token}
                       onChangeText={(text) => {
-                        setToken(text);
+                        setToken(text.replace(/\D/g, '').slice(0, 6));
                         clearFieldError('token');
                       }}
-                      autoCapitalize="none"
-                      autoCorrect={false}
+                      keyboardType="number-pad"
+                      maxLength={6}
                       editable={!isLoading}
-                      accessibilityLabel="Token de restablecimiento"
+                      accessibilityLabel="Código de restablecimiento"
                     />
                   </View>
                   {errors.token && (
@@ -434,6 +453,42 @@ export default observer(function ForgotPasswordScreen() {
                       {errors.password}
                     </Typography>
                   )}
+
+                  {password.length > 0 && (
+                    <View className="mt-4 mx-2">
+                      <View className="flex-row items-center gap-3 mb-3">
+                        <View className="flex-row gap-2 flex-1">
+                          {[1, 2, 3].map((dot) => (
+                            <View
+                              key={dot}
+                              className={`flex-1 h-1.5 rounded-full ${dot <= passwordStrength.level ? passwordStrength.bgClass : 'bg-bg-elevated'}`}
+                            />
+                          ))}
+                        </View>
+                        <Typography variant="caption" weight="bold" style={{ color: passwordStrength.color }}>
+                          {passwordStrength.label}
+                        </Typography>
+                      </View>
+                      <View className="gap-2">
+                        {passwordValidation.requirements.map((req, index) => (
+                          <View key={index} className="flex-row items-center gap-2">
+                            {req.met ? (
+                              <CheckCircle size={16} color="#34D399" strokeWidth={2.5} />
+                            ) : (
+                              <Circle size={16} color={isDarkMode ? '#52525B' : '#94A3B8'} strokeWidth={2.5} />
+                            )}
+                            <Typography
+                              variant="caption"
+                              weight={req.met ? 'semibold' : 'medium'}
+                              style={{ color: req.met ? '#34D399' : isDarkMode ? '#A1A1AA' : '#64748B' }}
+                            >
+                              {req.label}
+                            </Typography>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  )}
                 </View>
 
                 <View className="mb-6">
@@ -479,6 +534,14 @@ export default observer(function ForgotPasswordScreen() {
                     <Typography variant="caption" color="danger" weight="semibold" className="mt-2 ml-2">
                       {errors.confirmPassword}
                     </Typography>
+                  )}
+                  {!errors.confirmPassword && confirmPassword.length > 0 && password === confirmPassword && (
+                    <View className="flex-row items-center gap-2 mt-3 ml-2">
+                      <CheckCircle size={16} color="#34D399" strokeWidth={2.5} />
+                      <Typography variant="caption" weight="bold" className="text-semantic-success">
+                        Las contraseñas coinciden
+                      </Typography>
+                    </View>
                   )}
                 </View>
 
