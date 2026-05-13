@@ -135,13 +135,24 @@ describe('EventsViewModel', () => {
       expect(vm.allWeekEvents.map(event => event.id)).toEqual(['today', 'tomorrow']);
     });
 
-    it('reuses in-memory cache when current week has multiple days loaded', async () => {
+    it('does not reuse in-memory cache when current week is missing business days', async () => {
       const vm = createViewModel();
       const [today, tomorrow] = currentWeekDates();
-      vm.allWeekEvents = [
-        makeEvent({ id: 'today', eventDate: today }),
-        makeEvent({ id: 'tomorrow', eventDate: tomorrow }),
-      ];
+      const todayEvent = makeEvent({ id: 'today', eventDate: today });
+      const tomorrowEvent = makeEvent({ id: 'tomorrow', eventDate: tomorrow });
+      vm.allWeekEvents = [todayEvent, tomorrowEvent];
+      (vm as any).lastFetchTime = Date.now();
+      mockGetEvents.execute.mockResolvedValue([todayEvent, tomorrowEvent]);
+
+      await vm.loadEvents();
+
+      expect(mockGetEvents.execute).toHaveBeenCalledTimes(1);
+    });
+
+    it('reuses in-memory cache when current week has all business days loaded', async () => {
+      const vm = createViewModel();
+      vm.allWeekEvents = currentWeekDates()
+        .map((eventDate, index) => makeEvent({ id: `day-${index}`, eventDate }));
       (vm as any).lastFetchTime = Date.now();
 
       await vm.loadEvents();
