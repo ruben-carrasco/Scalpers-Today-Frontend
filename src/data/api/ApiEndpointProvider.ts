@@ -81,6 +81,10 @@ export class ApiEndpointProvider {
     return `${this.baseUrl}/config/countries`;
   }
 
+  get assistantChat(): string {
+    return `${this.baseUrl}/assistant/chat`;
+  }
+
   get health(): string {
     return `${this.baseUrl}/health`;
   }

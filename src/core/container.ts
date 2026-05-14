@@ -12,11 +12,13 @@ import { IAuthRepository } from '../domain/interfaces/repositories/IAuthReposito
 import { IEventRepository } from '../domain/interfaces/repositories/IEventRepository';
 import { IAlertRepository } from '../domain/interfaces/repositories/IAlertRepository';
 import { IConfigRepository } from '../domain/interfaces/repositories/IConfigRepository';
+import { IAssistantRepository } from '../domain/interfaces/repositories/IAssistantRepository';
 
 import { AuthRepositoryImpl } from '../data/repositories/AuthRepositoryImpl';
 import { EventRepositoryImpl } from '../data/repositories/EventRepositoryImpl';
 import { AlertRepositoryImpl } from '../data/repositories/AlertRepositoryImpl';
 import { ConfigRepositoryImpl } from '../data/repositories/ConfigRepositoryImpl';
+import { AssistantRepositoryImpl } from '../data/repositories/AssistantRepositoryImpl';
 
 import { ILoginUseCase } from '../domain/interfaces/usecases/ILoginUseCase';
 import { IGoogleLoginUseCase } from '../domain/interfaces/usecases/IGoogleLoginUseCase';
@@ -25,6 +27,7 @@ import { IRequestPasswordResetUseCase } from '../domain/interfaces/usecases/IReq
 import { IConfirmPasswordResetUseCase } from '../domain/interfaces/usecases/IConfirmPasswordResetUseCase';
 import { IGetCurrentUserUseCase } from '../domain/interfaces/usecases/IGetCurrentUserUseCase';
 import { ILogoutUseCase } from '../domain/interfaces/usecases/ILogoutUseCase';
+import { ISendAssistantMessageUseCase } from '../domain/interfaces/usecases/ISendAssistantMessageUseCase';
 
 import { LoginUseCase } from '../domain/usecases/auth/LoginUseCase';
 import { GoogleLoginUseCase } from '../domain/usecases/auth/GoogleLoginUseCase';
@@ -33,6 +36,7 @@ import { RequestPasswordResetUseCase } from '../domain/usecases/auth/RequestPass
 import { ConfirmPasswordResetUseCase } from '../domain/usecases/auth/ConfirmPasswordResetUseCase';
 import { GetCurrentUserUseCase } from '../domain/usecases/auth/GetCurrentUserUseCase';
 import { LogoutUseCase } from '../domain/usecases/auth/LogoutUseCase';
+import { SendAssistantMessageUseCase } from '../domain/usecases/assistant/SendAssistantMessageUseCase';
 
 import { IGetEventsUseCase } from '../domain/interfaces/usecases/IGetEventsUseCase';
 import { IGetFilteredEventsUseCase } from '../domain/interfaces/usecases/IGetFilteredEventsUseCase';
@@ -68,6 +72,7 @@ import { HomeViewModel } from '../presentation/viewmodels/HomeViewModel';
 import { EventsViewModel } from '../presentation/viewmodels/EventsViewModel';
 import { AlertsViewModel } from '../presentation/viewmodels/AlertsViewModel';
 import { SettingsViewModel } from '../presentation/viewmodels/SettingsViewModel';
+import { AssistantViewModel } from '../presentation/viewmodels/AssistantViewModel';
 import { CacheService } from '../services/CacheService';
 
 const container = new Container();
@@ -102,6 +107,10 @@ container.bind<IAlertRepository>(TYPES.AlertRepository)
 
 container.bind<IConfigRepository>(TYPES.ConfigRepository)
   .to(ConfigRepositoryImpl)
+  .inSingletonScope();
+
+container.bind<IAssistantRepository>(TYPES.AssistantRepository)
+  .to(AssistantRepositoryImpl)
   .inSingletonScope();
 
 container.bind<ILoginUseCase>(TYPES.LoginUseCase)
@@ -176,6 +185,10 @@ container.bind<IGetCountriesUseCase>(TYPES.GetCountriesUseCase)
   .to(GetCountriesUseCase)
   .inTransientScope();
 
+container.bind<ISendAssistantMessageUseCase>(TYPES.SendAssistantMessageUseCase)
+  .to(SendAssistantMessageUseCase)
+  .inTransientScope();
+
 container.bind<AuthViewModel>(TYPES.AuthViewModel)
   .to(AuthViewModel)
   .inSingletonScope();
@@ -194,6 +207,10 @@ container.bind<AlertsViewModel>(TYPES.AlertsViewModel)
 
 container.bind<SettingsViewModel>(TYPES.SettingsViewModel)
   .to(SettingsViewModel)
+  .inSingletonScope();
+
+container.bind<AssistantViewModel>(TYPES.AssistantViewModel)
+  .to(AssistantViewModel)
   .inSingletonScope();
 
 export { container };
