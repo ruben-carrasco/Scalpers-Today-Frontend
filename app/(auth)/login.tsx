@@ -252,6 +252,8 @@ export default observer(function LoginScreen() {
                   value={password}
                   onChangeText={handlePasswordChange}
                   secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
                   editable={!isLoading}
                   accessibilityLabel="Contraseña"
                 />
