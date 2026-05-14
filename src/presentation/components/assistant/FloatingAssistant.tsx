@@ -28,6 +28,7 @@ export const FloatingAssistant = observer(function FloatingAssistant() {
   const insets = useSafeAreaInsets();
   const [question, setQuestion] = useState('');
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const messagesScrollRef = useRef<any>(null);
   const snapPoints = useMemo(() => ['78%'], []);
 
   const palette = isDarkMode
@@ -65,6 +66,16 @@ export const FloatingAssistant = observer(function FloatingAssistant() {
       bottomSheetModalRef.current?.dismiss();
     }
   }, [assistant.isOpen]);
+
+  useEffect(() => {
+    if (!assistant.isOpen) return;
+
+    const timeout = setTimeout(() => {
+      messagesScrollRef.current?.scrollToEnd?.({ animated: true });
+    }, 80);
+
+    return () => clearTimeout(timeout);
+  }, [assistant.isOpen, assistant.messages.length, assistant.isLoading]);
 
   const renderBackdrop = useCallback(
     (props: any) => (
@@ -174,10 +185,16 @@ export const FloatingAssistant = observer(function FloatingAssistant() {
           </View>
 
           <BottomSheetScrollView
-            className="flex-1"
-            contentContainerStyle={{ padding: 20, gap: 14, paddingBottom: 24 }}
+            ref={messagesScrollRef}
+            style={{ flex: 1 }}
+            contentContainerStyle={{
+              flexGrow: 1,
+              padding: 20,
+              gap: 14,
+              paddingBottom: 32,
+            }}
             keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
+            showsVerticalScrollIndicator
           >
             {assistant.messages.map((message) => {
               const isUser = message.role === 'user';
