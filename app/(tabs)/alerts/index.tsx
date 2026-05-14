@@ -121,6 +121,7 @@ export default observer(function AlertsScreen() {
             />
           </AnimatedCard>
         )}
+        estimatedItemSize={160}
         contentContainerStyle={{ padding: 24, paddingBottom: 120 }}
         refreshControl={
           <RefreshControl

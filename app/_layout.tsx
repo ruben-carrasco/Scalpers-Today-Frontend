@@ -24,6 +24,7 @@ const RootLayoutNav = observer(function RootLayoutNav() {
   const isAuthenticated = authViewModel.isAuthenticated;
   const inAuthGroup = segments[0] === '(auth)';
   const [isReady, setIsReady] = useState(false);
+  const { isDarkMode } = useThemeMode();
 
   useEffect(() => {
     const init = async () => {
@@ -84,14 +85,20 @@ const RootLayoutNav = observer(function RootLayoutNav() {
 
   if (!isReady) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000000' }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: isDarkMode ? '#000000' : '#F4F4F5' }}>
         <ActivityIndicator size="large" color="#3B82F6" />
       </View>
     );
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
+    <Stack 
+      screenOptions={{ 
+        headerShown: false, 
+        animation: 'fade',
+        contentStyle: { backgroundColor: isDarkMode ? '#000000' : '#F4F4F5' }
+      }}
+    >
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(tabs)" />
     </Stack>

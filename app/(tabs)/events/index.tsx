@@ -12,6 +12,7 @@ import {
   AppState,
 } from 'react-native';
 import { FlashList, type FlashListRef } from '@shopify/flash-list';
+import { BottomSheetModal, BottomSheetBackdrop, BottomSheetView } from '@gorhom/bottom-sheet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
@@ -135,6 +136,17 @@ export default observer(function EventsScreen() {
   const flatEventsListRef = useRef<FlatList<EventModel>>(null);
   const flashEventsListRef = useRef<FlashListRef<EventModel>>(null);
   const listOffsetYRef = useRef(0);
+  const filtersModalRef = useRef<BottomSheetModal>(null);
+
+  const handleOpenFilters = useCallback(() => {
+    setIsFiltersModalOpen(true);
+    filtersModalRef.current?.present();
+  }, []);
+
+  const handleCloseFilters = useCallback(() => {
+    setIsFiltersModalOpen(false);
+    filtersModalRef.current?.dismiss();
+  }, []);
 
   const scrollEventsToTop = useCallback((animated: boolean = true) => {
     requestAnimationFrame(() => {
@@ -227,11 +239,11 @@ export default observer(function EventsScreen() {
     scrollEventsToTop(false);
   };
 
-  const handleEventPress = (event: EventModel) => {
+  const handleEventPress = useCallback((event: EventModel) => {
     haptics.impactLight();
     setSelectedEventId(event.id);
     setModalVisible(true);
-  };
+  }, [haptics]);
 
   const handleSelectDay = (date: string) => {
     haptics.selection();
@@ -276,9 +288,9 @@ export default observer(function EventsScreen() {
     scrollEventsToTop();
   };
 
-  const renderEventItem = ({ item }: { item: EventModel }) => (
+  const renderEventItem = useCallback(({ item }: { item: EventModel }) => (
     <EventCard event={item} onPress={() => handleEventPress(item)} />
-  );
+  ), [handleEventPress]);
 
   const eventsRefreshControl = (
     <RefreshControl
@@ -411,7 +423,7 @@ export default observer(function EventsScreen() {
 
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => setIsFiltersModalOpen(true)}
+            onPress={handleOpenFilters}
             className="h-12 px-3 rounded-2xl border flex-row items-center gap-2"
             style={{ borderColor: palette.surfaceBorder, backgroundColor: palette.surfaceBg }}
           >
@@ -526,6 +538,7 @@ export default observer(function EventsScreen() {
           extraData={listContextKey}
           keyExtractor={(item) => item.id}
           renderItem={renderEventItem}
+          estimatedItemSize={210}
           contentContainerStyle={eventsListContentStyle}
           keyboardShouldPersistTaps="handled"
           refreshControl={eventsRefreshControl}
@@ -547,110 +560,113 @@ export default observer(function EventsScreen() {
         }}
       />
 
-      <Modal
-        visible={isFiltersModalOpen}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setIsFiltersModalOpen(false)}
+      <BottomSheetModal
+        ref={filtersModalRef}
+        snapPoints={['35%']}
+        enablePanDownToClose
+        onDismiss={() => setIsFiltersModalOpen(false)}
+        backdropComponent={(props) => (
+          <BottomSheetBackdrop {...props} opacity={0.6} appearsOnIndex={0} disappearsOnIndex={-1} />
+        )}
+        backgroundStyle={{ backgroundColor: palette.modalSheetBg }}
+        handleIndicatorStyle={{ backgroundColor: palette.surfaceStrongBorder }}
       >
-        <View className="flex-1 justify-end" style={{ backgroundColor: palette.modalOverlay }}>
-          <View className="rounded-t-3xl border-t pb-8 pt-4 gap-3" style={{ backgroundColor: palette.modalSheetBg, borderTopColor: palette.surfaceBorder }}>
-            <View className="px-6 flex-row items-center justify-between">
-              <Typography variant="h2" weight="bold" color="secondary">Filtros</Typography>
-              <TouchableOpacity onPress={() => setIsFiltersModalOpen(false)} className="p-2">
-                <X size={20} color={palette.textSecondary} strokeWidth={2.5} />
-              </TouchableOpacity>
-            </View>
+        <BottomSheetView className="flex-1 pb-8 pt-2 gap-3">
+          <View className="px-6 flex-row items-center justify-between">
+            <Typography variant="h2" weight="bold" color="secondary">Filtros</Typography>
+            <TouchableOpacity onPress={handleCloseFilters} className="p-2">
+              <X size={20} color={palette.textSecondary} strokeWidth={2.5} />
+            </TouchableOpacity>
+          </View>
 
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerClassName="px-6 gap-2"
-            >
-              {hasActiveFilters && (
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={handleClearVisibleFilters}
-                  className="flex-row items-center px-4 py-2.5 rounded-xl border gap-2"
-                  style={{ backgroundColor: palette.surfaceStrong, borderColor: palette.surfaceStrongBorder }}
-                >
-                  <X size={14} color={palette.textPrimary} strokeWidth={2.5} />
-                  <Typography variant="body" weight="semibold" style={{ color: palette.textPrimary }}>
-                    Limpiar
-                  </Typography>
-                </TouchableOpacity>
-              )}
-
-              {[
-                { label: 'Todos', value: undefined, Icon: null, color: isDarkMode ? '#FFFFFF' : '#0F172A' },
-                { label: 'Alto', value: 3, Icon: Flame, color: '#FF453A' },
-                { label: 'Medio', value: 2, Icon: TrendingUp, color: '#FBBF24' },
-                { label: 'Bajo', value: 1, Icon: MinusCircle, color: '#A1A1AA' },
-              ].map((item) => {
-                const isActive = filters.importance === item.value;
-                return (
-                  <TouchableOpacity
-                    key={item.label}
-                    onPress={() => handleImportanceFilter(item.value)}
-                    activeOpacity={0.7}
-                    className="flex-row items-center px-4 py-2.5 rounded-xl border gap-2"
-                    style={{
-                      backgroundColor: isActive ? palette.surfaceStrong : palette.surfaceBg,
-                      borderColor: isActive ? palette.surfaceStrongBorder : palette.surfaceBorder,
-                    }}
-                  >
-                    {item.Icon && <item.Icon size={14} color={isActive ? item.color : palette.textMuted} strokeWidth={2.5} />}
-                    <Typography variant="body" weight="semibold" style={isActive ? { color: item.color } : { color: palette.textSecondary }}>
-                      {item.label}
-                    </Typography>
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
-
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerClassName="px-6 gap-2"
-            >
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerClassName="px-6 gap-2"
+          >
+            {hasActiveFilters && (
               <TouchableOpacity
-                onPress={() => handleCountryFilter(undefined)}
-                activeOpacity={0.7}
+                activeOpacity={0.8}
+                onPress={handleClearVisibleFilters}
                 className="flex-row items-center px-4 py-2.5 rounded-xl border gap-2"
-                style={{
-                  backgroundColor: !filters.country ? palette.surfaceStrong : palette.surfaceBg,
-                  borderColor: !filters.country ? palette.surfaceStrongBorder : palette.surfaceBorder,
-                }}
+                style={{ backgroundColor: palette.surfaceStrong, borderColor: palette.surfaceStrongBorder }}
               >
-                <Globe size={14} color={!filters.country ? palette.textPrimary : palette.textMuted} strokeWidth={2.5} />
-                <Typography variant="body" weight="semibold" style={!filters.country ? { color: palette.textPrimary } : { color: palette.textSecondary }}>
-                  Todos
+                <X size={14} color={palette.textPrimary} strokeWidth={2.5} />
+                <Typography variant="body" weight="semibold" style={{ color: palette.textPrimary }}>
+                  Limpiar
                 </Typography>
               </TouchableOpacity>
+            )}
 
-              {availableCountries.map((country) => {
-                const isCountryActive = filters.country === country;
-                return (
-                  <TouchableOpacity
-                    key={country}
-                    onPress={() => handleCountryFilter(country)}
-                    activeOpacity={0.7}
-                    className="flex-row items-center px-4 py-2.5 rounded-xl border gap-2"
-                    style={{
-                      backgroundColor: isCountryActive ? palette.surfaceStrong : palette.surfaceBg,
-                      borderColor: isCountryActive ? palette.surfaceStrongBorder : palette.surfaceBorder,
-                    }}
-                  >
-                    <Typography variant="body" weight="semibold" style={isCountryActive ? { color: palette.textPrimary } : { color: palette.textSecondary }}>
-                      {country}
-                    </Typography>
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
+            {[
+              { label: 'Todos', value: undefined, Icon: null, color: isDarkMode ? '#FFFFFF' : '#0F172A' },
+              { label: 'Alto', value: 3, Icon: Flame, color: '#FF453A' },
+              { label: 'Medio', value: 2, Icon: TrendingUp, color: '#FBBF24' },
+              { label: 'Bajo', value: 1, Icon: MinusCircle, color: '#A1A1AA' },
+            ].map((item) => {
+              const isActive = filters.importance === item.value;
+              return (
+                <TouchableOpacity
+                  key={item.label}
+                  onPress={() => handleImportanceFilter(item.value)}
+                  activeOpacity={0.7}
+                  className="flex-row items-center px-4 py-2.5 rounded-xl border gap-2"
+                  style={{
+                    backgroundColor: isActive ? palette.surfaceStrong : palette.surfaceBg,
+                    borderColor: isActive ? palette.surfaceStrongBorder : palette.surfaceBorder,
+                  }}
+                >
+                  {item.Icon && <item.Icon size={14} color={isActive ? item.color : palette.textMuted} strokeWidth={2.5} />}
+                  <Typography variant="body" weight="semibold" style={isActive ? { color: item.color } : { color: palette.textSecondary }}>
+                    {item.label}
+                  </Typography>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerClassName="px-6 gap-2"
+          >
+            <TouchableOpacity
+              onPress={() => handleCountryFilter(undefined)}
+              activeOpacity={0.7}
+              className="flex-row items-center px-4 py-2.5 rounded-xl border gap-2"
+              style={{
+                backgroundColor: !filters.country ? palette.surfaceStrong : palette.surfaceBg,
+                borderColor: !filters.country ? palette.surfaceStrongBorder : palette.surfaceBorder,
+              }}
+            >
+              <Globe size={14} color={!filters.country ? palette.textPrimary : palette.textMuted} strokeWidth={2.5} />
+              <Typography variant="body" weight="semibold" style={!filters.country ? { color: palette.textPrimary } : { color: palette.textSecondary }}>
+                Todos
+              </Typography>
+            </TouchableOpacity>
+
+            {availableCountries.map((country) => {
+              const isCountryActive = filters.country === country;
+              return (
+                <TouchableOpacity
+                  key={country}
+                  onPress={() => handleCountryFilter(country)}
+                  activeOpacity={0.7}
+                  className="flex-row items-center px-4 py-2.5 rounded-xl border gap-2"
+                  style={{
+                    backgroundColor: isCountryActive ? palette.surfaceStrong : palette.surfaceBg,
+                    borderColor: isCountryActive ? palette.surfaceStrongBorder : palette.surfaceBorder,
+                  }}
+                >
+                  <Typography variant="body" weight="semibold" style={isCountryActive ? { color: palette.textPrimary } : { color: palette.textSecondary }}>
+                    {country}
+                  </Typography>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </BottomSheetView>
+      </BottomSheetModal>
     </View>
   );
 });
