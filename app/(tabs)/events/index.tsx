@@ -550,7 +550,7 @@ export default observer(function EventsScreen() {
       <Modal
         visible={isFiltersModalOpen}
         transparent
-        animationType="fade"
+        animationType="slide"
         onRequestClose={() => setIsFiltersModalOpen(false)}
       >
         <View className="flex-1 justify-end" style={{ backgroundColor: palette.modalOverlay }}>
