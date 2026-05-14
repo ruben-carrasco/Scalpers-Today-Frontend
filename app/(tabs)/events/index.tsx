@@ -227,11 +227,11 @@ export default observer(function EventsScreen() {
     scrollEventsToTop(false);
   };
 
-  const handleEventPress = (event: EventModel) => {
+  const handleEventPress = useCallback((event: EventModel) => {
     haptics.impactLight();
     setSelectedEventId(event.id);
     setModalVisible(true);
-  };
+  }, [haptics]);
 
   const handleSelectDay = (date: string) => {
     haptics.selection();
@@ -276,9 +276,9 @@ export default observer(function EventsScreen() {
     scrollEventsToTop();
   };
 
-  const renderEventItem = ({ item }: { item: EventModel }) => (
+  const renderEventItem = useCallback(({ item }: { item: EventModel }) => (
     <EventCard event={item} onPress={() => handleEventPress(item)} />
-  );
+  ), [handleEventPress]);
 
   const eventsRefreshControl = (
     <RefreshControl
@@ -526,6 +526,7 @@ export default observer(function EventsScreen() {
           extraData={listContextKey}
           keyExtractor={(item) => item.id}
           renderItem={renderEventItem}
+          estimatedItemSize={210}
           contentContainerStyle={eventsListContentStyle}
           keyboardShouldPersistTaps="handled"
           refreshControl={eventsRefreshControl}
