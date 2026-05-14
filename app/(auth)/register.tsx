@@ -8,8 +8,10 @@ import {
   ScrollView,
   ActivityIndicator,
   StatusBar,
+  NativeSyntheticEvent,
+  TextInputKeyPressEventData,
 } from 'react-native';
-import { User, Mail, Lock, Eye, EyeOff, AlertCircle, ArrowLeft, CheckCircle, Circle } from 'lucide-react-native';
+import { Mail, Lock, User, Eye, EyeOff, ArrowLeft, CheckCircle, Circle, ArrowUpCircle } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { observer } from 'mobx-react-lite';
 import { useAuthViewModel } from '../../src/presentation/hooks';
@@ -49,7 +51,22 @@ export default observer(function RegisterScreen() {
   const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [capsLockActive, setCapsLockActive] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
+
+  const handleKeyPress = (e: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
+    const key = e.nativeEvent.key;
+    if (key.length === 1 && key.toUpperCase() === key && key.toLowerCase() !== key) {
+      const isShift = (e as any).nativeEvent.shiftKey;
+      if (isShift === false) {
+        setCapsLockActive(true);
+      } else if (isShift === true) {
+        setCapsLockActive(false);
+      }
+    } else if (key.length === 1 && key.toLowerCase() === key && key.toUpperCase() !== key) {
+      setCapsLockActive(false);
+    }
+  };
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const passwordStrength = useMemo(() => getPasswordStrength(password), [password]);
@@ -253,12 +270,18 @@ export default observer(function RegisterScreen() {
                   placeholderTextColor={palette.muted}
                   value={password}
                   onChangeText={(text) => { setPassword(text); clearFieldError('password'); }}
+                  onKeyPress={handleKeyPress}
                   secureTextEntry={!showPassword}
                   autoCapitalize="none"
                   autoCorrect={false}
                   editable={!isLoading}
                   accessibilityLabel="Contraseña"
                 />
+                {capsLockActive && (
+                  <View className="mr-2">
+                    <ArrowUpCircle size={20} color="#FBBF24" strokeWidth={2.5} />
+                  </View>
+                )}
                 <TouchableOpacity
                   onPress={() => setShowPassword(!showPassword)}
                   disabled={isLoading}
@@ -326,12 +349,18 @@ export default observer(function RegisterScreen() {
                   placeholderTextColor={palette.muted}
                   value={confirmPassword}
                   onChangeText={(text) => { setConfirmPassword(text); clearFieldError('confirmPassword'); }}
+                  onKeyPress={handleKeyPress}
                   secureTextEntry={!showConfirmPassword}
                   autoCapitalize="none"
                   autoCorrect={false}
                   editable={!isLoading}
                   accessibilityLabel="Confirmar contraseña"
                 />
+                {capsLockActive && (
+                  <View className="mr-2">
+                    <ArrowUpCircle size={20} color="#FBBF24" strokeWidth={2.5} />
+                  </View>
+                )}
                 <TouchableOpacity
                   onPress={() => setShowConfirmPassword(!showConfirmPassword)}
                   disabled={isLoading}
