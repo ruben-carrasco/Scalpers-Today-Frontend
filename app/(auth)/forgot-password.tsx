@@ -433,6 +433,8 @@ export default observer(function ForgotPasswordScreen() {
                         clearFieldError('password');
                       }}
                       secureTextEntry={!showPassword}
+                      autoCapitalize="none"
+                      autoCorrect={false}
                       editable={!isLoading}
                       accessibilityLabel="Nueva contraseña"
                     />
@@ -515,6 +517,8 @@ export default observer(function ForgotPasswordScreen() {
                         clearFieldError('confirmPassword');
                       }}
                       secureTextEntry={!showConfirmPassword}
+                      autoCapitalize="none"
+                      autoCorrect={false}
                       editable={!isLoading}
                       accessibilityLabel="Confirmar contraseña"
                     />

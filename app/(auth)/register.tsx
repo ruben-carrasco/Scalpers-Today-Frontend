@@ -254,6 +254,8 @@ export default observer(function RegisterScreen() {
                   value={password}
                   onChangeText={(text) => { setPassword(text); clearFieldError('password'); }}
                   secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
                   editable={!isLoading}
                   accessibilityLabel="Contraseña"
                 />
@@ -325,6 +327,8 @@ export default observer(function RegisterScreen() {
                   value={confirmPassword}
                   onChangeText={(text) => { setConfirmPassword(text); clearFieldError('confirmPassword'); }}
                   secureTextEntry={!showConfirmPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
                   editable={!isLoading}
                   accessibilityLabel="Confirmar contraseña"
                 />
