@@ -99,11 +99,14 @@ export default observer(function HomeScreen() {
   const [selectedEvent, setSelectedEvent] = useState<EventModel | null>(null);
 
   useEffect(() => {
-    homeViewModel.refresh();
     const timer = setInterval(() => {
       setCurrentTime(new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }));
-    }, 60000);
+    }, 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    homeViewModel.refresh();
   }, [homeViewModel]);
 
   useFocusEffect(
