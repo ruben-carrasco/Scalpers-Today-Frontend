@@ -15,6 +15,7 @@ import { Bot, Send, Sparkles, Trash2, X } from 'lucide-react-native';
 import { usePathname } from 'expo-router';
 import { observer } from 'mobx-react-lite';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as Haptics from 'expo-haptics';
 import { Typography } from '../common/Typography';
 import { useAssistantViewModel } from '../../hooks';
 import { useThemeMode } from '../../theme/ThemeModeContext';
@@ -33,9 +34,11 @@ export const FloatingAssistant = observer(function FloatingAssistant() {
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
   const [question, setQuestion] = useState('');
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  
   const messagesScrollRef = useRef<ScrollView>(null);
   const dragY = useRef(new Animated.Value(0)).current;
+  const backdropOpacity = useRef(new Animated.Value(0)).current;
+  const keyboardHeightAnim = useRef(new Animated.Value(0)).current;
 
   const palette = useMemo(
     () =>
@@ -70,32 +73,64 @@ export const FloatingAssistant = observer(function FloatingAssistant() {
   }, [assistant, pathname]);
 
   useEffect(() => {
-    const updateKeyboardHeight = (event: { endCoordinates: { screenY: number } }) => {
-      setKeyboardHeight(Math.max(0, windowHeight - event.endCoordinates.screenY));
+    const updateKeyboardHeight = (event: { endCoordinates: { screenY: number }, duration?: number }) => {
+      const keyboardHeight = Math.max(0, windowHeight - event.endCoordinates.screenY);
+      Animated.timing(keyboardHeightAnim, {
+        toValue: keyboardHeight,
+        duration: event.duration || 250,
+        useNativeDriver: true,
+      }).start();
     };
 
     const showSub = Keyboard.addListener('keyboardWillChangeFrame', updateKeyboardHeight);
     const didShowSub = Keyboard.addListener('keyboardDidShow', updateKeyboardHeight);
-    const hideSub = Keyboard.addListener('keyboardDidHide', () => setKeyboardHeight(0));
+    const hideSub = Keyboard.addListener('keyboardDidHide', (event) => {
+      Animated.timing(keyboardHeightAnim, {
+        toValue: 0,
+        duration: event.duration || 250,
+        useNativeDriver: true,
+      }).start();
+    });
 
     return () => {
       showSub.remove();
       didShowSub.remove();
       hideSub.remove();
     };
-  }, [windowHeight]);
+  }, [windowHeight, keyboardHeightAnim]);
 
+  // 1. Auto-scroll de mensajes
   useEffect(() => {
     if (!assistant.isOpen) return;
-
-    dragY.setValue(0);
 
     const timeout = setTimeout(() => {
       messagesScrollRef.current?.scrollToEnd?.({ animated: true });
     }, 80);
 
     return () => clearTimeout(timeout);
-  }, [assistant.isOpen, assistant.messages.length, assistant.isLoading, dragY]);
+  }, [assistant.isOpen, assistant.messages.length, assistant.isLoading]);
+
+  // 2. Animación de entrada independiente
+  useEffect(() => {
+    if (assistant.isOpen) {
+      dragY.setValue(windowHeight);
+      backdropOpacity.setValue(0);
+
+      Animated.parallel([
+        Animated.timing(backdropOpacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.spring(dragY, {
+          toValue: 0,
+          useNativeDriver: true,
+          damping: 22,
+          stiffness: 260,
+        }),
+      ]).start();
+    }
+  }, [assistant.isOpen, dragY, backdropOpacity, windowHeight]);
 
   const handleOpen = useCallback(() => {
     assistant.open({ screen: routeToScreen(pathname) });
@@ -103,16 +138,35 @@ export const FloatingAssistant = observer(function FloatingAssistant() {
 
   const handleClose = useCallback(() => {
     Keyboard.dismiss();
-    assistant.close();
-  }, [assistant]);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    
+    Animated.parallel([
+      Animated.timing(backdropOpacity, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(dragY, {
+        toValue: windowHeight,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      assistant.close();
+    });
+  }, [assistant, dragY, backdropOpacity, windowHeight]);
 
   const dragHandlePanResponder = useMemo(
     () =>
       PanResponder.create({
-        onMoveShouldSetPanResponder: (_, gestureState) =>
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponderCapture: (_, gestureState) =>
           gestureState.dy > 6 && Math.abs(gestureState.dy) > Math.abs(gestureState.dx),
         onPanResponderMove: (_, gestureState) => {
-          dragY.setValue(Math.max(0, gestureState.dy));
+          if (gestureState.dy > 0) {
+            // Add slight resistance to drag
+            dragY.setValue(gestureState.dy * 0.85);
+          }
         },
         onPanResponderRelease: (_, gestureState) => {
           if (gestureState.dy > 90 || gestureState.vy > 0.9) {
@@ -123,25 +177,19 @@ export const FloatingAssistant = observer(function FloatingAssistant() {
           Animated.spring(dragY, {
             toValue: 0,
             useNativeDriver: true,
+            damping: 25,
+            stiffness: 300,
           }).start();
         },
       }),
     [dragY, handleClose]
   );
 
-  const panelBottomOffset = keyboardHeight > 0 ? keyboardHeight : 0;
-  const panelHeight = Math.max(
-    320,
-    Math.min(
-      windowHeight * 0.82,
-      windowHeight - panelBottomOffset - insets.top - 12
-    )
-  );
-
   const handleSend = useCallback(async () => {
     const clean = question.trim();
     if (!clean || assistant.isLoading) return;
     setQuestion('');
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     await assistant.send(clean);
   }, [assistant, question]);
 
@@ -171,37 +219,59 @@ export const FloatingAssistant = observer(function FloatingAssistant() {
       <Modal
         visible={assistant.isOpen}
         transparent
-        animationType="slide"
+        animationType="none"
         statusBarTranslucent
         onRequestClose={handleClose}
       >
-        <View className="flex-1 justify-end" style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}>
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={handleClose}
-            style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
-            accessibilityRole="button"
-            accessibilityLabel="Cerrar asistente"
-          />
+        <View className="flex-1 justify-end">
+          <Animated.View
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              bottom: 0,
+              left: 0,
+              backgroundColor: 'rgba(0,0,0,0.55)',
+              opacity: backdropOpacity,
+            }}
+          >
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={handleClose}
+              style={{ flex: 1 }}
+              accessibilityRole="button"
+              accessibilityLabel="Cerrar asistente"
+            />
+          </Animated.View>
 
           <View className="flex-1 justify-end">
             <Animated.View
-              {...dragHandlePanResponder.panHandlers}
               style={{
-                height: panelHeight,
+                height: Math.max(320, windowHeight * 0.82 - insets.top),
                 backgroundColor: palette.bg,
                 borderTopLeftRadius: 30,
                 borderTopRightRadius: 30,
                 overflow: 'hidden',
-                marginBottom: panelBottomOffset,
-                transform: [{ translateY: dragY }],
+                transform: [
+                  { 
+                    translateY: Animated.add(
+                      dragY, 
+                      Animated.multiply(keyboardHeightAnim, -1)
+                    ) 
+                  }
+                ],
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: -4 },
+                shadowOpacity: 0.1,
+                shadowRadius: 12,
+                elevation: 20,
               }}
             >
-              <View>
+              <View {...dragHandlePanResponder.panHandlers} style={{ backgroundColor: 'transparent' }}>
                 <View className="items-center pt-3 pb-2">
                   <View
-                    className="w-11 h-1.5 rounded-full"
-                    style={{ backgroundColor: palette.border }}
+                    className="w-12 h-1.5 rounded-full opacity-80"
+                    style={{ backgroundColor: palette.muted }}
                   />
                 </View>
 
