@@ -134,6 +134,7 @@ export default observer(function EventsScreen() {
   const openedEventIdRef = useRef<string | null>(null);
   const flatEventsListRef = useRef<FlatList<EventModel>>(null);
   const flashEventsListRef = useRef<FlashListRef<EventModel>>(null);
+  const listOffsetYRef = useRef(0);
 
   const scrollEventsToTop = useCallback((animated: boolean = true) => {
     requestAnimationFrame(() => {
@@ -163,16 +164,29 @@ export default observer(function EventsScreen() {
     useCallback(() => {
       void eventsViewModel.loadEvents();
 
+      // iOS may preserve a tiny negative offset when returning from another tab.
+      // If user was already at the top, snap back to 0 to avoid a visible gap.
+      requestAnimationFrame(() => {
+        if (listOffsetYRef.current <= 16) {
+          scrollEventsToTop(false);
+        }
+      });
+
       const subscription = AppState.addEventListener('change', (nextState) => {
         if (nextState === 'active') {
           void eventsViewModel.loadEvents();
+          requestAnimationFrame(() => {
+            if (listOffsetYRef.current <= 16) {
+              scrollEventsToTop(false);
+            }
+          });
         }
       });
 
       return () => {
         subscription.remove();
       };
-    }, [eventsViewModel])
+    }, [eventsViewModel, scrollEventsToTop])
   );
 
   useEffect(() => {
@@ -253,6 +267,7 @@ export default observer(function EventsScreen() {
     filters.country ?? 'all-countries',
   ].join(':');
   const isIOS = Platform.OS === 'ios';
+  const eventsListContentStyle = { paddingHorizontal: 24, paddingTop: 12, paddingBottom: 120 };
 
   const handleClearVisibleFilters = () => {
     haptics.selection();
@@ -273,6 +288,7 @@ export default observer(function EventsScreen() {
         haptics.success();
       }}
       tintColor="#3B82F6"
+      progressViewOffset={0}
     />
   );
 
@@ -501,12 +517,19 @@ export default observer(function EventsScreen() {
           extraData={listContextKey}
           keyExtractor={(item) => item.id}
           renderItem={renderEventItem}
-          contentContainerStyle={{ padding: 24, paddingBottom: 120 }}
+          contentContainerStyle={eventsListContentStyle}
+          contentInsetAdjustmentBehavior="never"
+          contentInset={{ top: 0, left: 0, bottom: 0, right: 0 }}
+          scrollIndicatorInsets={{ top: 0, left: 0, bottom: 0, right: 0 }}
           keyboardShouldPersistTaps="handled"
           refreshControl={eventsRefreshControl}
           ListEmptyComponent={emptyEventsComponent}
           showsVerticalScrollIndicator={false}
           removeClippedSubviews={false}
+          onScroll={(event) => {
+            listOffsetYRef.current = event.nativeEvent.contentOffset.y;
+          }}
+          scrollEventThrottle={16}
         />
       ) : (
         <FlashList
@@ -516,11 +539,15 @@ export default observer(function EventsScreen() {
           extraData={listContextKey}
           keyExtractor={(item) => item.id}
           renderItem={renderEventItem}
-          contentContainerStyle={{ padding: 24, paddingBottom: 120 }}
+          contentContainerStyle={eventsListContentStyle}
           keyboardShouldPersistTaps="handled"
           refreshControl={eventsRefreshControl}
           ListEmptyComponent={emptyEventsComponent}
           showsVerticalScrollIndicator={false}
+          onScroll={(event) => {
+            listOffsetYRef.current = event.nativeEvent.contentOffset.y;
+          }}
+          scrollEventThrottle={16}
         />
       )}
 
