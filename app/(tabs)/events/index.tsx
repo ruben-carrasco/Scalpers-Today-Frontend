@@ -134,6 +134,7 @@ export default observer(function EventsScreen() {
   const openedEventIdRef = useRef<string | null>(null);
   const flatEventsListRef = useRef<FlatList<EventModel>>(null);
   const flashEventsListRef = useRef<FlashListRef<EventModel>>(null);
+  const listOffsetYRef = useRef(0);
 
   const scrollEventsToTop = useCallback((animated: boolean = true) => {
     requestAnimationFrame(() => {
@@ -163,16 +164,29 @@ export default observer(function EventsScreen() {
     useCallback(() => {
       void eventsViewModel.loadEvents();
 
+      // iOS may preserve a tiny negative offset when returning from another tab.
+      // If user was already at the top, snap back to 0 to avoid a visible gap.
+      requestAnimationFrame(() => {
+        if (listOffsetYRef.current <= 16) {
+          scrollEventsToTop(false);
+        }
+      });
+
       const subscription = AppState.addEventListener('change', (nextState) => {
         if (nextState === 'active') {
           void eventsViewModel.loadEvents();
+          requestAnimationFrame(() => {
+            if (listOffsetYRef.current <= 16) {
+              scrollEventsToTop(false);
+            }
+          });
         }
       });
 
       return () => {
         subscription.remove();
       };
-    }, [eventsViewModel])
+    }, [eventsViewModel, scrollEventsToTop])
   );
 
   useEffect(() => {
@@ -253,6 +267,7 @@ export default observer(function EventsScreen() {
     filters.country ?? 'all-countries',
   ].join(':');
   const isIOS = Platform.OS === 'ios';
+  const eventsListContentStyle = { paddingHorizontal: 24, paddingTop: 12, paddingBottom: 120 };
 
   const handleClearVisibleFilters = () => {
     haptics.selection();
@@ -273,6 +288,7 @@ export default observer(function EventsScreen() {
         haptics.success();
       }}
       tintColor="#3B82F6"
+      progressViewOffset={0}
     />
   );
 
@@ -372,21 +388,44 @@ export default observer(function EventsScreen() {
           </Typography>
         </TouchableOpacity>
 
-        <View className="flex-row items-center rounded-2xl px-4 h-12 gap-3 border" style={{ backgroundColor: palette.surfaceBg, borderColor: palette.surfaceBorder }}>
-          <Search size={20} color={palette.textMuted} strokeWidth={2.5} />
-          <TextInput
-            className="flex-1 text-[17px] font-medium"
-            style={{ color: palette.textPrimary }}
-            placeholder="Buscar evento..."
-            placeholderTextColor={palette.textMuted}
-            value={searchText}
-            onChangeText={handleSearch}
-          />
-          {searchText.length > 0 && (
-            <TouchableOpacity onPress={() => handleSearch('')} className="p-1">
-              <X size={20} color={palette.textSecondary} strokeWidth={2.5} />
-            </TouchableOpacity>
-          )}
+        <View className="flex-row items-center gap-2">
+          <View
+            className="flex-1 flex-row items-center rounded-2xl px-4 h-12 gap-3 border"
+            style={{ backgroundColor: palette.surfaceBg, borderColor: palette.surfaceBorder }}
+          >
+            <Search size={20} color={palette.textMuted} strokeWidth={2.5} />
+            <TextInput
+              className="flex-1 text-[17px] font-medium"
+              style={{ color: palette.textPrimary }}
+              placeholder="Buscar evento..."
+              placeholderTextColor={palette.textMuted}
+              value={searchText}
+              onChangeText={handleSearch}
+            />
+            {searchText.length > 0 && (
+              <TouchableOpacity onPress={() => handleSearch('')} className="p-1">
+                <X size={20} color={palette.textSecondary} strokeWidth={2.5} />
+              </TouchableOpacity>
+            )}
+          </View>
+
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => setIsFiltersModalOpen(true)}
+            className="h-12 px-3 rounded-2xl border flex-row items-center gap-2"
+            style={{ borderColor: palette.surfaceBorder, backgroundColor: palette.surfaceBg }}
+          >
+            <Typography variant="caption" weight="semibold" style={{ color: palette.textPrimary }}>
+              Filtros
+            </Typography>
+            {hasActiveFilters && (
+              <View className="px-1.5 py-0.5 rounded-full bg-[#2563EB33] border border-[#1D4ED8]">
+                <Typography variant="caption" weight="bold" style={{ color: '#60A5FA' }}>
+                  {activeFilterLabels.length}
+                </Typography>
+              </View>
+            )}
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -457,42 +496,6 @@ export default observer(function EventsScreen() {
         </View>
       )}
 
-      <View className="py-2 border-b" style={{ backgroundColor: palette.screenBg, borderBottomColor: palette.surfaceBorder }}>
-        <View className="px-6 flex-row items-center gap-2">
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => setIsFiltersModalOpen(true)}
-            className="px-3 py-1.5 rounded-lg border flex-row items-center gap-2"
-            style={{ borderColor: palette.surfaceBorder, backgroundColor: palette.surfaceBg }}
-          >
-            <Typography variant="caption" weight="semibold" style={{ color: palette.textPrimary }}>
-              Filtros
-            </Typography>
-            {hasActiveFilters && (
-              <View className="px-1.5 py-0.5 rounded-full bg-[#2563EB33] border border-[#1D4ED8]">
-                <Typography variant="caption" weight="bold" style={{ color: '#60A5FA' }}>
-                  {activeFilterLabels.length}
-                </Typography>
-              </View>
-            )}
-          </TouchableOpacity>
-
-          {hasActiveFilters && (
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={handleClearVisibleFilters}
-              className="px-3 py-1.5 rounded-lg border flex-row items-center gap-1.5"
-              style={{ borderColor: palette.surfaceStrongBorder, backgroundColor: palette.surfaceStrong }}
-            >
-              <X size={12} color={palette.textPrimary} strokeWidth={2.5} />
-              <Typography variant="caption" weight="semibold" style={{ color: palette.textPrimary }}>
-                Limpiar
-              </Typography>
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
-
       {isIOS ? (
         <FlatList
           key={listContextKey}
@@ -501,12 +504,19 @@ export default observer(function EventsScreen() {
           extraData={listContextKey}
           keyExtractor={(item) => item.id}
           renderItem={renderEventItem}
-          contentContainerStyle={{ padding: 24, paddingBottom: 120 }}
+          contentContainerStyle={eventsListContentStyle}
+          contentInsetAdjustmentBehavior="never"
+          contentInset={{ top: 0, left: 0, bottom: 0, right: 0 }}
+          scrollIndicatorInsets={{ top: 0, left: 0, bottom: 0, right: 0 }}
           keyboardShouldPersistTaps="handled"
           refreshControl={eventsRefreshControl}
           ListEmptyComponent={emptyEventsComponent}
           showsVerticalScrollIndicator={false}
           removeClippedSubviews={false}
+          onScroll={(event) => {
+            listOffsetYRef.current = event.nativeEvent.contentOffset.y;
+          }}
+          scrollEventThrottle={16}
         />
       ) : (
         <FlashList
@@ -516,11 +526,15 @@ export default observer(function EventsScreen() {
           extraData={listContextKey}
           keyExtractor={(item) => item.id}
           renderItem={renderEventItem}
-          contentContainerStyle={{ padding: 24, paddingBottom: 120 }}
+          contentContainerStyle={eventsListContentStyle}
           keyboardShouldPersistTaps="handled"
           refreshControl={eventsRefreshControl}
           ListEmptyComponent={emptyEventsComponent}
           showsVerticalScrollIndicator={false}
+          onScroll={(event) => {
+            listOffsetYRef.current = event.nativeEvent.contentOffset.y;
+          }}
+          scrollEventThrottle={16}
         />
       )}
 
