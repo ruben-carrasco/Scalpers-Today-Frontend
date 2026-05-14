@@ -2,9 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -12,6 +9,7 @@ import {
   BottomSheetBackdrop,
   BottomSheetModal,
   BottomSheetScrollView,
+  BottomSheetTextInput,
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import { Bot, Send, Sparkles, Trash2, X } from 'lucide-react-native';
@@ -145,8 +143,10 @@ export const FloatingAssistant = observer(function FloatingAssistant() {
         backdropComponent={renderBackdrop}
         backgroundStyle={{ backgroundColor: palette.bg }}
         handleIndicatorStyle={{ backgroundColor: palette.border }}
+        keyboardBehavior="interactive"
+        keyboardBlurBehavior="restore"
       >
-        <BottomSheetView className="flex-1 overflow-hidden">
+        <BottomSheetView style={{ flex: 1, overflow: 'hidden' }}>
           <View
             className="px-6 pb-4 border-b"
             style={{ borderColor: palette.border }}
@@ -192,77 +192,79 @@ export const FloatingAssistant = observer(function FloatingAssistant() {
             </View>
           </View>
 
-          <BottomSheetScrollView
-            ref={messagesScrollRef}
-            style={{ flex: 1 }}
-            contentContainerStyle={{
-              flexGrow: 1,
-              padding: 20,
-              gap: 14,
-              paddingBottom: 32,
-            }}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator
-          >
-            {assistant.messages.map((message) => {
-              const isUser = message.role === 'user';
-              return (
-                <View
-                  key={message.id}
-                  className={`max-w-[86%] rounded-3xl px-4 py-3 ${isUser ? 'self-end' : 'self-start'}`}
-                  style={{
-                    backgroundColor: isUser ? palette.userBubble : palette.assistantBubble,
-                    borderWidth: isUser ? 0 : 1,
-                    borderColor: palette.border,
-                  }}
-                >
-                  <Typography
-                    variant="body"
-                    style={{ color: isUser ? '#FFFFFF' : palette.text, fontSize: 16 }}
+          <View style={{ flex: 1 }}>
+            <BottomSheetScrollView
+              ref={messagesScrollRef}
+              style={{ flex: 1 }}
+              contentContainerStyle={{
+                flexGrow: 1,
+                paddingHorizontal: 20,
+                paddingTop: 20,
+                paddingBottom: 150 + Math.max(insets.bottom, 10),
+              }}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator
+              nestedScrollEnabled
+            >
+              <View style={{ gap: 14 }}>
+                {assistant.messages.map((message) => {
+                  const isUser = message.role === 'user';
+                  return (
+                    <View
+                      key={message.id}
+                      className={`max-w-[86%] rounded-3xl px-4 py-3 ${isUser ? 'self-end' : 'self-start'}`}
+                      style={{
+                        backgroundColor: isUser ? palette.userBubble : palette.assistantBubble,
+                        borderWidth: isUser ? 0 : 1,
+                        borderColor: palette.border,
+                      }}
+                    >
+                      <Typography
+                        variant="body"
+                        style={{ color: isUser ? '#FFFFFF' : palette.text, fontSize: 16 }}
+                      >
+                        {message.content}
+                      </Typography>
+                    </View>
+                  );
+                })}
+
+                {assistant.isLoading && (
+                  <View
+                    className="self-start rounded-3xl px-4 py-3 flex-row items-center gap-3 border"
+                    style={{ backgroundColor: palette.assistantBubble, borderColor: palette.border }}
                   >
-                    {message.content}
-                  </Typography>
-                </View>
-              );
-            })}
+                    <ActivityIndicator color={isDarkMode ? '#FFFFFF' : '#111827'} size="small" />
+                    <Typography variant="caption" style={{ color: palette.muted }}>
+                      Pensando...
+                    </Typography>
+                  </View>
+                )}
 
-            {assistant.isLoading && (
-              <View
-                className="self-start rounded-3xl px-4 py-3 flex-row items-center gap-3 border"
-                style={{ backgroundColor: palette.assistantBubble, borderColor: palette.border }}
-              >
-                <ActivityIndicator color={isDarkMode ? '#FFFFFF' : '#111827'} size="small" />
-                <Typography variant="caption" style={{ color: palette.muted }}>
-                  Pensando...
-                </Typography>
+                {assistant.error && (
+                  <View
+                    className="rounded-2xl px-4 py-3 border"
+                    style={{ backgroundColor: 'rgba(255,69,58,0.10)', borderColor: '#FF453A' }}
+                  >
+                    <Typography variant="caption" color="danger" weight="semibold">
+                      {assistant.error}
+                    </Typography>
+                  </View>
+                )}
               </View>
-            )}
+            </BottomSheetScrollView>
 
-            {assistant.error && (
-              <View
-                className="rounded-2xl px-4 py-3 border"
-                style={{ backgroundColor: 'rgba(255,69,58,0.10)', borderColor: '#FF453A' }}
-              >
-                <Typography variant="caption" color="danger" weight="semibold">
-                  {assistant.error}
-                </Typography>
-              </View>
-            )}
-          </BottomSheetScrollView>
-
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            keyboardVerticalOffset={12}
-          >
             <View
-              className="px-4 pt-3 border-t"
+              className="absolute left-0 right-0 px-4 pt-3 border-t"
               style={{
+                bottom: 0,
                 borderColor: palette.border,
+                backgroundColor: palette.bg,
                 paddingBottom: Math.max(insets.bottom, 10),
               }}
             >
               <View className="flex-row items-end gap-2">
-                <TextInput
+                <BottomSheetTextInput
                   value={question}
                   onChangeText={setQuestion}
                   placeholder="Pregunta sobre un evento..."
@@ -276,7 +278,7 @@ export const FloatingAssistant = observer(function FloatingAssistant() {
                     borderColor: palette.border,
                     borderWidth: 1,
                     color: palette.text,
-                    maxHeight: 96,
+                    maxHeight: 88,
                     minHeight: 52,
                     flexShrink: 1,
                   }}
@@ -286,7 +288,7 @@ export const FloatingAssistant = observer(function FloatingAssistant() {
                 <TouchableOpacity
                   onPress={handleSend}
                   disabled={!question.trim() || assistant.isLoading}
-                  className="w-13 h-13 rounded-full items-center justify-center"
+                  className="rounded-full items-center justify-center"
                   style={{
                     width: 52,
                     height: 52,
@@ -302,7 +304,7 @@ export const FloatingAssistant = observer(function FloatingAssistant() {
                 Contenido educativo, no asesoramiento financiero.
               </Typography>
             </View>
-          </KeyboardAvoidingView>
+          </View>
         </BottomSheetView>
       </BottomSheetModal>
     </>
