@@ -1,5 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Keyboard, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
@@ -138,7 +146,7 @@ export const FloatingAssistant = observer(function FloatingAssistant() {
         backgroundStyle={{ backgroundColor: palette.bg }}
         handleIndicatorStyle={{ backgroundColor: palette.border }}
       >
-        <BottomSheetView className="flex-1">
+        <BottomSheetView className="flex-1 overflow-hidden">
           <View
             className="px-6 pb-4 border-b"
             style={{ borderColor: palette.border }}
@@ -242,45 +250,59 @@ export const FloatingAssistant = observer(function FloatingAssistant() {
             )}
           </BottomSheetScrollView>
 
-          <View
-            className="px-5 pt-3 border-t"
-            style={{ borderColor: palette.border, paddingBottom: insets.bottom + 12 }}
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            keyboardVerticalOffset={12}
           >
-            <View className="flex-row items-end gap-3">
-              <TextInput
-                value={question}
-                onChangeText={setQuestion}
-                placeholder="Pregunta sobre un evento o concepto..."
-                placeholderTextColor={palette.muted}
-                multiline
-                maxLength={600}
-                className="flex-1 rounded-3xl px-5 py-4 text-[16px] max-h-32"
-                style={{
-                  backgroundColor: palette.input,
-                  borderColor: palette.border,
-                  borderWidth: 1,
-                  color: palette.text,
-                }}
-                editable={!assistant.isLoading}
-                accessibilityLabel="Pregunta para el asistente"
-              />
-              <TouchableOpacity
-                onPress={handleSend}
-                disabled={!question.trim() || assistant.isLoading}
-                className="w-14 h-14 rounded-full items-center justify-center"
-                style={{
-                  backgroundColor: !question.trim() || assistant.isLoading ? palette.elevated : '#2563EB',
-                }}
-                accessibilityRole="button"
-                accessibilityLabel="Enviar pregunta"
-              >
-                <Send size={21} color="#FFFFFF" strokeWidth={2.4} />
-              </TouchableOpacity>
+            <View
+              className="px-4 pt-3 border-t"
+              style={{
+                borderColor: palette.border,
+                paddingBottom: Math.max(insets.bottom, 10),
+              }}
+            >
+              <View className="flex-row items-end gap-2">
+                <TextInput
+                  value={question}
+                  onChangeText={setQuestion}
+                  placeholder="Pregunta sobre un evento..."
+                  placeholderTextColor={palette.muted}
+                  multiline
+                  maxLength={600}
+                  scrollEnabled
+                  className="flex-1 rounded-3xl px-4 py-3 text-[16px]"
+                  style={{
+                    backgroundColor: palette.input,
+                    borderColor: palette.border,
+                    borderWidth: 1,
+                    color: palette.text,
+                    maxHeight: 96,
+                    minHeight: 52,
+                    flexShrink: 1,
+                  }}
+                  editable={!assistant.isLoading}
+                  accessibilityLabel="Pregunta para el asistente"
+                />
+                <TouchableOpacity
+                  onPress={handleSend}
+                  disabled={!question.trim() || assistant.isLoading}
+                  className="w-13 h-13 rounded-full items-center justify-center"
+                  style={{
+                    width: 52,
+                    height: 52,
+                    backgroundColor: !question.trim() || assistant.isLoading ? palette.elevated : '#2563EB',
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel="Enviar pregunta"
+                >
+                  <Send size={20} color="#FFFFFF" strokeWidth={2.4} />
+                </TouchableOpacity>
+              </View>
+              <Typography variant="caption" className="mt-2 text-center" style={{ color: palette.muted, fontSize: 12 }}>
+                Contenido educativo, no asesoramiento financiero.
+              </Typography>
             </View>
-            <Typography variant="caption" className="mt-2 text-center" style={{ color: palette.muted, fontSize: 12 }}>
-              Contenido educativo, no asesoramiento financiero.
-            </Typography>
-          </View>
+          </KeyboardAvoidingView>
         </BottomSheetView>
       </BottomSheetModal>
     </>
