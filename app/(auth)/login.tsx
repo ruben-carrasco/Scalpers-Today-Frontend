@@ -9,10 +9,8 @@ import {
   ActivityIndicator,
   StatusBar,
   Image,
-  NativeSyntheticEvent,
-  TextInputKeyPressEventData,
 } from 'react-native';
-import { Mail, Lock, Eye, EyeOff, AlertCircle, ArrowUpCircle } from 'lucide-react-native';
+import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
@@ -50,22 +48,8 @@ export default observer(function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [capsLockActive, setCapsLockActive] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
-  const handleKeyPress = (e: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
-    const key = e.nativeEvent.key;
-    if (key.length === 1 && key.toUpperCase() === key && key.toLowerCase() !== key) {
-      const isShift = (e as any).nativeEvent.shiftKey;
-      if (isShift === false) {
-        setCapsLockActive(true);
-      } else if (isShift === true) {
-        setCapsLockActive(false);
-      }
-    } else if (key.length === 1 && key.toLowerCase() === key && key.toUpperCase() !== key) {
-      setCapsLockActive(false);
-    }
-  };
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
   const [googleError, setGoogleError] = useState<string | null>(null);
@@ -268,18 +252,12 @@ export default observer(function LoginScreen() {
                   placeholderTextColor={palette.muted}
                   value={password}
                   onChangeText={handlePasswordChange}
-                  onKeyPress={handleKeyPress}
                   secureTextEntry={!showPassword}
                   autoCapitalize="none"
                   autoCorrect={false}
                   editable={!isLoading}
                   accessibilityLabel="Contraseña"
                 />
-                {capsLockActive && (
-                  <View className="mr-2">
-                    <ArrowUpCircle size={20} color="#FBBF24" strokeWidth={2.5} />
-                  </View>
-                )}
                 <TouchableOpacity
                   onPress={() => setShowPassword(!showPassword)}
                   disabled={isLoading}
