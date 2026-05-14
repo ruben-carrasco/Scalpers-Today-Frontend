@@ -1,19 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Animated,
   Keyboard,
-  KeyboardAvoidingView,
-  Platform,
+  Modal,
+  PanResponder,
+  ScrollView,
   TextInput,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
-import {
-  BottomSheetBackdrop,
-  BottomSheetModal,
-  BottomSheetScrollView,
-  BottomSheetView,
-} from '@gorhom/bottom-sheet';
 import { Bot, Send, Sparkles, Trash2, X } from 'lucide-react-native';
 import { usePathname } from 'expo-router';
 import { observer } from 'mobx-react-lite';
@@ -34,84 +31,119 @@ export const FloatingAssistant = observer(function FloatingAssistant() {
   const { isDarkMode } = useThemeMode();
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
   const [question, setQuestion] = useState('');
-  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-  const messagesScrollRef = useRef<any>(null);
-  const snapPoints = useMemo(() => ['78%'], []);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const messagesScrollRef = useRef<ScrollView>(null);
+  const dragY = useRef(new Animated.Value(0)).current;
 
-  const palette = isDarkMode
-    ? {
-        bg: '#0A0A0B',
-        card: '#18181B',
-        elevated: '#27272A',
-        border: '#3F3F46',
-        text: '#FFFFFF',
-        muted: '#A1A1AA',
-        assistantBubble: '#18181B',
-        userBubble: '#2563EB',
-        input: '#111113',
-      }
-    : {
-        bg: '#FFFFFF',
-        card: '#F8FAFC',
-        elevated: '#E2E8F0',
-        border: '#CBD5E1',
-        text: '#0F172A',
-        muted: '#475569',
-        assistantBubble: '#F1F5F9',
-        userBubble: '#1D4ED8',
-        input: '#FFFFFF',
-      };
+  const palette = useMemo(
+    () =>
+      isDarkMode
+        ? {
+            bg: '#0A0A0B',
+            card: '#18181B',
+            elevated: '#27272A',
+            border: '#3F3F46',
+            text: '#FFFFFF',
+            muted: '#A1A1AA',
+            assistantBubble: '#18181B',
+            userBubble: '#2563EB',
+            input: '#111113',
+          }
+        : {
+            bg: '#FFFFFF',
+            card: '#F8FAFC',
+            elevated: '#E2E8F0',
+            border: '#CBD5E1',
+            text: '#0F172A',
+            muted: '#475569',
+            assistantBubble: '#F1F5F9',
+            userBubble: '#1D4ED8',
+            input: '#FFFFFF',
+          },
+    [isDarkMode]
+  );
 
   useEffect(() => {
     assistant.setContext({ screen: routeToScreen(pathname) });
   }, [assistant, pathname]);
 
   useEffect(() => {
-    if (assistant.isOpen) {
-      bottomSheetModalRef.current?.present();
-    } else {
-      bottomSheetModalRef.current?.dismiss();
-    }
-  }, [assistant.isOpen]);
+    const updateKeyboardHeight = (event: { endCoordinates: { screenY: number } }) => {
+      setKeyboardHeight(Math.max(0, windowHeight - event.endCoordinates.screenY));
+    };
+
+    const showSub = Keyboard.addListener('keyboardWillChangeFrame', updateKeyboardHeight);
+    const didShowSub = Keyboard.addListener('keyboardDidShow', updateKeyboardHeight);
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => setKeyboardHeight(0));
+
+    return () => {
+      showSub.remove();
+      didShowSub.remove();
+      hideSub.remove();
+    };
+  }, [windowHeight]);
 
   useEffect(() => {
     if (!assistant.isOpen) return;
+
+    dragY.setValue(0);
 
     const timeout = setTimeout(() => {
       messagesScrollRef.current?.scrollToEnd?.({ animated: true });
     }, 80);
 
     return () => clearTimeout(timeout);
-  }, [assistant.isOpen, assistant.messages.length, assistant.isLoading]);
+  }, [assistant.isOpen, assistant.messages.length, assistant.isLoading, dragY]);
 
-  const renderBackdrop = useCallback(
-    (props: any) => (
-      <BottomSheetBackdrop
-        {...props}
-        disappearsOnIndex={-1}
-        appearsOnIndex={0}
-        opacity={0.55}
-      />
-    ),
-    []
-  );
-
-  const handleOpen = () => {
+  const handleOpen = useCallback(() => {
     assistant.open({ screen: routeToScreen(pathname) });
-  };
+  }, [assistant, pathname]);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     Keyboard.dismiss();
     assistant.close();
-  };
+  }, [assistant]);
 
-  const handleSend = async () => {
+  const dragHandlePanResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onMoveShouldSetPanResponder: (_, gestureState) =>
+          gestureState.dy > 6 && Math.abs(gestureState.dy) > Math.abs(gestureState.dx),
+        onPanResponderMove: (_, gestureState) => {
+          dragY.setValue(Math.max(0, gestureState.dy));
+        },
+        onPanResponderRelease: (_, gestureState) => {
+          if (gestureState.dy > 90 || gestureState.vy > 0.9) {
+            handleClose();
+            return;
+          }
+
+          Animated.spring(dragY, {
+            toValue: 0,
+            useNativeDriver: true,
+          }).start();
+        },
+      }),
+    [dragY, handleClose]
+  );
+
+  const panelBottomOffset = keyboardHeight > 0 ? keyboardHeight : 0;
+  const panelHeight = Math.max(
+    320,
+    Math.min(
+      windowHeight * 0.82,
+      windowHeight - panelBottomOffset - insets.top - 12
+    )
+  );
+
+  const handleSend = useCallback(async () => {
     const clean = question.trim();
     if (!clean || assistant.isLoading) return;
     setQuestion('');
     await assistant.send(clean);
-  };
+  }, [assistant, question]);
 
   return (
     <>
@@ -136,175 +168,208 @@ export const FloatingAssistant = observer(function FloatingAssistant() {
         </TouchableOpacity>
       )}
 
-      <BottomSheetModal
-        ref={bottomSheetModalRef}
-        index={0}
-        snapPoints={snapPoints}
-        enableDynamicSizing={false}
-        onDismiss={() => assistant.close()}
-        backdropComponent={renderBackdrop}
-        backgroundStyle={{ backgroundColor: palette.bg }}
-        handleIndicatorStyle={{ backgroundColor: palette.border }}
+      <Modal
+        visible={assistant.isOpen}
+        transparent
+        animationType="slide"
+        statusBarTranslucent
+        onRequestClose={handleClose}
       >
-        <BottomSheetView className="flex-1 overflow-hidden">
-          <View
-            className="px-6 pb-4 border-b"
-            style={{ borderColor: palette.border }}
-          >
-            <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center gap-3 flex-1">
-                <View
-                  className="w-11 h-11 rounded-2xl items-center justify-center"
-                  style={{ backgroundColor: isDarkMode ? '#27272A' : '#E0F2FE' }}
-                >
-                  <Bot size={23} color={isDarkMode ? '#FFFFFF' : '#0369A1'} strokeWidth={2.3} />
-                </View>
-                <View className="flex-1">
-                  <Typography variant="h3" weight="bold" style={{ color: palette.text }}>
-                    Asistente IA
-                  </Typography>
-                  <Typography variant="caption" style={{ color: palette.muted }}>
-                    Conceptos, eventos y análisis de la app
-                  </Typography>
-                </View>
-              </View>
+        <View className="flex-1 justify-end" style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}>
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={handleClose}
+            style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
+            accessibilityRole="button"
+            accessibilityLabel="Cerrar asistente"
+          />
 
-              <View className="flex-row items-center gap-2">
-                <TouchableOpacity
-                  onPress={() => assistant.clear()}
-                  className="w-10 h-10 rounded-full items-center justify-center"
-                  style={{ backgroundColor: palette.card }}
-                  accessibilityRole="button"
-                  accessibilityLabel="Limpiar chat"
-                >
-                  <Trash2 size={18} color={palette.muted} strokeWidth={2.2} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={handleClose}
-                  className="w-10 h-10 rounded-full items-center justify-center"
-                  style={{ backgroundColor: palette.card }}
-                  accessibilityRole="button"
-                  accessibilityLabel="Cerrar asistente"
-                >
-                  <X size={20} color={palette.text} strokeWidth={2.4} />
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-
-          <BottomSheetScrollView
-            ref={messagesScrollRef}
-            style={{ flex: 1 }}
-            contentContainerStyle={{
-              flexGrow: 1,
-              padding: 20,
-              gap: 14,
-              paddingBottom: 32,
-            }}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator
-          >
-            {assistant.messages.map((message) => {
-              const isUser = message.role === 'user';
-              return (
-                <View
-                  key={message.id}
-                  className={`max-w-[86%] rounded-3xl px-4 py-3 ${isUser ? 'self-end' : 'self-start'}`}
-                  style={{
-                    backgroundColor: isUser ? palette.userBubble : palette.assistantBubble,
-                    borderWidth: isUser ? 0 : 1,
-                    borderColor: palette.border,
-                  }}
-                >
-                  <Typography
-                    variant="body"
-                    style={{ color: isUser ? '#FFFFFF' : palette.text, fontSize: 16 }}
-                  >
-                    {message.content}
-                  </Typography>
-                </View>
-              );
-            })}
-
-            {assistant.isLoading && (
-              <View
-                className="self-start rounded-3xl px-4 py-3 flex-row items-center gap-3 border"
-                style={{ backgroundColor: palette.assistantBubble, borderColor: palette.border }}
-              >
-                <ActivityIndicator color={isDarkMode ? '#FFFFFF' : '#111827'} size="small" />
-                <Typography variant="caption" style={{ color: palette.muted }}>
-                  Pensando...
-                </Typography>
-              </View>
-            )}
-
-            {assistant.error && (
-              <View
-                className="rounded-2xl px-4 py-3 border"
-                style={{ backgroundColor: 'rgba(255,69,58,0.10)', borderColor: '#FF453A' }}
-              >
-                <Typography variant="caption" color="danger" weight="semibold">
-                  {assistant.error}
-                </Typography>
-              </View>
-            )}
-          </BottomSheetScrollView>
-
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            keyboardVerticalOffset={12}
-          >
-            <View
-              className="px-4 pt-3 border-t"
+          <View className="flex-1 justify-end">
+            <Animated.View
+              {...dragHandlePanResponder.panHandlers}
               style={{
-                borderColor: palette.border,
-                paddingBottom: Math.max(insets.bottom, 10),
+                height: panelHeight,
+                backgroundColor: palette.bg,
+                borderTopLeftRadius: 30,
+                borderTopRightRadius: 30,
+                overflow: 'hidden',
+                marginBottom: panelBottomOffset,
+                transform: [{ translateY: dragY }],
               }}
             >
-              <View className="flex-row items-end gap-2">
-                <TextInput
-                  value={question}
-                  onChangeText={setQuestion}
-                  placeholder="Pregunta sobre un evento..."
-                  placeholderTextColor={palette.muted}
-                  multiline
-                  maxLength={600}
-                  scrollEnabled
-                  className="flex-1 rounded-3xl px-4 py-3 text-[16px]"
-                  style={{
-                    backgroundColor: palette.input,
-                    borderColor: palette.border,
-                    borderWidth: 1,
-                    color: palette.text,
-                    maxHeight: 96,
-                    minHeight: 52,
-                    flexShrink: 1,
-                  }}
-                  editable={!assistant.isLoading}
-                  accessibilityLabel="Pregunta para el asistente"
-                />
-                <TouchableOpacity
-                  onPress={handleSend}
-                  disabled={!question.trim() || assistant.isLoading}
-                  className="w-13 h-13 rounded-full items-center justify-center"
-                  style={{
-                    width: 52,
-                    height: 52,
-                    backgroundColor: !question.trim() || assistant.isLoading ? palette.elevated : '#2563EB',
-                  }}
-                  accessibilityRole="button"
-                  accessibilityLabel="Enviar pregunta"
+              <View>
+                <View className="items-center pt-3 pb-2">
+                  <View
+                    className="w-11 h-1.5 rounded-full"
+                    style={{ backgroundColor: palette.border }}
+                  />
+                </View>
+
+                <View
+                  className="px-6 pb-4 border-b"
+                  style={{ borderColor: palette.border }}
                 >
-                  <Send size={20} color="#FFFFFF" strokeWidth={2.4} />
-                </TouchableOpacity>
+                  <View className="flex-row items-center justify-between">
+                    <View className="flex-row items-center gap-3 flex-1">
+                      <View
+                        className="w-11 h-11 rounded-2xl items-center justify-center"
+                        style={{ backgroundColor: isDarkMode ? '#27272A' : '#E0F2FE' }}
+                      >
+                        <Bot size={23} color={isDarkMode ? '#FFFFFF' : '#0369A1'} strokeWidth={2.3} />
+                      </View>
+                      <View className="flex-1">
+                        <Typography variant="h3" weight="bold" style={{ color: palette.text }}>
+                          Asistente IA
+                        </Typography>
+                        <Typography variant="caption" style={{ color: palette.muted }}>
+                          Conceptos, eventos y análisis de la app
+                        </Typography>
+                      </View>
+                    </View>
+
+                    <View className="flex-row items-center gap-2">
+                      <TouchableOpacity
+                        onPress={() => assistant.clear()}
+                        className="w-10 h-10 rounded-full items-center justify-center"
+                        style={{ backgroundColor: palette.card }}
+                        accessibilityRole="button"
+                        accessibilityLabel="Limpiar chat"
+                      >
+                        <Trash2 size={18} color={palette.muted} strokeWidth={2.2} />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={handleClose}
+                        className="w-10 h-10 rounded-full items-center justify-center"
+                        style={{ backgroundColor: palette.card }}
+                        accessibilityRole="button"
+                        accessibilityLabel="Cerrar asistente"
+                      >
+                        <X size={20} color={palette.text} strokeWidth={2.4} />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
               </View>
-              <Typography variant="caption" className="mt-2 text-center" style={{ color: palette.muted, fontSize: 12 }}>
-                Contenido educativo, no asesoramiento financiero.
-              </Typography>
-            </View>
-          </KeyboardAvoidingView>
-        </BottomSheetView>
-      </BottomSheetModal>
+
+              <ScrollView
+                ref={messagesScrollRef}
+                style={{ flex: 1 }}
+                contentContainerStyle={{
+                  flexGrow: 1,
+                  justifyContent: 'flex-end',
+                  paddingHorizontal: 20,
+                  paddingTop: 16,
+                  paddingBottom: 12,
+                }}
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator
+                onContentSizeChange={() => {
+                  if (assistant.isOpen) {
+                    messagesScrollRef.current?.scrollToEnd({ animated: true });
+                  }
+                }}
+              >
+                <View style={{ gap: 14 }}>
+                  {assistant.messages.map((message) => {
+                    const isUser = message.role === 'user';
+                    return (
+                      <View
+                        key={message.id}
+                        className={`max-w-[86%] rounded-3xl px-4 py-3 ${isUser ? 'self-end' : 'self-start'}`}
+                        style={{
+                          backgroundColor: isUser ? palette.userBubble : palette.assistantBubble,
+                          borderWidth: isUser ? 0 : 1,
+                          borderColor: palette.border,
+                        }}
+                      >
+                        <Typography
+                          variant="body"
+                          style={{ color: isUser ? '#FFFFFF' : palette.text, fontSize: 16 }}
+                        >
+                          {message.content}
+                        </Typography>
+                      </View>
+                    );
+                  })}
+
+                  {assistant.isLoading && (
+                    <View
+                      className="self-start rounded-3xl px-4 py-3 flex-row items-center gap-3 border"
+                      style={{ backgroundColor: palette.assistantBubble, borderColor: palette.border }}
+                    >
+                      <ActivityIndicator color={isDarkMode ? '#FFFFFF' : '#111827'} size="small" />
+                      <Typography variant="caption" style={{ color: palette.muted }}>
+                        Pensando...
+                      </Typography>
+                    </View>
+                  )}
+
+                  {assistant.error && (
+                    <View
+                      className="rounded-2xl px-4 py-3 border"
+                      style={{ backgroundColor: 'rgba(255,69,58,0.10)', borderColor: '#FF453A' }}
+                    >
+                      <Typography variant="caption" color="danger" weight="semibold">
+                        {assistant.error}
+                      </Typography>
+                    </View>
+                  )}
+                </View>
+              </ScrollView>
+
+              <View
+                className="px-4 pt-3 border-t"
+                style={{
+                  borderColor: palette.border,
+                  backgroundColor: palette.bg,
+                  paddingBottom: Math.max(insets.bottom, 10),
+                }}
+              >
+                <View className="flex-row items-end gap-2">
+                  <TextInput
+                    value={question}
+                    onChangeText={setQuestion}
+                    placeholder="Pregunta sobre un evento..."
+                    placeholderTextColor={palette.muted}
+                    multiline
+                    maxLength={600}
+                    scrollEnabled
+                    className="flex-1 rounded-3xl px-4 py-3 text-[16px]"
+                    style={{
+                      backgroundColor: palette.input,
+                      borderColor: palette.border,
+                      borderWidth: 1,
+                      color: palette.text,
+                      maxHeight: 88,
+                      minHeight: 52,
+                      flexShrink: 1,
+                    }}
+                    editable={!assistant.isLoading}
+                    accessibilityLabel="Pregunta para el asistente"
+                  />
+                  <TouchableOpacity
+                    onPress={handleSend}
+                    disabled={!question.trim() || assistant.isLoading}
+                    className="rounded-full items-center justify-center"
+                    style={{
+                      width: 52,
+                      height: 52,
+                      backgroundColor: !question.trim() || assistant.isLoading ? palette.elevated : '#2563EB',
+                    }}
+                    accessibilityRole="button"
+                    accessibilityLabel="Enviar pregunta"
+                  >
+                    <Send size={20} color="#FFFFFF" strokeWidth={2.4} />
+                  </TouchableOpacity>
+                </View>
+                <Typography variant="caption" className="mt-2 text-center" style={{ color: palette.muted, fontSize: 12 }}>
+                  Contenido educativo, no asesoramiento financiero.
+                </Typography>
+              </View>
+            </Animated.View>
+          </View>
+        </View>
+      </Modal>
     </>
   );
 });
