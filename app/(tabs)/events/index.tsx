@@ -388,21 +388,44 @@ export default observer(function EventsScreen() {
           </Typography>
         </TouchableOpacity>
 
-        <View className="flex-row items-center rounded-2xl px-4 h-12 gap-3 border" style={{ backgroundColor: palette.surfaceBg, borderColor: palette.surfaceBorder }}>
-          <Search size={20} color={palette.textMuted} strokeWidth={2.5} />
-          <TextInput
-            className="flex-1 text-[17px] font-medium"
-            style={{ color: palette.textPrimary }}
-            placeholder="Buscar evento..."
-            placeholderTextColor={palette.textMuted}
-            value={searchText}
-            onChangeText={handleSearch}
-          />
-          {searchText.length > 0 && (
-            <TouchableOpacity onPress={() => handleSearch('')} className="p-1">
-              <X size={20} color={palette.textSecondary} strokeWidth={2.5} />
-            </TouchableOpacity>
-          )}
+        <View className="flex-row items-center gap-2">
+          <View
+            className="flex-1 flex-row items-center rounded-2xl px-4 h-12 gap-3 border"
+            style={{ backgroundColor: palette.surfaceBg, borderColor: palette.surfaceBorder }}
+          >
+            <Search size={20} color={palette.textMuted} strokeWidth={2.5} />
+            <TextInput
+              className="flex-1 text-[17px] font-medium"
+              style={{ color: palette.textPrimary }}
+              placeholder="Buscar evento..."
+              placeholderTextColor={palette.textMuted}
+              value={searchText}
+              onChangeText={handleSearch}
+            />
+            {searchText.length > 0 && (
+              <TouchableOpacity onPress={() => handleSearch('')} className="p-1">
+                <X size={20} color={palette.textSecondary} strokeWidth={2.5} />
+              </TouchableOpacity>
+            )}
+          </View>
+
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => setIsFiltersModalOpen(true)}
+            className="h-12 px-3 rounded-2xl border flex-row items-center gap-2"
+            style={{ borderColor: palette.surfaceBorder, backgroundColor: palette.surfaceBg }}
+          >
+            <Typography variant="caption" weight="semibold" style={{ color: palette.textPrimary }}>
+              Filtros
+            </Typography>
+            {hasActiveFilters && (
+              <View className="px-1.5 py-0.5 rounded-full bg-[#2563EB33] border border-[#1D4ED8]">
+                <Typography variant="caption" weight="bold" style={{ color: '#60A5FA' }}>
+                  {activeFilterLabels.length}
+                </Typography>
+              </View>
+            )}
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -472,42 +495,6 @@ export default observer(function EventsScreen() {
           </ScrollView>
         </View>
       )}
-
-      <View className="py-2 border-b" style={{ backgroundColor: palette.screenBg, borderBottomColor: palette.surfaceBorder }}>
-        <View className="px-6 flex-row items-center gap-2">
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => setIsFiltersModalOpen(true)}
-            className="px-3 py-1.5 rounded-lg border flex-row items-center gap-2"
-            style={{ borderColor: palette.surfaceBorder, backgroundColor: palette.surfaceBg }}
-          >
-            <Typography variant="caption" weight="semibold" style={{ color: palette.textPrimary }}>
-              Filtros
-            </Typography>
-            {hasActiveFilters && (
-              <View className="px-1.5 py-0.5 rounded-full bg-[#2563EB33] border border-[#1D4ED8]">
-                <Typography variant="caption" weight="bold" style={{ color: '#60A5FA' }}>
-                  {activeFilterLabels.length}
-                </Typography>
-              </View>
-            )}
-          </TouchableOpacity>
-
-          {hasActiveFilters && (
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={handleClearVisibleFilters}
-              className="px-3 py-1.5 rounded-lg border flex-row items-center gap-1.5"
-              style={{ borderColor: palette.surfaceStrongBorder, backgroundColor: palette.surfaceStrong }}
-            >
-              <X size={12} color={palette.textPrimary} strokeWidth={2.5} />
-              <Typography variant="caption" weight="semibold" style={{ color: palette.textPrimary }}>
-                Limpiar
-              </Typography>
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
 
       {isIOS ? (
         <FlatList
