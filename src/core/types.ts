@@ -9,6 +9,7 @@ export const TYPES = {
   EventRepository: Symbol.for('EventRepository'),
   AlertRepository: Symbol.for('AlertRepository'),
   ConfigRepository: Symbol.for('ConfigRepository'),
+  AssistantRepository: Symbol.for('AssistantRepository'),
 
   LoginUseCase: Symbol.for('LoginUseCase'),
   GoogleLoginUseCase: Symbol.for('GoogleLoginUseCase'),
@@ -33,12 +34,14 @@ export const TYPES = {
   RegisterDeviceTokenUseCase: Symbol.for('RegisterDeviceTokenUseCase'),
 
   GetCountriesUseCase: Symbol.for('GetCountriesUseCase'),
+  SendAssistantMessageUseCase: Symbol.for('SendAssistantMessageUseCase'),
 
   AuthViewModel: Symbol.for('AuthViewModel'),
   HomeViewModel: Symbol.for('HomeViewModel'),
   EventsViewModel: Symbol.for('EventsViewModel'),
   AlertsViewModel: Symbol.for('AlertsViewModel'),
   SettingsViewModel: Symbol.for('SettingsViewModel'),
+  AssistantViewModel: Symbol.for('AssistantViewModel'),
 
   CacheService: Symbol.for('CacheService'),
 };
