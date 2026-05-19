@@ -111,23 +111,31 @@ export default observer(function HomeScreen() {
     return () => clearInterval(timer);
   }, []);
 
+  const refreshHome = useCallback(async () => {
+    await homeViewModel.refresh(true);
+  }, [homeViewModel]);
+
+  useEffect(() => {
+    void refreshHome();
+  }, [refreshHome]);
+
   useFocusEffect(
     useCallback(() => {
-      homeViewModel.refresh(true);
+      void refreshHome();
 
       const subscription = AppState.addEventListener('change', (nextState) => {
         if (nextState === 'active') {
-          homeViewModel.refresh(true);
+          void refreshHome();
         }
       });
 
       return () => {
         subscription.remove();
       };
-    }, [homeViewModel])
+    }, [refreshHome])
   );
 
-  const { summary, briefing, isLoading, error } = homeViewModel;
+  const { summary, briefing, isLoading, error, lastRefreshTime } = homeViewModel;
   const userName = authViewModel.user?.name?.split(' ')[0] || 'Trader';
 
   const sentiment = summary?.marketSentiment?.overall
@@ -156,7 +164,7 @@ export default observer(function HomeScreen() {
         refreshControl={
           <RefreshControl
             refreshing={isLoading}
-            onRefresh={() => homeViewModel.refresh(true)}
+            onRefresh={refreshHome}
             tintColor="#3B82F6"
           />
         }
@@ -182,7 +190,7 @@ export default observer(function HomeScreen() {
                 <View className="flex-row items-center gap-2">
                   <RotateCw size={14} color={palette.blueAccent} strokeWidth={2.5} />
                   <Typography variant="caption" weight="semibold" style={{ color: palette.updateText }}>
-                    Actualizado a las {activeSummary.welcome.time}
+                    Actualizado a las {lastRefreshTime ?? activeSummary.welcome.time}
                   </Typography>
                 </View>
                 <Typography variant="caption" weight="bold" style={{ color: palette.cityAccent }}>
