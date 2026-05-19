@@ -20,6 +20,7 @@ export class HomeViewModel {
   isLoadingBriefing: boolean = false;
   summaryError: string | null = null;
   briefingError: string | null = null;
+  lastRefreshTime: string | null = null;
   private lastSummaryFetchTime: number = 0;
   private lastBriefingFetchTime: number = 0;
   private _summaryRequestId: number = 0;
@@ -44,11 +45,11 @@ export class HomeViewModel {
   }
 
   get error(): string | null {
-    return this.summaryError || this.briefingError;
+    return this.summaryError;
   }
 
   get isLoading(): boolean {
-    return this.isLoadingSummary || this.isLoadingBriefing;
+    return this.isLoadingSummary;
   }
 
   async loadSummary(): Promise<boolean> {
@@ -64,6 +65,10 @@ export class HomeViewModel {
         }
         this.summary = summary;
         this.lastSummaryFetchTime = Date.now();
+        this.lastRefreshTime = new Date().toLocaleTimeString('es-ES', {
+          hour: '2-digit',
+          minute: '2-digit',
+        });
       });
       await this.cacheService.set(SUMMARY_CACHE_KEY, summary);
       return requestId === this._summaryRequestId;
@@ -100,6 +105,10 @@ export class HomeViewModel {
   }
 
   async loadBriefing(): Promise<boolean> {
+    if (this.isLoadingBriefing) {
+      return false;
+    }
+
     const requestId = ++this._briefingRequestId;
     this.isLoadingBriefing = true;
     this.briefingError = null;
@@ -124,9 +133,9 @@ export class HomeViewModel {
           }
           if (cachedBriefing) {
             this.briefing = cachedBriefing;
-            this.briefingError = 'Modo sin conexión. Mostrando datos guardados.';
+            this.briefingError = null;
           } else {
-            this.briefingError = 'Sin conexión a internet. Verifica tu conexión.';
+            this.briefingError = null;
           }
         });
       } else {
@@ -134,7 +143,7 @@ export class HomeViewModel {
           if (requestId !== this._briefingRequestId) {
             return;
           }
-          this.briefingError = getErrorMessage(err);
+          this.briefingError = null;
         });
       }
       return false;
@@ -173,18 +182,12 @@ export class HomeViewModel {
         });
       }
 
-      const pendingLoads: Promise<boolean>[] = [];
-
       if (force || !hasFreshSummary) {
-        pendingLoads.push(this.loadSummary());
+        await this.loadSummary();
       }
 
       if (force || !hasFreshBriefing) {
-        pendingLoads.push(this.loadBriefing());
-      }
-
-      if (pendingLoads.length > 0) {
-        await Promise.all(pendingLoads);
+        void this.loadBriefing();
       }
     })();
 
@@ -202,6 +205,7 @@ export class HomeViewModel {
     this.briefing = null;
     this.summaryError = null;
     this.briefingError = null;
+    this.lastRefreshTime = null;
     this.lastSummaryFetchTime = 0;
     this.lastBriefingFetchTime = 0;
     this._summaryRequestId += 1;

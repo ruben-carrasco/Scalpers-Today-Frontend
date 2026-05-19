@@ -145,7 +145,10 @@ export class EventRepositoryImpl implements IEventRepository {
   }
 
   async getHomeSummary(): Promise<HomeSummary> {
-    const response = await this.apiClient.get<ApiHomeSummary>(this.endpoints.homeSummary);
+    const response = await this.apiClient.get<ApiHomeSummary>(
+      this.endpoints.homeSummary,
+      { _ts: Date.now() }
+    );
     return {
       welcome: response.welcome,
       todayStats: {
@@ -166,7 +169,10 @@ export class EventRepositoryImpl implements IEventRepository {
   }
 
   async getDailyBriefing(): Promise<DailyBriefing> {
-    const response = await this.apiClient.get<ApiBriefing>(this.endpoints.brief);
+    const response = await this.apiClient.get<ApiBriefing>(
+      this.endpoints.brief,
+      { _ts: Date.now() }
+    );
     return {
       generalOutlook: response.general_outlook,
       impactedAssets: response.impacted_assets,
