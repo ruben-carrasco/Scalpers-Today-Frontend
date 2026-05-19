@@ -130,6 +130,8 @@ export class ApiClient {
   private getHeaders(): HeadersInit {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
+      'Cache-Control': 'no-cache',
+      Pragma: 'no-cache',
     };
     const token = this.tokenManager.getToken();
     if (token) {
@@ -196,6 +198,7 @@ export class ApiClient {
     const response = await this.fetchWithRetry(fullUrl, {
       method: 'GET',
       headers: this.getHeaders(),
+      cache: 'no-store',
     });
     return this.handleResponse<T>(response);
   }

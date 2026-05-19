@@ -69,6 +69,7 @@ export default observer(function HomeScreen() {
         cityAccent: '#8DEBFF',
         blueAccent: '#60A5FA',
         blueAccentBg: '#3B82F633',
+        updateText: '#CBD5E1',
         agendaCardBg: 'rgba(4,47,46,0.30)',
         agendaCardBorder: 'rgba(15,118,110,0.40)',
         agendaIconBg: '#0F766E33',
@@ -89,6 +90,7 @@ export default observer(function HomeScreen() {
         cityAccent: '#1D4ED8',
         blueAccent: '#1E40AF',
         blueAccentBg: '#DCEBFF',
+        updateText: '#475569',
         agendaCardBg: '#ECFDF5',
         agendaCardBorder: '#A7F3D0',
         agendaIconBg: '#D1FAE5',
@@ -109,17 +111,13 @@ export default observer(function HomeScreen() {
     return () => clearInterval(timer);
   }, []);
 
-  useEffect(() => {
-    homeViewModel.refresh();
-  }, [homeViewModel]);
-
   useFocusEffect(
     useCallback(() => {
-      homeViewModel.refresh();
+      homeViewModel.refresh(true);
 
       const subscription = AppState.addEventListener('change', (nextState) => {
         if (nextState === 'active') {
-          homeViewModel.refresh();
+          homeViewModel.refresh(true);
         }
       });
 
@@ -183,7 +181,7 @@ export default observer(function HomeScreen() {
               >
                 <View className="flex-row items-center gap-2">
                   <RotateCw size={14} color={palette.blueAccent} strokeWidth={2.5} />
-                  <Typography variant="caption" color="muted" weight="semibold">
+                  <Typography variant="caption" weight="semibold" style={{ color: palette.updateText }}>
                     Actualizado a las {activeSummary.welcome.time}
                   </Typography>
                 </View>
