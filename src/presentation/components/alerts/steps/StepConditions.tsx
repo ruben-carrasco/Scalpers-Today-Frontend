@@ -32,6 +32,8 @@ export function StepConditions({ selectedTypes, conditionValues, availableCountr
   const baseText = isDarkMode ? colors.text.icon : '#334155';
   const indicator = isDarkMode ? colors.border.indicator : '#64748B';
   const descriptionText = isDarkMode ? colors.text.muted : '#475569';
+  const selectedBg = isDarkMode ? colors.brand.primary + '1A' : '#DCEBFF';
+  const selectedText = isDarkMode ? colors.text.primary : '#1E40AF';
 
   return (
     <View className="pb-10">
@@ -43,13 +45,13 @@ export function StepConditions({ selectedTypes, conditionValues, availableCountr
             onPress={() => onToggleType(alertType.type)}
             activeOpacity={0.7}
             className="flex-row items-center p-4 rounded-2xl mb-3 border"
-            style={{ backgroundColor: isSelected ? colors.brand.primary + '1A' : baseBg, borderColor: isSelected ? colors.brand.primary : baseBorder }}
+            style={{ backgroundColor: isSelected ? selectedBg : baseBg, borderColor: isSelected ? colors.brand.primaryDark : baseBorder }}
           >
             <View className="w-12 h-12 rounded-xl items-center justify-center mr-4" style={{ backgroundColor: isSelected ? colors.brand.primary : baseSurface }}>
               <alertType.Icon size={20} color={isSelected ? colors.white : baseText} strokeWidth={2} />
             </View>
             <View className="flex-1">
-              <Typography variant="body" weight="bold" style={{ color: isSelected ? colors.text.primary : baseText }}>
+              <Typography variant="body" weight="bold" style={{ color: isSelected ? selectedText : baseText }}>
                 {alertType.label}
               </Typography>
               <Typography variant="caption" className="mt-1" style={{ color: descriptionText }}>
@@ -57,7 +59,7 @@ export function StepConditions({ selectedTypes, conditionValues, availableCountr
               </Typography>
             </View>
             {isSelected ? (
-              <CheckCircle size={24} color={colors.brand.primary} strokeWidth={2.5} />
+              <CheckCircle size={24} color={isDarkMode ? colors.brand.primary : colors.brand.primaryDark} strokeWidth={2.5} />
             ) : (
               <Circle size={24} color={indicator} strokeWidth={2.5} />
             )}
@@ -101,7 +103,7 @@ function ValueSelector({
   onSelect: (v: string) => void;
   isDarkMode: boolean;
 }) {
-  const boxBg = isDarkMode ? colors.bg.modalCard : '#EEF2FF';
+  const boxBg = isDarkMode ? colors.bg.modalCard : '#DCEBFF';
   const chipBg = isDarkMode ? colors.bg.modal : '#FFFFFF';
   const border = isDarkMode ? colors.border.medium : '#CBD5E1';
   const chipText = isDarkMode ? colors.text.icon : '#334155';

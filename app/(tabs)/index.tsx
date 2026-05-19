@@ -67,6 +67,8 @@ export default observer(function HomeScreen() {
         cardBorder: '#27272A',
         mutedLine: '#27272A',
         cityAccent: '#8DEBFF',
+        blueAccent: '#60A5FA',
+        blueAccentBg: '#3B82F633',
         agendaCardBg: 'rgba(4,47,46,0.30)',
         agendaCardBorder: 'rgba(15,118,110,0.40)',
         agendaIconBg: '#0F766E33',
@@ -85,6 +87,8 @@ export default observer(function HomeScreen() {
         cardBorder: '#E4E4E7',
         mutedLine: '#E4E4E7',
         cityAccent: '#1D4ED8',
+        blueAccent: '#1E40AF',
+        blueAccentBg: '#DCEBFF',
         agendaCardBg: '#ECFDF5',
         agendaCardBorder: '#A7F3D0',
         agendaIconBg: '#D1FAE5',
@@ -178,7 +182,7 @@ export default observer(function HomeScreen() {
                 style={{ borderColor: palette.updateCardBorder, backgroundColor: palette.updateCardBg }}
               >
                 <View className="flex-row items-center gap-2">
-                  <RotateCw size={14} color="#60A5FA" strokeWidth={2.5} />
+                  <RotateCw size={14} color={palette.blueAccent} strokeWidth={2.5} />
                   <Typography variant="caption" color="muted" weight="semibold">
                     Actualizado a las {activeSummary.welcome.time}
                   </Typography>
@@ -277,14 +281,14 @@ export default observer(function HomeScreen() {
                 {briefing.impactedAssets && briefing.impactedAssets.length > 0 && (
                   <View className="border rounded-3xl p-6" style={{ backgroundColor: palette.cardBg, borderColor: palette.cardBorder }}>
                     <View className="flex-row items-center gap-2 mb-4">
-                      <TrendingUp size={20} color="#3B82F6" strokeWidth={2.5} />
-                      <Typography variant="h3" weight="bold" className="text-[#3B82F6]">
+                      <TrendingUp size={20} color={palette.blueAccent} strokeWidth={2.5} />
+                      <Typography variant="h3" weight="bold" style={{ color: palette.blueAccent }}>
                         Activos a Vigilar
                       </Typography>
                     </View>
                     <View className="flex-row flex-wrap gap-2">
                       {briefing.impactedAssets.slice(0, 6).map((asset, index) => (
-                        <View key={index} className="px-4 py-2 rounded-xl" style={{ backgroundColor: isDarkMode ? '#27272A' : '#EEF2FF' }}>
+                        <View key={index} className="px-4 py-2 rounded-xl" style={{ backgroundColor: isDarkMode ? '#27272A' : '#DCEBFF' }}>
                           <Typography variant="body" weight="semibold" style={{ color: palette.textPrimary }}>
                             {asset}
                           </Typography>
@@ -315,8 +319,8 @@ export default observer(function HomeScreen() {
                       className="flex-row items-center gap-4 py-4"
                       style={index < Math.min(activeSummary.highlights!.length - 1, 4) ? { borderBottomWidth: 1, borderBottomColor: palette.mutedLine } : undefined}
                     >
-                      <View className="w-8 h-8 rounded-full bg-[#3B82F6]/20 items-center justify-center">
-                        <Typography variant="body" weight="bold" className="text-[#60A5FA]">
+                      <View className="w-8 h-8 rounded-full items-center justify-center" style={{ backgroundColor: palette.blueAccentBg }}>
+                        <Typography variant="body" weight="bold" style={{ color: palette.blueAccent }}>
                           {index + 1}
                         </Typography>
                       </View>

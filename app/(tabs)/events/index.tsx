@@ -8,7 +8,6 @@ import {
   ScrollView,
   FlatList,
   Platform,
-  Modal,
   AppState,
 } from 'react-native';
 import { FlashList, type FlashListRef } from '@shopify/flash-list';
@@ -71,9 +70,9 @@ function getDayTone(count: number, isDarkMode: boolean): DayTone {
 
   return {
     label: 'Agenda ligera',
-    color: isDarkMode ? '#60A5FA' : '#1D4ED8',
-    backgroundColor: isDarkMode ? '#1D4ED833' : '#DBEAFE',
-    borderColor: isDarkMode ? '#1D4ED8' : '#93C5FD',
+    color: isDarkMode ? '#60A5FA' : '#1E40AF',
+    backgroundColor: isDarkMode ? '#1D4ED833' : '#DCEBFF',
+    borderColor: isDarkMode ? '#1D4ED8' : '#2563EB',
   };
 }
 
@@ -98,7 +97,6 @@ export default observer(function EventsScreen() {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [isControlsOpen, setIsControlsOpen] = useState(false);
-  const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false);
 
   const eventsViewModel = useEventsViewModel();
   const haptics = useHaptics();
@@ -123,8 +121,8 @@ export default observer(function EventsScreen() {
         statusBar: 'dark-content' as const,
         surfaceBg: '#FFFFFF',
         surfaceBorder: '#E4E4E7',
-        surfaceStrong: '#DBEAFE',
-        surfaceStrongBorder: '#93C5FD',
+        surfaceStrong: '#DCEBFF',
+        surfaceStrongBorder: '#2563EB',
         textPrimary: '#18181B',
         textSecondary: '#334155',
         textMuted: '#475569',
@@ -139,12 +137,10 @@ export default observer(function EventsScreen() {
   const filtersModalRef = useRef<BottomSheetModal>(null);
 
   const handleOpenFilters = useCallback(() => {
-    setIsFiltersModalOpen(true);
     filtersModalRef.current?.present();
   }, []);
 
   const handleCloseFilters = useCallback(() => {
-    setIsFiltersModalOpen(false);
     filtersModalRef.current?.dismiss();
   }, []);
 
@@ -339,9 +335,12 @@ export default observer(function EventsScreen() {
             haptics.success();
           }}
           className="px-5 py-3 rounded-2xl border"
-          style={{ backgroundColor: '#1D4ED833', borderColor: '#1D4ED8' }}
+          style={{
+            backgroundColor: isDarkMode ? '#1D4ED833' : '#DCEBFF',
+            borderColor: isDarkMode ? '#1D4ED8' : '#2563EB',
+          }}
         >
-          <Typography variant="body" weight="bold" style={{ color: '#60A5FA' }}>
+          <Typography variant="body" weight="bold" style={{ color: isDarkMode ? '#60A5FA' : '#1E40AF' }}>
             Actualizar calendario
           </Typography>
         </TouchableOpacity>
@@ -431,8 +430,14 @@ export default observer(function EventsScreen() {
               Filtros
             </Typography>
             {hasActiveFilters && (
-              <View className="px-1.5 py-0.5 rounded-full bg-[#2563EB33] border border-[#1D4ED8]">
-                <Typography variant="caption" weight="bold" style={{ color: '#60A5FA' }}>
+              <View
+                className="px-1.5 py-0.5 rounded-full border"
+                style={{
+                  backgroundColor: isDarkMode ? '#2563EB33' : '#DCEBFF',
+                  borderColor: isDarkMode ? '#1D4ED8' : '#2563EB',
+                }}
+              >
+                <Typography variant="caption" weight="bold" style={{ color: isDarkMode ? '#60A5FA' : '#1E40AF' }}>
                   {activeFilterLabels.length}
                 </Typography>
               </View>
@@ -480,8 +485,11 @@ export default observer(function EventsScreen() {
                         {day.shortLabel}
                       </Typography>
                       {day.isToday && (
-                        <View className="px-2 py-0.5 rounded-full" style={{ backgroundColor: '#2563EB33' }}>
-                          <Typography variant="caption" weight="bold" style={{ color: isDarkMode ? '#60A5FA' : '#1D4ED8' }}>
+                        <View
+                          className="px-2 py-0.5 rounded-full"
+                          style={{ backgroundColor: isDarkMode ? '#2563EB33' : '#DCEBFF' }}
+                        >
+                          <Typography variant="caption" weight="bold" style={{ color: isDarkMode ? '#60A5FA' : '#1E40AF' }}>
                             Hoy
                           </Typography>
                         </View>
@@ -538,7 +546,6 @@ export default observer(function EventsScreen() {
           extraData={listContextKey}
           keyExtractor={(item) => item.id}
           renderItem={renderEventItem}
-          estimatedItemSize={210}
           contentContainerStyle={eventsListContentStyle}
           keyboardShouldPersistTaps="handled"
           refreshControl={eventsRefreshControl}
@@ -564,7 +571,6 @@ export default observer(function EventsScreen() {
         ref={filtersModalRef}
         snapPoints={['35%']}
         enablePanDownToClose
-        onDismiss={() => setIsFiltersModalOpen(false)}
         backdropComponent={(props) => (
           <BottomSheetBackdrop {...props} opacity={0.6} appearsOnIndex={0} disappearsOnIndex={-1} />
         )}
