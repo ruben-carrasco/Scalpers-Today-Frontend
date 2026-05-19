@@ -26,11 +26,13 @@ export default observer(function AlertsScreen() {
         screenBg: '#000000',
         statusBar: 'light-content' as const,
         emptyIconBg: '#18181B',
+        primaryActionBg: '#3B82F6',
       }
     : {
         screenBg: '#F4F4F5',
         statusBar: 'dark-content' as const,
         emptyIconBg: '#E4E4E7',
+        primaryActionBg: '#2563EB',
       };
 
   useEffect(() => {
@@ -101,7 +103,8 @@ export default observer(function AlertsScreen() {
           </View>
           <TouchableOpacity
             onPress={() => setCreateModalVisible(true)}
-            className="w-12 h-12 rounded-full bg-[#3B82F6] items-center justify-center shadow-lg"
+            className="w-12 h-12 rounded-full items-center justify-center shadow-lg"
+            style={{ backgroundColor: palette.primaryActionBg }}
           >
             <Plus size={24} color="#fff" strokeWidth={3} />
           </TouchableOpacity>
@@ -121,7 +124,6 @@ export default observer(function AlertsScreen() {
             />
           </AnimatedCard>
         )}
-        estimatedItemSize={160}
         contentContainerStyle={{ padding: 24, paddingBottom: 120 }}
         refreshControl={
           <RefreshControl
@@ -147,7 +149,8 @@ export default observer(function AlertsScreen() {
                 Crea tu primera alerta para recibir notificaciones cuando se publiquen eventos económicos clave.
               </Typography>
               <TouchableOpacity
-                className="mt-6 bg-[#3B82F6] px-8 py-4 rounded-full flex-row items-center gap-2"
+                className="mt-6 px-8 py-4 rounded-full flex-row items-center gap-2"
+                style={{ backgroundColor: palette.primaryActionBg }}
                 onPress={() => setCreateModalVisible(true)}
               >
                 <Plus size={20} color="#fff" strokeWidth={3} />

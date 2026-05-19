@@ -19,13 +19,18 @@ export function NextEventCard({ event, onPress }: NextEventCardProps) {
   const secondaryText = isDarkMode ? '#A1A1AA' : '#475569';
   const countryChip = {
     backgroundColor: isDarkMode ? '#27272A' : '#DBEAFE',
-    borderColor: isDarkMode ? '#3F3F46' : '#93C5FD',
+    borderColor: isDarkMode ? '#3F3F46' : '#2563EB',
     textColor: isDarkMode ? '#E4E4E7' : '#1E3A8A',
   };
   const currencyChip = {
     backgroundColor: isDarkMode ? '#27272A' : '#DCFCE7',
     borderColor: isDarkMode ? '#3F3F46' : '#86EFAC',
     textColor: isDarkMode ? '#E4E4E7' : '#166534',
+  };
+  const aiBadge = {
+    backgroundColor: isDarkMode ? '#3B82F633' : '#DCEBFF',
+    borderColor: isDarkMode ? '#1D4ED8' : '#2563EB',
+    textColor: isDarkMode ? '#60A5FA' : '#1E40AF',
   };
 
   return (
@@ -40,9 +45,12 @@ export function NextEventCard({ event, onPress }: NextEventCardProps) {
             <Typography variant="h3" weight="bold" className="font-mono" style={{ color: primaryText }}>{event.time}</Typography>
           </View>
           {event.aiAnalysis && (
-            <View className="flex-row items-center gap-1.5 bg-[#3B82F6]/20 px-3 py-1.5 rounded-full">
-              <Sparkles size={14} color="#60A5FA" strokeWidth={2.5} />
-              <Typography variant="caption" weight="bold" className="text-[#60A5FA]">IA Analysis</Typography>
+            <View
+              className="flex-row items-center gap-1.5 px-3 py-1.5 rounded-full border"
+              style={{ backgroundColor: aiBadge.backgroundColor, borderColor: aiBadge.borderColor }}
+            >
+              <Sparkles size={14} color={aiBadge.textColor} strokeWidth={2.5} />
+              <Typography variant="caption" weight="bold" style={{ color: aiBadge.textColor }}>IA Analysis</Typography>
             </View>
           )}
         </View>

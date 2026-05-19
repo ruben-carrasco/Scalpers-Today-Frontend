@@ -36,6 +36,7 @@ export default observer(function SettingsScreen() {
         verified: '#34D399',
         themeInactiveBg: '#27272A',
         themeInactiveText: '#A1A1AA',
+        primaryActionBg: '#3B82F6',
       }
     : {
         screenBg: '#F4F4F5',
@@ -50,6 +51,7 @@ export default observer(function SettingsScreen() {
         verified: '#059669',
         themeInactiveBg: '#F4F4F5',
         themeInactiveText: '#52525B',
+        primaryActionBg: '#2563EB',
       };
 
   const handleLogout = () => {
@@ -86,7 +88,7 @@ export default observer(function SettingsScreen() {
             className="rounded-3xl p-6 flex-row items-center border"
             style={{ backgroundColor: palette.sectionBg, borderColor: palette.sectionBorder }}
           >
-            <View className="w-16 h-16 rounded-full bg-[#3B82F6] items-center justify-center">
+            <View className="w-16 h-16 rounded-full items-center justify-center" style={{ backgroundColor: palette.primaryActionBg }}>
               <Typography variant="h2" weight="bold" className="text-white">
                 {user?.name?.charAt(0).toUpperCase() || '?'}
               </Typography>
@@ -141,7 +143,8 @@ export default observer(function SettingsScreen() {
                 <TouchableOpacity
                   activeOpacity={0.8}
                   onPress={() => setThemeMode('dark')}
-                  className={`px-3 py-2 rounded-full ${themeMode === 'dark' ? 'bg-[#3B82F6]' : ''}`}
+                  className="px-3 py-2 rounded-full"
+                  style={themeMode === 'dark' ? { backgroundColor: palette.primaryActionBg } : undefined}
                 >
                   <Typography
                     variant="caption"
@@ -154,7 +157,8 @@ export default observer(function SettingsScreen() {
                 <TouchableOpacity
                   activeOpacity={0.8}
                   onPress={() => setThemeMode('light')}
-                  className={`px-3 py-2 rounded-full ${themeMode === 'light' ? 'bg-[#3B82F6]' : ''}`}
+                  className="px-3 py-2 rounded-full"
+                  style={themeMode === 'light' ? { backgroundColor: palette.primaryActionBg } : undefined}
                 >
                   <Typography
                     variant="caption"

@@ -22,10 +22,10 @@ export function FormattedAIText({ text }: FormattedAITextProps) {
   const { isDarkMode } = useThemeMode();
   const palette = {
     body: isDarkMode ? colors.text.secondary : '#334155',
-    accent: isDarkMode ? colors.brand.accentLight : '#2563EB',
+    accent: isDarkMode ? colors.brand.accentLight : '#1E40AF',
     key: isDarkMode ? colors.text.muted : '#64748B',
-    cardBg: isDarkMode ? colors.bg.primary + '80' : '#EEF2FF',
-    cardBorder: isDarkMode ? colors.border.subtle : '#CBD5E1',
+    cardBg: isDarkMode ? colors.bg.primary + '80' : '#DCEBFF',
+    cardBorder: isDarkMode ? colors.border.subtle : '#2563EB',
     dim: isDarkMode ? colors.text.dim : '#475569',
   };
   const processed = preprocess(text);
@@ -52,7 +52,7 @@ function LineBlock({
   if (scenarioMatch) {
     return (
       <View style={styles.scenarioBlock}>
-        <Text style={styles.scenarioLabel}>{scenarioMatch[1]}</Text>
+        <Text style={[styles.scenarioLabel, { color: palette.accent }]}>{scenarioMatch[1]}</Text>
         {scenarioMatch[2] ? <Text style={[styles.body, { color: palette.body }]}>{scenarioMatch[2]}</Text> : null}
       </View>
     );
@@ -62,7 +62,7 @@ function LineBlock({
   if (gestionMatch) {
     return (
       <View style={styles.kvBlock}>
-        <Text style={styles.kvKey}>{gestionMatch[1]}</Text>
+        <Text style={[styles.kvKey, { color: palette.key }]}>{gestionMatch[1]}</Text>
         <Text style={[styles.body, { color: palette.body }]}>{gestionMatch[2]}</Text>
       </View>
     );
@@ -102,8 +102,8 @@ function LineBlock({
   if (numMatch) {
     return (
       <View style={styles.bulletRow}>
-        <View style={styles.numBadge}>
-          <Text style={styles.numText}>{numMatch[1]}</Text>
+        <View style={[styles.numBadge, { backgroundColor: palette.cardBg }]}>
+          <Text style={[styles.numText, { color: palette.accent }]}>{numMatch[1]}</Text>
         </View>
         <Text style={[styles.body, { color: palette.body }]}>{numMatch[2]}</Text>
       </View>

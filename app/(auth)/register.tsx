@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
   StatusBar,
 } from 'react-native';
-import { Mail, Lock, User, Eye, EyeOff, ArrowLeft, CheckCircle, Circle } from 'lucide-react-native';
+import { Mail, Lock, User, Eye, EyeOff, ArrowLeft, CheckCircle, Circle, AlertCircle } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { observer } from 'mobx-react-lite';
 import { useAuthViewModel } from '../../src/presentation/hooks';

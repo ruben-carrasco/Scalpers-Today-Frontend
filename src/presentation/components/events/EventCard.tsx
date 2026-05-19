@@ -38,14 +38,16 @@ export const EventCard = React.memo(function EventCard({ event, onPress }: Event
     ? {
         Icon: Sparkles,
         label: 'Análisis IA',
-        color: colors.brand.primaryLight,
-        backgroundColor: colors.brand.primary + '18',
+        color: isDarkMode ? colors.brand.primaryLight : '#1E40AF',
+        backgroundColor: isDarkMode ? colors.brand.primary + '18' : '#DCEBFF',
+        borderColor: isDarkMode ? colors.brand.primaryDark : '#2563EB',
       }
     : {
         Icon: Clock3,
         label: 'IA pendiente',
-        color: colors.semantic.warningLight,
-        backgroundColor: colors.semantic.warning + '16',
+        color: isDarkMode ? colors.semantic.warningLight : '#92400E',
+        backgroundColor: isDarkMode ? colors.semantic.warning + '16' : '#FEF3C7',
+        borderColor: isDarkMode ? colors.semantic.warningDark : colors.semantic.warning,
       };
 
   return (
@@ -102,8 +104,8 @@ export const EventCard = React.memo(function EventCard({ event, onPress }: Event
 
         <View style={{ borderTopColor: cardBorder }} className="flex-row items-center justify-between gap-2 mt-4 pt-3 border-t">
           <View
-            className="flex-row items-center gap-1.5 px-2.5 py-1.5 rounded-lg"
-            style={{ backgroundColor: aiStatus.backgroundColor }}
+            className="flex-row items-center gap-1.5 px-2.5 py-1.5 rounded-lg border"
+            style={{ backgroundColor: aiStatus.backgroundColor, borderColor: aiStatus.borderColor }}
           >
             <aiStatus.Icon size={14} color={aiStatus.color} strokeWidth={2.5} />
             <Typography variant="caption" weight="bold" style={{ color: aiStatus.color }}>
