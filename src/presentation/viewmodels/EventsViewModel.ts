@@ -305,6 +305,11 @@ export class EventsViewModel {
     }
   }
 
+  cancelActiveLoad(): void {
+    this._loadRequestId += 1;
+    this.isLoading = false;
+  }
+
   async loadUpcoming(limit: number = 5): Promise<void> {
     const requestId = ++this._upcomingRequestId;
     this.isLoadingUpcoming = true;

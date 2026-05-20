@@ -192,6 +192,7 @@ export default observer(function EventsScreen() {
       });
 
       return () => {
+        eventsViewModel.cancelActiveLoad();
         subscription.remove();
       };
     }, [eventsViewModel, scrollEventsToTop])
