@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, TouchableOpacity, LayoutAnimation, ScrollView, Modal } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Sparkles, BarChart3, Globe, Crosshair, Lightbulb,
   ChevronRight, Minus, X, Clock3, AlertCircle,
@@ -73,6 +74,7 @@ export function EventAnalysisUnavailableSection() {
 
 export function EventAnalysisSection({ ai, isHighImpact = false }: EventAnalysisSectionProps) {
   const [detailsVisible, setDetailsVisible] = useState(false);
+  const insets = useSafeAreaInsets();
   const { isDarkMode } = useThemeMode();
   const surface = isDarkMode ? colors.bg.modalCard : '#F8FAFC';
   const base = isDarkMode ? colors.bg.modal : '#FFFFFF';
@@ -152,7 +154,7 @@ export function EventAnalysisSection({ ai, isHighImpact = false }: EventAnalysis
         <View className="flex-1" style={{ backgroundColor: base }}>
           <View
             className="flex-row items-center justify-between px-6 py-4 border-b"
-            style={{ borderBottomColor: border }}
+            style={{ borderBottomColor: border, paddingTop: Math.max(insets.top + 8, 16) }}
           >
             <Typography variant="h2" weight="bold" style={{ color: titleColor }}>
               Análisis detallado
@@ -168,7 +170,11 @@ export function EventAnalysisSection({ ai, isHighImpact = false }: EventAnalysis
 
           <ScrollView
             className="flex-1"
-            contentContainerStyle={{ padding: 24, paddingBottom: 40, gap: 16 }}
+            contentContainerStyle={{
+              padding: 24,
+              paddingBottom: Math.max(insets.bottom + 72, 104),
+              gap: 16,
+            }}
             showsVerticalScrollIndicator
             keyboardShouldPersistTaps="handled"
           >

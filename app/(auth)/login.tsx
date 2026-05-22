@@ -35,7 +35,6 @@ const platformGoogleClientId = Platform.select({
   android: googleAuthConfig.androidClientId,
   default: googleAuthConfig.webClientId,
 });
-const hasGoogleClientId = Boolean(platformGoogleClientId);
 const safeGoogleAuthConfig = {
   iosClientId: googleAuthConfig.iosClientId ?? 'missing-ios-google-client-id',
   androidClientId: googleAuthConfig.androidClientId ?? 'missing-android-google-client-id',
@@ -106,12 +105,23 @@ export default observer(function LoginScreen() {
   };
 
   const handleGoogleLogin = async () => {
-    if (isLoading || !googleRequest || !hasGoogleClientId) {
+    if (isLoading) {
       return;
     }
 
     authViewModel.clearError();
     setGoogleError(null);
+
+    if (!platformGoogleClientId) {
+      setGoogleError('Google Sign-In no esta configurado en esta build. Falta Client ID para esta plataforma.');
+      return;
+    }
+
+    if (!googleRequest) {
+      setGoogleError('Google Sign-In aun no esta listo. Intenta de nuevo en unos segundos.');
+      return;
+    }
+
     setIsGoogleSubmitting(true);
 
     try {
@@ -158,7 +168,7 @@ export default observer(function LoginScreen() {
   };
 
   const isLoading = authViewModel.isLoading || isSubmitting || isGoogleSubmitting;
-  const isGoogleDisabled = isLoading || !googleRequest || !hasGoogleClientId;
+  const isGoogleDisabled = isLoading;
   const palette = isDarkMode
     ? {
         bg: '#000000',
