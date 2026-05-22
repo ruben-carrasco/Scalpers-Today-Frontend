@@ -1,17 +1,18 @@
 # ScalperToday Frontend
 
-Aplicación móvil de `ScalperToday` construida con React Native + Expo. Consume el backend del proyecto para mostrar eventos macroeconómicos, briefing diario, alertas personalizadas y análisis enriquecidos con IA.
+Aplicación móvil de `ScalperToday` construida con React Native + Expo. Consume el backend del proyecto para mostrar eventos macroeconómicos, briefing diario, alertas personalizadas, análisis enriquecidos con IA y un asistente conversacional integrado.
 
 Este README está orientado a desarrollador y mantenimiento técnico del TFG.
 
 ## Objetivo de la app
 
-La app resuelve cuatro casos principales:
+La app resuelve cinco casos principales:
 
 - autenticación de usuario;
-- consulta del calendario económico diario;
-- visualización de briefing y highlights;
-- creación y gestión de alertas con notificaciones push.
+- consulta del calendario económico semanal con foco en el día actual;
+- visualización de briefing, highlights y próximo evento;
+- creación y gestión de alertas con notificaciones push;
+- consulta de análisis y ayuda contextual con chatbot.
 
 ## Stack técnico
 
@@ -22,6 +23,8 @@ La app resuelve cuatro casos principales:
 - InversifyJS para DI
 - MobX + `mobx-react-lite`
 - NativeWind para estilos utilitarios
+- Expo Notifications
+- Expo Auth Session
 - `@gorhom/bottom-sheet` para modales inferiores
 - Jest + `jest-expo`
 - ESLint
@@ -66,12 +69,13 @@ src/
 - `viewmodels/` contienen el estado observable de cada área funcional
 - `components/` agrupan UI reutilizable
 - `hooks/` conectan las pantallas con el contenedor DI
+- `theme/` centraliza el modo claro/oscuro y los tokens visuales
 
 ## Navegación
 
 La navegación principal se organiza así:
 
-- grupo `(auth)` para login y registro
+- grupo `(auth)` para login, registro y recuperación de contraseña
 - grupo `(tabs)` para home, eventos, alertas y ajustes
 - layout raíz con proveedor de bottom sheets y manejo de notificaciones
 
@@ -95,11 +99,16 @@ EXPO_PUBLIC_API_URL=https://tu-backend/api/v1
 
 ## Variables y configuración
 
-Actualmente la app no depende de un `.env` complejo. La única sobreescritura prevista en runtime es:
+Archivo base: [.env.example](/Users/rubencarrascofrias/Documents/TFG/proyectoFrontend/.env.example)
+
+Variables previstas:
 
 - `EXPO_PUBLIC_API_URL`
+- `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`
+- `EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID`
+- `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` (solo si se necesita compatibilidad técnica con flujo web)
 
-Si no está definida, se usa la URL por defecto de Azure configurada en `api.config.ts`.
+Si `EXPO_PUBLIC_API_URL` no está definida, se usa la URL por defecto de Azure configurada en `api.config.ts`.
 
 ## Ejecución local
 
@@ -108,6 +117,7 @@ Si no está definida, se usa la URL por defecto de Azure configurada en `api.con
 ```bash
 cd proyectoFrontend
 npm install
+cp .env.example .env
 ```
 
 ### 2. Lanzar la app
@@ -116,13 +126,14 @@ npm install
 npm run start
 ```
 
-También disponibles:
+Para abrir la app móvil:
 
 ```bash
 npm run android
 npm run ios
-npm run web
 ```
+
+`npm run web` existe solo como soporte técnico de Expo, pero la entrega y el producto objetivo son móviles.
 
 ## Calidad y validación
 
@@ -151,11 +162,11 @@ npm test -- --runInBand
 - resumen del día
 - briefing generado por IA
 - próximo evento
-- highlights
+- noticias y highlights
 
 ### Events
 
-- lista del día
+- lista semanal con selector de día
 - filtros por importancia, país y búsqueda
 - detalle de evento en bottom sheet
 - análisis detallado en modal independiente y scrolleable
@@ -165,12 +176,19 @@ npm test -- --runInBand
 - listado de alertas
 - creación guiada por pasos
 - gestión de `status` y `pushEnabled`
+- triggers por impacto, país, divisa y tipo de evento
 - registro de token de dispositivo para notificaciones
 
 ### Settings
 
 - estado de sesión
 - configuración básica del usuario y sesión
+- cambio de tema claro/oscuro
+
+### Assistant
+
+- chatbot autenticado para dudas sobre conceptos macroeconómicos
+- ayuda contextual integrada en la propia app
 
 ## Decisiones técnicas relevantes
 
@@ -178,12 +196,14 @@ npm test -- --runInBand
 - `CacheService` para respuesta rápida en `home` y `events`.
 - `ApiClient` con retry controlado para errores transitorios.
 - `status` de alerta y `pushEnabled` se modelan por separado; la UI debe reflejar ambos conceptos sin mezclarlos.
+- `NotificationService` encapsula permisos, registro de token Expo y listeners de notificaciones.
 - algunos flujos complejos de bottom sheets se resolvieron moviendo contenido largo a modales dedicados para evitar conflictos de scroll.
 
 ## Limitaciones actuales
 
 - la app depende de un backend propio; no funciona de forma aislada.
 - el estado offline es parcial, no una estrategia completa offline-first.
+- el login con Google depende de credenciales válidas por plataforma.
 - los tests cubren lógica técnica importante, pero no sustituyen validación visual en dispositivo real.
 
 ## Documentación relacionada

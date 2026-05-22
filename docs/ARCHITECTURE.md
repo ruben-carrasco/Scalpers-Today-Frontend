@@ -10,7 +10,7 @@ La intención práctica es:
 
 - facilitar pruebas;
 - aislar lógica de negocio de la UI;
-- hacer mantenible el crecimiento por módulos (`auth`, `events`, `alerts`, `home`, `settings`).
+- hacer mantenible el crecimiento por módulos (`auth`, `events`, `alerts`, `home`, `settings`, `assistant`).
 
 ## Capas
 
@@ -133,11 +133,17 @@ Se usa para acelerar pantallas como `home` y `events` y mejorar degradación cua
 
 Centraliza listeners y comportamiento asociado a notificaciones de Expo.
 
+Además:
+
+- registra el token Expo del dispositivo;
+- encapsula permisos y listeners de foreground/background;
+- desacopla la UI del detalle técnico de Expo Notifications.
+
 ## Flujos importantes
 
 ### Autenticación
 
-1. pantalla de login/registro
+1. pantalla de login/registro/recuperación
 2. `AuthViewModel`
 3. casos de uso de auth
 4. repositorio de auth
@@ -164,6 +170,20 @@ Centraliza listeners y comportamiento asociado a notificaciones de Expo.
 2. `AlertsViewModel.createAlert()`
 3. persistencia en backend
 4. representación separada de `status` y `pushEnabled`
+5. registro del token del dispositivo para poder recibir push
+
+### Assistant
+
+1. apertura del chatbot autenticado desde la app
+2. `AssistantViewModel` o flujo equivalente de presentación
+3. envío del prompt al backend
+4. respuesta explicativa apoyada por el proveedor de IA del sistema
+
+### Theming
+
+1. `ThemeModeContext` centraliza el modo claro/oscuro
+2. las pantallas consumen tokens de color derivados del tema activo
+3. el ajuste se refleja en `home`, `events`, `alerts`, `settings` y pantallas de autenticación
 
 ## Decisión importante: `status` vs `pushEnabled`
 
