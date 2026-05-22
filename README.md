@@ -110,6 +110,15 @@ Variables previstas:
 
 Si `EXPO_PUBLIC_API_URL` no está definida, se usa la URL por defecto de Azure configurada en `api.config.ts`.
 
+### Requisitos Google OAuth para APK Android
+
+Para que Google Sign-In funcione en build APK (EAS), además de las variables anteriores:
+
+- el cliente OAuth de tipo Android debe usar el paquete `com.rubencorrasco.scalpertoday`;
+- debe incluir la huella SHA-1 del keystore de EAS;
+- hay que activar la opción `Enable custom URI scheme` en ese cliente Android;
+- el valor de `EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID` en EAS (`preview`/`production`) debe coincidir exactamente con ese cliente.
+
 ## Ejecución local
 
 ### 1. Instalar dependencias
