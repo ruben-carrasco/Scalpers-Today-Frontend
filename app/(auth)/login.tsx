@@ -13,6 +13,7 @@ import {
 import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import * as Google from 'expo-auth-session/providers/google';
+import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
 import { Link, useRouter } from 'expo-router';
 import { observer } from 'mobx-react-lite';
@@ -39,11 +40,13 @@ const platformGoogleClientId = Platform.select({
 const googleAuthRequestConfig = Platform.select({
   android: {
     androidClientId: googleAuthConfig.androidClientId,
+    redirectUri: AuthSession.makeRedirectUri({ scheme: 'scalpertoday' }),
     scopes: ['openid', 'profile', 'email'],
     selectAccount: true,
   },
   ios: {
     iosClientId: googleAuthConfig.iosClientId,
+    redirectUri: AuthSession.makeRedirectUri({ scheme: 'scalpertoday' }),
     scopes: ['openid', 'profile', 'email'],
     selectAccount: true,
   },
@@ -136,7 +139,7 @@ export default observer(function LoginScreen() {
     setIsGoogleSubmitting(true);
 
     try {
-      const result = await promptGoogleSignIn();
+      const result = await promptGoogleSignIn({ useProxy: false });
 
       if (result.type === 'cancel' || result.type === 'dismiss') {
         return;

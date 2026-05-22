@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useCallback, useMemo } from 'react';
-import { Platform, UIManager } from 'react-native';
+import { Platform, UIManager, Modal, View, TouchableOpacity, StatusBar, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { X } from 'lucide-react-native';
 import {
   BottomSheetModal,
   BottomSheetView,
@@ -11,6 +12,7 @@ import { EventModel } from '../../models/EventModel';
 import { getImportanceColor } from '../../theme';
 import { colors } from '../../theme/tokens';
 import { useThemeMode } from '../../theme/ThemeModeContext';
+import { Typography } from '../common/Typography';
 import { EventHeader } from './sections/EventHeader';
 import { EventDataSection } from './sections/EventDataSection';
 import {
@@ -89,6 +91,72 @@ export function EventDetailModal({ event, visible, onClose }: EventDetailModalPr
   if (!displayEvent) return null;
 
   const impColor = getImportanceColor(displayEvent.importance);
+  const isAndroid = Platform.OS === 'android';
+
+  if (isAndroid) {
+    return (
+      <Modal
+        visible={visible && Boolean(displayEvent)}
+        animationType="slide"
+        presentationStyle="fullScreen"
+        statusBarTranslucent
+        navigationBarTranslucent
+        onRequestClose={onClose}
+      >
+        <View className="flex-1" style={{ backgroundColor: isDarkMode ? colors.bg.modal : '#FFFFFF' }}>
+          <View
+            className="px-6 pb-4 border-b"
+            style={{
+              borderBottomColor: isDarkMode ? colors.border.medium : '#CBD5E1',
+              paddingTop: Math.max(insets.top + (StatusBar.currentHeight ?? 0) + 10, 28),
+            }}
+          >
+            <View className="flex-row justify-between items-center mb-3">
+              <View className="flex-row items-center gap-3">
+                <View className="px-3 py-1.5 rounded-lg" style={{ backgroundColor: impColor + '20' }}>
+                  <Typography variant="h3" weight="bold" style={{ color: impColor }} className="font-mono">
+                    {displayEvent.time}
+                  </Typography>
+                </View>
+                <Typography variant="h3" weight="bold" style={{ color: impColor }}>
+                  {displayEvent.importanceStars}
+                </Typography>
+              </View>
+              <TouchableOpacity
+                onPress={onClose}
+                className="w-10 h-10 rounded-full items-center justify-center"
+                style={{ backgroundColor: isDarkMode ? colors.bg.modalCard : '#F4F4F5' }}
+              >
+                <X size={20} color={colors.text.icon} strokeWidth={2.5} />
+              </TouchableOpacity>
+            </View>
+
+            <Typography variant="h1" weight="bold" className="leading-tight" style={{ color: isDarkMode ? colors.text.primary : '#0F172A' }}>
+              {displayEvent.title}
+            </Typography>
+          </View>
+
+          <ScrollView
+            className="flex-1"
+            contentContainerStyle={{
+              paddingHorizontal: 24,
+              paddingTop: 18,
+              paddingBottom: Math.max(insets.bottom + 80, 120),
+            }}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <EventDataSection event={displayEvent} />
+            {displayEvent.aiAnalysis ? (
+              <EventAnalysisSection ai={displayEvent.aiAnalysis} isHighImpact={displayEvent.importance === 3} />
+            ) : (
+              <EventAnalysisUnavailableSection />
+            )}
+          </ScrollView>
+        </View>
+      </Modal>
+    );
+  }
 
   return (
     <BottomSheetModal
