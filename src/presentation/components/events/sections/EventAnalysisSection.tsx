@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, LayoutAnimation, ScrollView, Modal } from 'react-native';
+import { View, TouchableOpacity, LayoutAnimation, ScrollView, Modal, Platform, StatusBar } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Sparkles, BarChart3, Globe, Crosshair, Lightbulb,
@@ -148,13 +148,20 @@ export function EventAnalysisSection({ ai, isHighImpact = false }: EventAnalysis
       <Modal
         visible={detailsVisible}
         animationType="slide"
-        presentationStyle="pageSheet"
+        presentationStyle={Platform.OS === 'ios' ? 'pageSheet' : 'fullScreen'}
+        statusBarTranslucent={Platform.OS === 'android'}
+        navigationBarTranslucent={Platform.OS === 'android'}
         onRequestClose={() => setDetailsVisible(false)}
       >
         <View className="flex-1" style={{ backgroundColor: base }}>
           <View
             className="flex-row items-center justify-between px-6 py-4 border-b"
-            style={{ borderBottomColor: border, paddingTop: Math.max(insets.top + 8, 16) }}
+            style={{
+              borderBottomColor: border,
+              paddingTop: Platform.OS === 'android'
+                ? Math.max(insets.top + (StatusBar.currentHeight ?? 0) + 8, 24)
+                : Math.max(insets.top + 4, 12),
+            }}
           >
             <Typography variant="h2" weight="bold" style={{ color: titleColor }}>
               Análisis detallado
@@ -172,7 +179,9 @@ export function EventAnalysisSection({ ai, isHighImpact = false }: EventAnalysis
             className="flex-1"
             contentContainerStyle={{
               padding: 24,
-              paddingBottom: Math.max(insets.bottom + 72, 104),
+              paddingBottom: Platform.OS === 'android'
+                ? Math.max(insets.bottom + 140, 180)
+                : Math.max(insets.bottom + 24, 48),
               gap: 16,
             }}
             showsVerticalScrollIndicator

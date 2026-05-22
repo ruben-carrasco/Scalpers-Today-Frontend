@@ -32,7 +32,10 @@ export function EventDetailModal({ event, visible, onClose }: EventDetailModalPr
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const lastEventRef = useRef<EventModel | null>(null);
   const hasNotifiedCloseRef = useRef(false);
-  const snapPoints = useMemo(() => ['70%', '92%'], []);
+  const snapPoints = useMemo(
+    () => (Platform.OS === 'android' ? ['70%', '92%'] : ['65%', '90%']),
+    []
+  );
   const { isDarkMode } = useThemeMode();
   const insets = useSafeAreaInsets();
 
@@ -93,7 +96,7 @@ export function EventDetailModal({ event, visible, onClose }: EventDetailModalPr
       index={0}
       snapPoints={snapPoints}
       enableDynamicSizing={false}
-      bottomInset={Math.max(insets.bottom + 20, 28)}
+      bottomInset={Platform.OS === 'android' ? Math.max(insets.bottom + 20, 28) : Math.max(insets.bottom, 8)}
       onChange={handleSheetChanges}
       onDismiss={notifyClosed}
       backdropComponent={renderBackdrop}
@@ -111,7 +114,12 @@ export function EventDetailModal({ event, visible, onClose }: EventDetailModalPr
         <BottomSheetScrollView
           key={displayEvent.id}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: Math.max(insets.bottom + 84, 120) }}
+          contentContainerStyle={{
+            paddingHorizontal: 24,
+            paddingBottom: Platform.OS === 'android'
+              ? Math.max(insets.bottom + 84, 120)
+              : Math.max(insets.bottom + 28, 40),
+          }}
           keyboardShouldPersistTaps="handled"
         >
           <EventDataSection event={displayEvent} />

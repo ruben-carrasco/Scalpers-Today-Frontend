@@ -35,11 +35,24 @@ const platformGoogleClientId = Platform.select({
   android: googleAuthConfig.androidClientId,
   default: googleAuthConfig.webClientId,
 });
-const safeGoogleAuthConfig = {
-  iosClientId: googleAuthConfig.iosClientId ?? 'missing-ios-google-client-id',
-  androidClientId: googleAuthConfig.androidClientId ?? 'missing-android-google-client-id',
-  webClientId: googleAuthConfig.webClientId ?? 'missing-web-google-client-id',
-};
+
+const googleAuthRequestConfig = Platform.select({
+  android: {
+    androidClientId: googleAuthConfig.androidClientId,
+    scopes: ['openid', 'profile', 'email'],
+    selectAccount: true,
+  },
+  ios: {
+    iosClientId: googleAuthConfig.iosClientId,
+    scopes: ['openid', 'profile', 'email'],
+    selectAccount: true,
+  },
+  default: {
+    webClientId: googleAuthConfig.webClientId,
+    scopes: ['openid', 'profile', 'email'],
+    selectAccount: true,
+  },
+})!;
 
 export default observer(function LoginScreen() {
   const router = useRouter();
@@ -55,9 +68,7 @@ export default observer(function LoginScreen() {
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
   const [googleError, setGoogleError] = useState<string | null>(null);
   const [googleRequest, , promptGoogleSignIn] = Google.useIdTokenAuthRequest({
-    ...safeGoogleAuthConfig,
-    scopes: ['openid', 'profile', 'email'],
-    selectAccount: true,
+    ...googleAuthRequestConfig,
   });
 
   useEffect(() => {
