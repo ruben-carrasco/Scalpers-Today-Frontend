@@ -100,6 +100,8 @@ export default observer(function ForgotPasswordScreen() {
         muted: '#64748B',
         icon: '#64748B',
         successBg: 'rgba(16,185,129,0.12)',
+        secondaryText: '#334155',
+        tertiaryText: '#475569',
       };
 
   const clearFieldError = (field: keyof FormErrors) => {
@@ -196,7 +198,7 @@ export default observer(function ForgotPasswordScreen() {
           >
             Contraseña actualizada
           </Typography>
-          <Typography variant="body" color="secondary" className="text-center mb-8">
+          <Typography variant="body" className="text-center mb-8" style={{ color: isDarkMode ? '#D4D4D8' : palette.secondaryText }}>
             Ya puedes iniciar sesión con tu nueva contraseña.
           </Typography>
           <TouchableOpacity
@@ -236,7 +238,7 @@ export default observer(function ForgotPasswordScreen() {
           >
             Solicitud enviada
           </Typography>
-          <Typography variant="body" color="secondary" className="mb-6">
+          <Typography variant="body" className="mb-6" style={{ color: isDarkMode ? '#D4D4D8' : palette.secondaryText }}>
             Código enviado si el email existe.
           </Typography>
           <TouchableOpacity
@@ -300,7 +302,7 @@ export default observer(function ForgotPasswordScreen() {
             >
               {hasRequestedReset && showResetForm ? 'Introduce el código' : 'Restablecer contraseña'}
             </Typography>
-            <Typography variant="h3" color="secondary">
+            <Typography variant="h3" style={{ color: isDarkMode ? '#D4D4D8' : palette.secondaryText }}>
               {hasRequestedReset && showResetForm
                 ? 'Introduce el código recibido y define una nueva contraseña.'
                 : 'Introduce tu email para recibir un código de verificación.'}
@@ -482,7 +484,7 @@ export default observer(function ForgotPasswordScreen() {
                             <Typography
                               variant="caption"
                               weight={req.met ? 'semibold' : 'medium'}
-                              style={{ color: req.met ? '#34D399' : isDarkMode ? '#A1A1AA' : '#64748B' }}
+                              style={{ color: req.met ? '#34D399' : isDarkMode ? '#A1A1AA' : palette.tertiaryText }}
                             >
                               {req.label}
                             </Typography>
@@ -542,7 +544,7 @@ export default observer(function ForgotPasswordScreen() {
                   {!errors.confirmPassword && confirmPassword.length > 0 && password === confirmPassword && (
                     <View className="flex-row items-center gap-2 mt-3 ml-2">
                       <CheckCircle size={16} color="#34D399" strokeWidth={2.5} />
-                      <Typography variant="caption" weight="bold" className="text-semantic-success">
+                      <Typography variant="caption" weight="bold" style={{ color: isDarkMode ? '#34D399' : '#15803D' }}>
                         Las contraseñas coinciden
                       </Typography>
                     </View>

@@ -145,6 +145,8 @@ export default observer(function RegisterScreen() {
         inputText: '#0F172A',
         muted: '#94A3B8',
         icon: '#64748B',
+        secondaryText: '#334155',
+        tertiaryText: '#475569',
       };
 
   return (
@@ -175,7 +177,9 @@ export default observer(function RegisterScreen() {
             <Typography variant="metric" weight="bold" className="mb-2" style={{ color: palette.inputText }}>
               Crear Cuenta
             </Typography>
-            <Typography variant="h3" color="secondary">Completa tus datos para comenzar</Typography>
+            <Typography variant="h3" style={{ color: isDarkMode ? '#D4D4D8' : palette.secondaryText }}>
+              Completa tus datos para comenzar
+            </Typography>
           </View>
 
           {/* Form */}
@@ -299,7 +303,7 @@ export default observer(function RegisterScreen() {
                         ) : (
                           <Circle size={16} color={isDarkMode ? '#52525B' : '#94A3B8'} strokeWidth={2.5} />
                         )}
-                        <Typography variant="caption" weight={req.met ? "semibold" : "medium"} style={{ color: req.met ? '#34D399' : isDarkMode ? '#A1A1AA' : '#64748B' }}>
+                        <Typography variant="caption" weight={req.met ? "semibold" : "medium"} style={{ color: req.met ? '#34D399' : isDarkMode ? '#A1A1AA' : palette.tertiaryText }}>
                           {req.label}
                         </Typography>
                       </View>
@@ -350,7 +354,9 @@ export default observer(function RegisterScreen() {
               {!errors.confirmPassword && confirmPassword.length > 0 && password === confirmPassword && (
                 <View className="flex-row items-center gap-2 mt-3 ml-2">
                   <CheckCircle size={16} color="#34D399" strokeWidth={2.5} />
-                  <Typography variant="caption" weight="bold" className="text-semantic-success">Las contraseñas coinciden</Typography>
+                  <Typography variant="caption" weight="bold" style={{ color: isDarkMode ? '#34D399' : '#15803D' }}>
+                    Las contraseñas coinciden
+                  </Typography>
                 </View>
               )}
             </View>
