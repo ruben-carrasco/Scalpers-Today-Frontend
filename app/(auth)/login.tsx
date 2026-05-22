@@ -16,6 +16,7 @@ import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import { Link, useRouter } from 'expo-router';
 import { observer } from 'mobx-react-lite';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuthViewModel } from '../../src/presentation/hooks';
 import { emailValidator } from '../../src/core/validation';
 import { Typography } from '../../src/presentation/components/common/Typography';
@@ -43,6 +44,7 @@ const safeGoogleAuthConfig = {
 
 export default observer(function LoginScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const authViewModel = useAuthViewModel();
   const { isDarkMode } = useThemeMode();
   const [email, setEmail] = useState('');
@@ -184,8 +186,13 @@ export default observer(function LoginScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
-        <ScrollView 
-          contentContainerClassName="flex-grow justify-center p-8" 
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingHorizontal: 32,
+            paddingTop: 40,
+            paddingBottom: Math.max(insets.bottom + 24, 40),
+          }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
@@ -350,7 +357,7 @@ export default observer(function LoginScreen() {
           </View>
 
           {/* Footer */}
-          <View className="flex-row justify-center items-center mt-auto py-6 gap-2">
+          <View className="flex-row justify-center items-center py-6 gap-2">
             <Typography variant="body" color="secondary">¿No tienes cuenta?</Typography>
             <Link href="/(auth)/register" asChild>
               <TouchableOpacity disabled={isLoading} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>

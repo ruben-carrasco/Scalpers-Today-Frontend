@@ -97,6 +97,7 @@ export default observer(function EventsScreen() {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [isControlsOpen, setIsControlsOpen] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const eventsViewModel = useEventsViewModel();
   const haptics = useHaptics();
@@ -291,10 +292,15 @@ export default observer(function EventsScreen() {
 
   const eventsRefreshControl = (
     <RefreshControl
-      refreshing={isLoading}
+      refreshing={isRefreshing}
       onRefresh={async () => {
-        await eventsViewModel.loadEvents(true);
-        haptics.success();
+        setIsRefreshing(true);
+        try {
+          await eventsViewModel.loadEvents(true);
+          haptics.success();
+        } finally {
+          setIsRefreshing(false);
+        }
       }}
       tintColor="#3B82F6"
       progressViewOffset={0}

@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useCallback, useMemo } from 'react';
 import { Platform, UIManager } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   BottomSheetModal,
   BottomSheetView,
@@ -33,6 +34,7 @@ export function EventDetailModal({ event, visible, onClose }: EventDetailModalPr
   const hasNotifiedCloseRef = useRef(false);
   const snapPoints = useMemo(() => ['65%', '90%'], []);
   const { isDarkMode } = useThemeMode();
+  const insets = useSafeAreaInsets();
 
   // Keep last event data so content stays visible during close animation
   if (event) {
@@ -91,6 +93,7 @@ export function EventDetailModal({ event, visible, onClose }: EventDetailModalPr
       index={0}
       snapPoints={snapPoints}
       enableDynamicSizing={false}
+      bottomInset={Math.max(insets.bottom, 12)}
       onChange={handleSheetChanges}
       onDismiss={notifyClosed}
       backdropComponent={renderBackdrop}
@@ -108,7 +111,7 @@ export function EventDetailModal({ event, visible, onClose }: EventDetailModalPr
         <BottomSheetScrollView
           key={displayEvent.id}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 40 }}
+          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: Math.max(insets.bottom + 40, 64) }}
           keyboardShouldPersistTaps="handled"
         >
           <EventDataSection event={displayEvent} />
